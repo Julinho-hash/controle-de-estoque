@@ -1,0 +1,148 @@
+/* Remove as margens e espaçamentos padrão do navegador.
+   O box-sizing: border-box faz com que padding e borda
+   sejam incluídos no tamanho total dos elementos. */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Configura o corpo da página */
+body {
+    background: #f0f4f8; /* Cor de fundo */
+    padding: 25px;       /* Espaçamento interno */
+    max-width: 1100px;   /* Largura máxima */
+    margin: 0 auto;      /* Centraliza o conteúdo */
+}
+
+/* Estiliza os títulos */
+h1, h2 {
+    color: #1e40af;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #bfdbfe;
+    padding-bottom: 8px;
+}
+
+/* Cria uma grade responsiva para os campos */
+.linha {
+    display: grid;
+
+    /* Cria colunas automaticamente conforme o tamanho da tela */
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+/* Estilização dos campos */
+input, select, button {
+    padding: 10px;
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+/* Estilo dos botões */
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+
+    /* Cria uma pequena animação */
+    transition: background 0.2s;
+}
+
+/* Quando o mouse passa sobre o botão */
+button:hover {
+    background: #1d4ed8;
+}
+
+/* Configuração da tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 6px;
+
+    /* Sombra ao redor da tabela */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Células da tabela */
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Cabeçalho da tabela */
+th {
+    background: #eff6ff;
+    color: #1e40af;
+    font-weight: bold;
+}
+
+/* Muda o fundo da linha quando o mouse passa sobre ela */
+tr:hover {
+    background: #f8fafc;
+}
+
+/* Botão de excluir */
+.excluir {
+    background: #ef4444 !important;
+    color: white !important;
+    border: none !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+}
+
+/* Configuração dos parágrafos */
+p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+/* Deixa elementos strong azuis */
+strong {
+    color: #1e40af;
+}
+
+/* Área que mostra a lista de produtos */
+.lista-produtos {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+/* Lista dentro da área de produtos */
+.lista-produtos ul {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+/* Cada item da lista */
+.lista-produtos li {
+    padding: 3px 0;
+}
+
+.botao-excluir {
+  background-color: #dc3545; /* vermelho */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.botao-excluir:hover {
+  background-color: #c82333; /* vermelho mais escuro ao passar o mouse */
+}
+
+
