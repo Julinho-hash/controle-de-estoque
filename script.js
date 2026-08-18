@@ -1,433 +1,252 @@
-// ==========================================
-// CONFIGURAÇÕES GERAIS
-// ==========================================
-const SENHA_SISTEMA = "estoque123";
-let produtos = [];
+// Buscar produto
+async function buscarProduto() {
+  const codigo = document.getElementById('codigoProd').value;
+  if (!codigo) return;
 
-// ==========================================
-// ATUALIZAR TABELA DE PRODUTOS NA TELA
-// ==========================================
-function atualizarListaProdutos() {
-  const tabela = document.querySelector('#tabelaEstoque tbody');
-  if (!tabela) return;
+  const res = await fetch('/api/produtos/' + codigo);
+  const prod = await res.json();
 
-  tabela.innerHTML = '';
-
-  produtos.forEach(p => {
-    const totalItem = (p.quantidade * p.preco).toFixed(2);
-    const linha = document.createElement('tr');
-    linha.innerHTML = `
-      <td>${p.codigo}</td>
-      <td>${p.nome}</td>
-      <td>${p.categoria}</td>
-      <td>R$ ${p.preco.toFixed(2)}</td>
-      <td>${p.quantidade}</td>
-      <td>R$ ${totalItem}</td>
-      <td>${p.ultima_atualizacao || '-'}</td>
-      <td>
-        <button class="botao-excluir" onclick="excluirProduto(${p.codigo})">Excluir</button>
-      </td>
-    `;
-    tabela.appendChild(linha);
-  });
-
-  atualizarRelatorioResumido();
-}
-
-// ==========================================
-// ATUALIZAR RELATÓRIO RESUMIDO
-// ==========================================
-function atualizarRelatorioResumido() {
-  let qtdTotal = 0;
-  let valorTotal = 0;
-
-  produtos.forEach(p => {
-    qtdTotal += p.quantidade;
-    valorTotal += p.quantidade * p.preco;
-  });
-
-  const el = id => document.getElementById(id);
-  if (el('res_totalItens')) el('res_totalItens').textContent = produtos.length;
-  if (el('res_qtdTotal')) el('res_qtdTotal').textContent = qtdTotal;
-  if (el('res_valorTotal')) el('res_valorTotal').textContent = valorTotal.toFixed(2);
-}
-
-// ==========================================
-// PREENCHER LISTA DE CÓDIGOS
-// ==========================================
-function preencherListaCodigos() {
-  const lista = document.getElementById('lista-codigos');
-  if (!lista) return;
-
-  lista.innerHTML = '';
-  produtos.forEach(p => {
-    const li = document.createElement('li');
-    li.textContent = p.codigo + ' | ' + p.nome + ' | ' + p.categoria + ' | R$ ' + p.preco.toFixed(2);
-    lista.appendChild(li);
-  });
-}
-
-// ==========================================
-// MOSTRAR/OCULTAR LISTA DE PRODUTOS
-// ==========================================
-function mostrarOcultarLista() {
-  const area = document.getElementById('areaListaProdutos');
-  if (!area) return;
-
-  if (area.style.display === 'none' || area.style.display === '') {
-    area.style.display = 'block';
-    preencherListaCodigos();
-  } else {
-    area.style.display = 'none';
+  if (prod) {
+    document.getElementById('nomeProd').value = prod.nome || '';
+    document.getElementById('categoriaProd').value = prod.categoria || '';
+    document.getElementById('precoProd').value = prod.preco_unitario || '';
   }
 }
 
-// ==========================================
-// MOSTRAR/OCULTAR TABELA DE ESTOQUE
-// ==========================================
-function mostrarOcultarEstoque() {
-  const area = document.getElementById('areaEstoqueAtual');
-  if (!area) return;
+// Registrar movimentação
+async function registrarMovimentacao() {
+  const dados = {
+    codigo: document.getElementById('codigoProd').value,
+    tipo: document.getElementById('tipoMov').value,
+    quantidade: document.getElementById('qtdProd').value,
+    responsavel: document.getElementById('responsavel').value
+  };
 
-  if (area.style.display === 'none' || area.style.display === '') {
-    area.style.display = 'block';
-  } else {
-    area.style.display = 'none';
-  }
-}
-
-// ==========================================
-// BUSCAR PRODUTO PELO CÓDIGO
-// ==========================================
-function buscarProdutoPorCodigo() {
-  const codigo = parseInt(document.getElementById('codigoMov').value);
-  if (!codigo) {
-    document.getElementById('prod').value = '';
-    document.getElementById('cat').value = '';
-    document.getElementById('preco').value = '';
-    return;
-  }
-
-  const produto = produtos.find(p => p.codigo === codigo);
-  if (produto) {
-    document.getElementById('prod').value = produto.nome;
-    document.getElementById('cat').value = produto.categoria;
-    document.getElementById('preco').value = produto.preco.toFixed(2);
-  } else {
-    document.getElementById('prod').value = '';
-    document.getElementById('cat').value = '';
-    document.getElementById('preco').value = '';
-  }
-}
-
-// ==========================================
-// CARREGAR CATEGORIAS NO SELECT
-// ==========================================
-function carregarCategorias() {
-  fetch('/api/categorias')
-    .then(res => res.json())
-    .then(listaCategorias => {
-      const select = document.getElementById('categoriaFiltro');
-      if (!select) return;
-
-      select.innerHTML = '<option value="">Escolha Categoria</option>';
-      listaCategorias.forEach(cat => {
-        const opcao = document.createElement('option');
-        opcao.value = cat;
-        opcao.textContent = cat;
-        select.appendChild(opcao);
-      });
-    })
-    .catch(err => console.log('Erro ao carregar categorias:', err));
-}
-
-// ==========================================
-// ATUALIZAR DADOS DO BANCO
-// ==========================================
-function atualizarDoBanco() {
-  fetch('/api/produtos')
-    .then(res => res.json())
-    .then(dados => {
-      produtos = dados;
-      atualizarListaProdutos();
-      preencherListaCodigos();
-      carregarCategorias();
-    })
-    .catch(err => console.log('Erro:', err));
-}
-
-// ==========================================
-// LOGIN
-// ==========================================
-function verificarLogin() {
-  const senha = document.getElementById('senha').value;
-  if (senha === SENHA_SISTEMA) {
-    document.getElementById('telaLogin').style.display = 'none';
-    document.getElementById('sistemaPrincipal').style.display = 'block';
-    atualizarDoBanco();
-  } else {
-    document.getElementById('avisoErro').style.display = 'block';
-    document.getElementById('senha').value = '';
-  }
-}
-
-// ==========================================
-// SAIR DO SISTEMA
-// ==========================================
-function sairDoSistema() {
-  if (confirm('Deseja realmente sair?')) {
-    document.getElementById('sistemaPrincipal').style.display = 'none';
-    document.getElementById('telaLogin').style.display = 'flex';
-    document.getElementById('senha').value = '';
-    document.getElementById('avisoErro').style.display = 'none';
-  }
-}
-
-// ==========================================
-// CADASTRAR PRODUTO
-// ==========================================
-function cadastrarProduto() {
-  const codigo = parseInt(document.getElementById('novoCodigo').value);
-  const nome = document.getElementById('novoNome').value.toUpperCase();
-  const categoria = document.getElementById('novaCategoria').value.toUpperCase();
-  const preco = parseFloat(document.getElementById('novoPreco').value);
-
-  if (!codigo || !nome || !categoria || !preco) {
-    alert('Preencha TODOS os campos!');
-    return;
-  }
-
-  fetch('/api/produtos', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ codigo, nome, categoria, preco })
-  })
-  .then(res => res.json())
-  .then(dados => {
-    if (dados.erro) {
-      alert(dados.erro);
-      return;
-    }
-    alert('Produto cadastrado com sucesso!');
-    atualizarDoBanco();
-    document.getElementById('novoCodigo').value = '';
-    document.getElementById('novoNome').value = '';
-    document.getElementById('novaCategoria').value = '';
-    document.getElementById('novoPreco').value = '';
-  })
-  .catch(err => alert('Erro: ' + err));
-}
-
-// ==========================================
-// REGISTRAR MOVIMENTAÇÃO
-// ==========================================
-function registrarMovimentacao() {
-  const codigo = parseInt(document.getElementById('codigoMov').value);
-  const quantidade = parseInt(document.getElementById('qtdMov').value);
-  const tipo = document.getElementById('tipoMov').value;
-  const responsavel = document.getElementById('respMov').value;
-
-  if (!codigo || !quantidade || !responsavel) {
+  if (!dados.codigo || !dados.quantidade || !dados.responsavel) {
     alert('Preencha todos os campos!');
     return;
   }
 
-  fetch('/api/movimentacao', {
+  const res = await fetch('/api/movimentacao', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ codigo, quantidade, tipo, responsavel })
-  })
-  .then(res => res.json())
-  .then(dados => {
-    if (dados.erro) {
-      alert(dados.erro);
-      return;
-    }
-    alert('Movimentação registrada!');
-    atualizarDoBanco();
-    document.getElementById('codigoMov').value = '';
-    document.getElementById('prod').value = '';
-    document.getElementById('cat').value = '';
-    document.getElementById('preco').value = '';
-    document.getElementById('qtdMov').value = '';
-    document.getElementById('respMov').value = '';
-  })
-  .catch(err => alert('Erro: ' + err));
-}
-
-// ==========================================
-// EXCLUIR PRODUTO
-// ==========================================
-function excluirProduto(codigo) {
-  if (!confirm('Deseja excluir este produto?')) return;
-  alert('Função de exclusão - código: ' + codigo);
-  atualizarDoBanco();
-}
-
-// ==========================================
-// RELATÓRIO COMPLETO
-// ==========================================
-function gerarRelatorioCompleto() {
-  if (!produtos || produtos.length === 0) {
-    alert('Nenhum produto cadastrado!');
-    return;
-  }
-
-  let qtdTotal = 0;
-  let valorTotal = 0;
-
-  produtos.forEach(p => {
-    qtdTotal += p.quantidade;
-    valorTotal += p.quantidade * p.preco;
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados)
   });
 
-  alert(
-'===== RELATÓRIO COMPLETO =====\n\n' +
-'Total de Itens: ' + produtos.length + '\n' +
-'Quantidade Total: ' + qtdTotal + '\n' +
-'Valor Total: R$ ' + valorTotal.toFixed(2)
-  );
+  const resultado = await res.json();
+  if (resultado.erro) {
+    alert(resultado.erro);
+  } else {
+    alert('Sucesso!');
+    atualizarTudo();
+    limparMov();
+  }
 }
 
-// ==========================================
-// RELATÓRIO POR CATEGORIA
-// ==========================================
-function gerarRelatorioPorCategoria() {
-  const select = document.getElementById('categoriaFiltro');
-  if (!select) {
-    alert('Campo de categoria não encontrado!');
+function limparMov() {
+  document.getElementById('codigoProd').value = '';
+  document.getElementById('nomeProd').value = '';
+  document.getElementById('categoriaProd').value = '';
+  document.getElementById('precoProd').value = '';
+  document.getElementById('qtdProd').value = '';
+  document.getElementById('responsavel').value = '';
+}
+
+// Cadastrar produto
+async function cadastrarProduto() {
+  const dados = {
+    codigo: document.getElementById('codigoNovo').value,
+    nome: document.getElementById('nomeNovo').value,
+    categoria: document.getElementById('categoriaNova').value,
+    preco_unitario: document.getElementById('precoNovo').value,
+    quantidade: 0
+  };
+
+  if (!dados.codigo || !dados.nome || !dados.categoria) {
+    alert('Código, Nome e Categoria são obrigatórios!');
     return;
   }
 
-  const catEscolhida = select.value;
-  if (!catEscolhida) {
-    alert('Escolha uma categoria primeiro!');
-    return;
-  }
-
-  const filtrados = produtos.filter(p => p.categoria === catEscolhida);
-  let qtdTotal = 0;
-  let valorTotal = 0;
-
-  filtrados.forEach(p => {
-    qtdTotal += p.quantidade;
-    valorTotal += p.quantidade * p.preco;
+  const res = await fetch('/api/produtos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados)
   });
 
-  alert(
-'===== ' + catEscolhida.toUpperCase() + ' =====\n\n' +
-'Produtos: ' + filtrados.length + '\n' +
-'Quantidade: ' + qtdTotal + '\n' +
-'Valor Total: R$ ' + valorTotal.toFixed(2)
-  );
+  const resultado = await res.json();
+  if (resultado.erro) {
+    alert(resultado.erro);
+  } else {
+    alert('Produto cadastrado!');
+    atualizarTudo();
+    limparCad();
+  }
 }
 
-// ==========================================
-// HISTÓRICO DE MOVIMENTAÇÕES
-// ==========================================
-function gerarRelatorioMovimentacoes() {
-  fetch('/api/movimentacoes')
-    .then(res => res.json())
-    .then(dados => {
-      if (!dados || dados.length === 0) {
-        alert('Nenhuma movimentação registrada!');
-        return;
-      }
-
-      let texto =
-'===== HISTÓRICO DE MOVIMENTAÇÕES =====\n' +
-'Total de registros: ' + dados.length + '\n\n' +
-'Cód | Produto         | Tipo     | Qtd | Responsável      | Data/Hora\n' +
-'-----------------------------------------------------------------------\n';
-
-      dados.forEach(m => {
-        const tipoTexto = m.tipo === 'entrada' ? 'ENTRADA' :
-                          m.tipo === 'saida' ? 'SAÍDA  ' : 'EXCLUSÃO';
-        const data = m.data ? m.data.replace('T', ' ').substring(0, 19) : '-';
-        texto +=
-String(m.codigo_produto).padStart(3, ' ') + ' | ' +
-(m.nome || 'DESCONHECIDO').padEnd(15) + ' | ' +
-tipoTexto + ' | ' +
-String(m.quantidade).padStart(3, ' ') + ' | ' +
-(m.responsavel || '-').padEnd(16) + ' | ' + data + '\n';
-      });
-
-      alert(texto);
-    })
-    .catch(err => alert('Erro ao carregar relatório: ' + err));
+function limparCad() {
+  document.getElementById('codigoNovo').value = '';
+  document.getElementById('nomeNovo').value = '';
+  document.getElementById('categoriaNova').value = '';
+  document.getElementById('precoNovo').value = '';
 }
 
-// ==========================================
-// RELATÓRIO POR PERÍODO
-// ==========================================
-function gerarRelatorioPorPeriodo() {
-  const inicio = document.getElementById('dataInicio').value;
+// Carregar produtos
+async function carregarProdutos() {
+  const res = await fetch('/api/produtos');
+  const produtos = await res.json();
+  const tb = document.querySelector('#tabela-produtos tbody');
+  tb.innerHTML = '';
+
+  for (let i = 0; i < produtos.length; i++) {
+    const p = produtos[i];
+    tb.innerHTML += '<tr>' +
+      '<td>' + p.codigo + '</td>' +
+      '<td>' + p.nome + '</td>' +
+      '<td>' + p.categoria + '</td>' +
+      '<td>R$ ' + Number(p.preco_unitario).toFixed(2) + '</td>' +
+      '<td>' + p.quantidade + '</td>' +
+      '<td>R$ ' + (p.quantidade * p.preco_unitario).toFixed(2) + '</td>' +
+      '</tr>';
+  }
+}
+
+// Atualizar estoque
+async function atualizarEstoque() {
+  const res = await fetch('/api/produtos');
+  const produtos = await res.json();
+  const tb = document.querySelector('#tabela-estoque tbody');
+  tb.innerHTML = '';
+
+  for (let i = 0; i < produtos.length; i++) {
+    const p = produtos[i];
+    tb.innerHTML += '<tr>' +
+      '<td>' + p.codigo + '</td>' +
+      '<td>' + p.nome + '</td>' +
+      '<td>' + p.categoria + '</td>' +
+      '<td>R$ ' + Number(p.preco_unitario).toFixed(2) + '</td>' +
+      '<td>' + p.quantidade + '</td>' +
+      '<td>R$ ' + (p.quantidade * p.preco_unitario).toFixed(2) + '</td>' +
+      '<td>' + (p.data_criacao || '-') + '</td>' +
+      '<td><button class="btn-excluir" onclick="excluirProd(' + p.codigo + ')">Excluir</button></td>' +
+      '</tr>';
+  }
+}
+
+// Excluir produto
+async function excluirProd(codigo) {
+  if (!confirm('Excluir produto?')) return;
+  await fetch('/api/produtos/' + codigo, { method: 'DELETE' });
+  alert('Excluído!');
+  atualizarTudo();
+}
+
+// Atualizar resumo
+async function atualizarResumo() {
+  const res = await fetch('/api/resumo');
+  const r = await res.json();
+
+  document.getElementById('r-total-itens').textContent = r.total_produtos;
+  document.getElementById('r-qtd-total').textContent = r.total_quantidade;
+  document.getElementById('r-valor-total').textContent = r.total_valor.toFixed(2);
+
+  const movRes = await fetch('/api/movimentacoes');
+  const movs = await movRes.json();
+  let ent = 0;
+  let sai = 0;
+  for (let i = 0; i < movs.length; i++) {
+    if (movs[i].tipo === 'entrada') ent += movs[i].quantidade;
+    else sai += movs[i].quantidade;
+  }
+  document.getElementById('r-entradas').textContent = ent;
+  document.getElementById('r-saidas').textContent = sai;
+}
+
+// Mostrar/Ocultar
+let visivelProd = true;
+function mostrarOcultarProdutos() {
+  visivelProd = !visivelProd;
+  document.getElementById('sec-produtos').style.display = visivelProd ? 'block' : 'none';
+}
+
+let visivelEst = true;
+function mostrarOcultarEstoque() {
+  visivelEst = !visivelEst;
+  document.getElementById('tabela-estoque').style.display = visivelEst ? 'table' : 'none';
+}
+
+// Relatórios
+async function relatorioCompleto() {
+  const res = await fetch('/api/movimentacoes');
+  const dados = await res.json();
+  mostrarRel(dados, 'Relatório Completo');
+}
+
+async function historicoMovimentacoes() {
+  const res = await fetch('/api/movimentacoes');
+  const dados = await res.json();
+  mostrarRel(dados, 'Histórico de Movimentações');
+}
+
+async function filtrarPorCategoria() {
+  const cat = document.getElementById('filtroCategoria').value;
+  let url = '/api/movimentacoes';
+  if (cat) url = url + '?categoria=' + cat;
+
+  const res = await fetch(url);
+  const dados = await res.json();
+  mostrarRel(dados, 'Categoria: ' + (cat || 'Todas'));
+}
+
+async function gerarRelatorioPeriodo() {
+  const ini = document.getElementById('dataInicio').value;
   const fim = document.getElementById('dataFim').value;
+  let url = '/api/movimentacoes?';
+  if (ini) url = url + 'inicio=' + ini + '&';
+  if (fim) url = url + 'fim=' + fim;
 
-  if (!inicio || !fim) {
-    alert('Preencha a Data de Início e a Data de Fim!');
-    return;
-  }
-
-  fetch('/api/movimentacoes-periodo?inicio=' + inicio + '&fim=' + fim)
-    .then(res => res.json())
-    .then(dados => {
-      if (!dados || dados.length === 0) {
-        alert('Nenhuma movimentação encontrada entre ' + inicio + ' e ' + fim + '!');
-        return;
-      }
-
-      let totalEntradas = 0;
-      let totalSaidas = 0;
-
-      let texto =
-'===== RELATÓRIO POR PERÍODO =====\n' +
-'Período: ' + inicio + ' até ' + fim + '\n' +
-'Total de registros: ' + dados.length + '\n\n' +
-'Cód | Produto         | Tipo     | Qtd | Responsável      | Data/Hora\n' +
-'-----------------------------------------------------------------------\n';
-
-      dados.forEach(m => {
-        const tipoTexto = m.tipo === 'entrada' ? 'ENTRADA' :
-                          m.tipo === 'saida' ? 'SAÍDA  ' : 'EXCLUSÃO';
-
-        if (m.tipo === 'entrada') totalEntradas += m.quantidade;
-        if (m.tipo === 'saida') totalSaidas += m.quantidade;
-
-        const data = m.data ? m.data.replace('T', ' ').substring(0, 19) : '-';
-        texto +=
-String(m.codigo_produto).padStart(3, ' ') + ' | ' +
-(m.nome || 'DESCONHECIDO').padEnd(15) + ' | ' +
-tipoTexto + ' | ' +
-String(m.quantidade).padStart(3, ' ') + ' | ' +
-(m.responsavel || '-').padEnd(16) + ' | ' + data + '\n';
-      });
-
-      texto +=
-'-----------------------------------------------------------------------\n' +
-'TOTAIS DO PERÍODO:\n' +
-'  Entradas: ' + totalEntradas + '\n' +
-'  Saídas:   ' + totalSaidas + '\n' +
-'  Saldo:    ' + (totalEntradas - totalSaidas);
-
-      alert(texto);
-    })
-    .catch(err => alert('Erro ao carregar relatório: ' + err));
+  const res = await fetch(url);
+  const dados = await res.json();
+  mostrarRel(dados, 'Período: ' + ini + ' a ' + fim);
 }
 
-// ==========================================
-// INICIALIZAÇÃO AO CARREGAR A PÁGINA
-// ==========================================
-document.addEventListener('DOMContentLoaded', function() {
-  // Botões de login
-  document.getElementById('btnEntrar').addEventListener('click', verificarLogin);
-  document.getElementById('senha').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') verificarLogin();
-  });
+function mostrarRel(dados, titulo) {
+  const div = document.getElementById('conteudo-relatorio');
+  div.style.display = 'block';
+  let html = '<h3>' + titulo + '</h3><table border="1" cellpadding="8" style="width:100%;margin-top:10px;">' +
+    '<tr><th>Data</th><th>Tipo</th><th>Produto</th><th>Qtd</th><th>Resp.</th><th>Categ.</th></tr>';
 
-  // Botão de sair
-  document.getElementById('btnSair').addEventListener('click', sairDoSistema);
+  if (dados.length === 0) {
+    html += '<tr><td colspan="6">Nenhuma movimentação</td></tr>';
+  } else {
+    for (let i = 0; i < dados.length; i++) {
+      const m = dados[i];
+      const data = m.data_hora ? m.data_hora.substring(0,10) : '-';
+      html += '<tr>' +
+        '<td>' + data + '</td>' +
+        '<td>' + m.tipo + '</td>' +
+        '<td>' + m.nome + '</td>' +
+        '<td>' + m.quantidade + '</td>' +
+        '<td>' + m.responsavel + '</td>' +
+        '<td>' + m.categoria + '</td>' +
+        '</tr>';
+    }
+  }
+  div.innerHTML = html + '</table>';
+}
 
-  // Carrega categorias
-  carregarCategorias();
-});
+// Atualizar tudo
+function atualizarTudo() {
+  carregarProdutos();
+  atualizarEstoque();
+  atualizarResumo();
+}
+
+// Sair
+function sair() {
+  window.location.href = 'login.html';
+}
+
+// Iniciar
+window.onload = function() {
+  atualizarTudo();
+};
