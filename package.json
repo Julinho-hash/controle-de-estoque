@@ -4,11 +4,10 @@
   "description": "Sistema de Controle de Estoque",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "install": "npm rebuild sqlite3"
+    "start": "node app.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "sqlite3": "^5.1.7"
+    "pg": "^8.11.3"
   }
 }
