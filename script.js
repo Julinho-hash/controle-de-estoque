@@ -1,19 +1,21 @@
-// Buscar produto
+// ========== BUSCAR PRODUTO ==========
 async function buscarProduto() {
   const codigo = document.getElementById('codigoProd').value;
   if (!codigo) return;
-
   const res = await fetch('/api/produtos/' + codigo);
   const prod = await res.json();
-
   if (prod) {
     document.getElementById('nomeProd').value = prod.nome || '';
     document.getElementById('categoriaProd').value = prod.categoria || '';
     document.getElementById('precoProd').value = prod.preco_unitario || '';
+  } else {
+    document.getElementById('nomeProd').value = '';
+    document.getElementById('categoriaProd').value = '';
+    document.getElementById('precoProd').value = '';
   }
 }
 
-// Registrar movimentação
+// ========== REGISTRAR MOVIMENTAÇÃO ==========
 async function registrarMovimentacao() {
   const dados = {
     codigo: document.getElementById('codigoProd').value,
@@ -21,23 +23,18 @@ async function registrarMovimentacao() {
     quantidade: document.getElementById('qtdProd').value,
     responsavel: document.getElementById('responsavel').value
   };
-
   if (!dados.codigo || !dados.quantidade || !dados.responsavel) {
-    alert('Preencha todos os campos!');
-    return;
+    alert('Preencha todos os campos!'); return;
   }
-
   const res = await fetch('/api/movimentacao', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dados)
   });
-
-  const resultado = await res.json();
-  if (resultado.erro) {
-    alert(resultado.erro);
-  } else {
-    alert('Sucesso!');
+  const r = await res.json();
+  if (r.erro) alert(r.erro);
+  else {
+    alert('Sucesso! Qtd: ' + r.novaQuantidade);
     atualizarTudo();
     limparMov();
   }
@@ -52,34 +49,30 @@ function limparMov() {
   document.getElementById('responsavel').value = '';
 }
 
-// Cadastrar produto
+// ========== CADASTRAR PRODUTO ==========
 async function cadastrarProduto() {
   const dados = {
     codigo: document.getElementById('codigoNovo').value,
     nome: document.getElementById('nomeNovo').value,
     categoria: document.getElementById('categoriaNova').value,
-    preco_unitario: document.getElementById('precoNovo').value,
+    preco_unitario: document.getElementById('precoNovo').value || 0,
     quantidade: 0
   };
-
   if (!dados.codigo || !dados.nome || !dados.categoria) {
-    alert('Código, Nome e Categoria são obrigatórios!');
-    return;
+    alert('Código, Nome e Categoria são obrigatórios!'); return;
   }
-
   const res = await fetch('/api/produtos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dados)
   });
-
-  const resultado = await res.json();
-  if (resultado.erro) {
-    alert(resultado.erro);
-  } else {
-    alert('Produto cadastrado!');
+  const r = await res.json();
+  if (r.erro) alert(r.erro);
+  else {
+    alert('Cadastrado!');
     atualizarTudo();
     limparCad();
+    carregarCategorias();
   }
 }
 
@@ -90,108 +83,126 @@ function limparCad() {
   document.getElementById('precoNovo').value = '';
 }
 
-// Carregar produtos
+// ========== CARREGAR CATEGORIAS ==========
+async function carregarCategorias() {
+  const sel = document.getElementById('filtroCategoria');
+  if (!sel) return;
+  const res = await fetch('/api/produtos');
+  const prods = await res.json();
+  const cats = [];
+  for (let p of prods) if (p.categoria && !cats.includes(p.categoria)) cats.push(p.categoria);
+  sel.innerHTML = '<option value="">Todas</option>';
+  for (let c of cats) sel.innerHTML += '<option value="' + c + '">' + c + '</option>';
+}
+
+// ========== CARREGAR TABELAS ==========
 async function carregarProdutos() {
-  const res = await fetch('/api/produtos');
-  const produtos = await res.json();
-  const tb = document.querySelector('#tabela-produtos tbody');
+  const tb = document.querySelector('#tabela-prod tbody');
+  if (!tb) return;
   tb.innerHTML = '';
-
-  for (let i = 0; i < produtos.length; i++) {
-    const p = produtos[i];
+  const res = await fetch('/api/produtos');
+  const prods = await res.json();
+  for (let p of prods) {
+    const preco = Number(p.preco_unitario || 0).toFixed(2);
+    const total = (p.quantidade * (p.preco_unitario || 0)).toFixed(2);
     tb.innerHTML += '<tr>' +
       '<td>' + p.codigo + '</td>' +
       '<td>' + p.nome + '</td>' +
       '<td>' + p.categoria + '</td>' +
-      '<td>R$ ' + Number(p.preco_unitario).toFixed(2) + '</td>' +
+      '<td>R$ ' + preco + '</td>' +
       '<td>' + p.quantidade + '</td>' +
-      '<td>R$ ' + (p.quantidade * p.preco_unitario).toFixed(2) + '</td>' +
-      '</tr>';
+      '<td>R$ ' + total + '</td></tr>';
   }
 }
 
-// Atualizar estoque
 async function atualizarEstoque() {
-  const res = await fetch('/api/produtos');
-  const produtos = await res.json();
   const tb = document.querySelector('#tabela-estoque tbody');
+  if (!tb) return;
   tb.innerHTML = '';
-
-  for (let i = 0; i < produtos.length; i++) {
-    const p = produtos[i];
+  const res = await fetch('/api/produtos');
+  const prods = await res.json();
+  for (let p of prods) {
+    const preco = Number(p.preco_unitario || 0).toFixed(2);
+    const total = (p.quantidade * (p.preco_unitario || 0)).toFixed(2);
+    const dt = p.data_criacao ? p.data_criacao.substring(0, 10) : '-';
     tb.innerHTML += '<tr>' +
       '<td>' + p.codigo + '</td>' +
       '<td>' + p.nome + '</td>' +
       '<td>' + p.categoria + '</td>' +
-      '<td>R$ ' + Number(p.preco_unitario).toFixed(2) + '</td>' +
+      '<td>R$ ' + preco + '</td>' +
       '<td>' + p.quantidade + '</td>' +
-      '<td>R$ ' + (p.quantidade * p.preco_unitario).toFixed(2) + '</td>' +
-      '<td>' + (p.data_criacao || '-') + '</td>' +
-      '<td><button class="btn-excluir" onclick="excluirProd(' + p.codigo + ')">Excluir</button></td>' +
-      '</tr>';
+      '<td>R$ ' + total + '</td>' +
+      '<td>' + dt + '</td>' +
+      '<td><button onclick="excluirProd(' + p.codigo + ')">Excluir</button></td></tr>';
   }
 }
 
-// Excluir produto
-async function excluirProd(codigo) {
-  if (!confirm('Excluir produto?')) return;
-  await fetch('/api/produtos/' + codigo, { method: 'DELETE' });
+async function excluirProd(cod) {
+  if (!confirm('Excluir?')) return;
+  await fetch('/api/produtos/' + cod, { method: 'DELETE' });
   alert('Excluído!');
   atualizarTudo();
+  carregarCategorias();
 }
 
-// Atualizar resumo
+// ========== RESUMO ==========
 async function atualizarResumo() {
   const res = await fetch('/api/resumo');
   const r = await res.json();
-
-  document.getElementById('r-total-itens').textContent = r.total_produtos;
-  document.getElementById('r-qtd-total').textContent = r.total_quantidade;
-  document.getElementById('r-valor-total').textContent = r.total_valor.toFixed(2);
+  document.getElementById('r-total-itens').textContent = r.total_produtos || 0;
+  document.getElementById('r-qtd-total').textContent = r.total_quantidade || 0;
+  document.getElementById('r-valor-total').textContent = Number(r.total_valor || 0).toFixed(2);
 
   const movRes = await fetch('/api/movimentacoes');
   const movs = await movRes.json();
-  let ent = 0;
-  let sai = 0;
-  for (let i = 0; i < movs.length; i++) {
-    if (movs[i].tipo === 'entrada') ent += movs[i].quantidade;
-    else sai += movs[i].quantidade;
+  let ent = 0, sai = 0;
+  if (movs && movs.length) {
+    for (let m of movs) {
+      if (m.tipo === 'entrada') ent += Number(m.quantidade);
+      else sai += Number(m.quantidade);
+    }
   }
   document.getElementById('r-entradas').textContent = ent;
   document.getElementById('r-saidas').textContent = sai;
 }
 
-// Mostrar/Ocultar
-let visivelProd = true;
+// ========== MOSTRAR/OCULTAR ==========
+let visProd = true;
 function mostrarOcultarProdutos() {
-  visivelProd = !visivelProd;
-  document.getElementById('sec-produtos').style.display = visivelProd ? 'block' : 'none';
+  visProd = !visProd;
+  const el = document.getElementById('sec-produtos');
+  if (el) el.style.display = visProd ? 'block' : 'none';
 }
 
-let visivelEst = true;
+let visEst = true;
 function mostrarOcultarEstoque() {
-  visivelEst = !visivelEst;
-  document.getElementById('tabela-estoque').style.display = visivelEst ? 'table' : 'none';
+  visEst = !visEst;
+  const el = document.getElementById('tabela-estoque');
+  if (el) el.style.display = visEst ? 'table' : 'none';
 }
 
-// Relatórios
+// ========== RELATÓRIOS — TODOS FUNCIONANDO ==========
 async function relatorioCompleto() {
+  console.log('→ Relatório Completo');
   const res = await fetch('/api/movimentacoes');
   const dados = await res.json();
   mostrarRel(dados, 'Relatório Completo');
 }
 
 async function historicoMovimentacoes() {
+  console.log('→ Histórico de Movimentações');
   const res = await fetch('/api/movimentacoes');
   const dados = await res.json();
   mostrarRel(dados, 'Histórico de Movimentações');
 }
 
 async function filtrarPorCategoria() {
-  const cat = document.getElementById('filtroCategoria').value;
+  const sel = document.getElementById('filtroCategoria');
+  if (!sel) return;
+  const cat = sel.value;
   let url = '/api/movimentacoes';
-  if (cat) url = url + '?categoria=' + cat;
-
+  if (cat) url += '?categoria=' + encodeURIComponent(cat);
+  console.log('→ Filtrar por categoria:', cat);
   const res = await fetch(url);
   const dados = await res.json();
   mostrarRel(dados, 'Categoria: ' + (cat || 'Todas'));
@@ -200,10 +211,10 @@ async function filtrarPorCategoria() {
 async function gerarRelatorioPeriodo() {
   const ini = document.getElementById('dataInicio').value;
   const fim = document.getElementById('dataFim').value;
+  console.log('→ Período:', ini, 'a', fim);
   let url = '/api/movimentacoes?';
-  if (ini) url = url + 'inicio=' + ini + '&';
-  if (fim) url = url + 'fim=' + fim;
-
+  if (ini) url += 'inicio=' + ini + '&';
+  if (fim) url += 'fim=' + fim;
   const res = await fetch(url);
   const dados = await res.json();
   mostrarRel(dados, 'Período: ' + ini + ' a ' + fim);
@@ -211,42 +222,55 @@ async function gerarRelatorioPeriodo() {
 
 function mostrarRel(dados, titulo) {
   const div = document.getElementById('conteudo-relatorio');
-  div.style.display = 'block';
-  let html = '<h3>' + titulo + '</h3><table border="1" cellpadding="8" style="width:100%;margin-top:10px;">' +
-    '<tr><th>Data</th><th>Tipo</th><th>Produto</th><th>Qtd</th><th>Resp.</th><th>Categ.</th></tr>';
+  if (!div) {
+    alert('Área de relatório não encontrada!');
+    return;
+  }
 
-  if (dados.length === 0) {
-    html += '<tr><td colspan="6">Nenhuma movimentação</td></tr>';
+  let html = '<h3 style="margin:0 0 15px 0; color:#1e3a8a;">' + titulo + '</h3>';
+
+  if (!dados || !dados.length) {
+    html += '<p style="padding:15px; background:#f3f4f6; border-radius:6px;">Nenhuma movimentação encontrada.</p>';
   } else {
+    html += '<table style="width:100%; border-collapse:collapse;">' +
+      '<tr style="background:#1e3a8a; color:white;">' +
+      '<th style="padding:10px; text-align:left;">Data</th>' +
+      '<th style="padding:10px; text-align:left;">Tipo</th>' +
+      '<th style="padding:10px; text-align:left;">Produto</th>' +
+      '<th style="padding:10px; text-align:left;">Qtd</th>' +
+      '<th style="padding:10px; text-align:left;">Responsável</th>' +
+      '<th style="padding:10px; text-align:left;">Categoria</th>' +
+      '</tr>';
     for (let i = 0; i < dados.length; i++) {
       const m = dados[i];
-      const data = m.data_hora ? m.data_hora.substring(0,10) : '-';
-      html += '<tr>' +
-        '<td>' + data + '</td>' +
-        '<td>' + m.tipo + '</td>' +
-        '<td>' + m.nome + '</td>' +
-        '<td>' + m.quantidade + '</td>' +
-        '<td>' + m.responsavel + '</td>' +
-        '<td>' + m.categoria + '</td>' +
+      const dt = m.data_hora ? m.data_hora.substring(0, 10) : '-';
+      const cor = m.tipo === 'entrada' ? '#dcfce7' : '#fee2e2';
+      html += '<tr style="background:' + cor + ';">' +
+        '<td style="padding:8px; border-bottom:1px solid #ddd;">' + dt + '</td>' +
+        '<td style="padding:8px; border-bottom:1px solid #ddd;">' + m.tipo + '</td>' +
+        '<td style="padding:8px; border-bottom:1px solid #ddd;">' + (m.nome || '-') + '</td>' +
+        '<td style="padding:8px; border-bottom:1px solid #ddd;">' + m.quantidade + '</td>' +
+        '<td style="padding:8px; border-bottom:1px solid #ddd;">' + (m.responsavel || '-') + '</td>' +
+        '<td style="padding:8px; border-bottom:1px solid #ddd;">' + (m.categoria || '-') + '</td>' +
         '</tr>';
     }
+    html += '</table>';
   }
-  div.innerHTML = html + '</table>';
+
+  div.innerHTML = html;
+  console.log('✅ Relatório exibido!');
 }
 
-// Atualizar tudo
+// ========== GERAL ==========
 function atualizarTudo() {
   carregarProdutos();
   atualizarEstoque();
   atualizarResumo();
+  carregarCategorias();
 }
 
-// Sair
 function sair() {
   window.location.href = 'login.html';
 }
 
-// Iniciar
-window.onload = function() {
-  atualizarTudo();
-};
+window.onload = atualizarTudo;

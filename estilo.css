@@ -6,19 +6,18 @@
 }
 
 body {
-    background: #f0f2f5;
+    background-color: #f0f2f5;
 }
 
-/* Layout Principal — Lado a Lado */
 .app-container {
     display: flex;
     min-height: 100vh;
 }
 
-/* Barra Lateral */
+/* BARRA LATERAL */
 .sidebar {
     width: 280px;
-    background: #2c3e50;
+    background-color: #1e3a8a;
     color: white;
     padding: 20px 15px;
     position: fixed;
@@ -26,155 +25,219 @@ body {
     overflow-y: auto;
 }
 
-.sidebar h3 {
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
     text-align: center;
-    margin-bottom: 25px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #3498db;
 }
 
-.sidebar h4 {
-    margin: 15px 0 8px;
-    font-size: 14px;
-    color: #bdc3c7;
-}
-
-.sidebar-section {
+.sidebar hr {
+    border: none;
+    border-top: 1px solid #3b5998;
     margin-bottom: 20px;
 }
 
-.sidebar button,
+.grupo {
+    margin-bottom: 25px;
+}
+
+.grupo h4 {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #bfdbfe;
+}
+
 .sidebar input,
 .sidebar select {
     width: 100%;
     padding: 8px;
-    margin: 4px 0;
+    margin-bottom: 8px;
     border: none;
     border-radius: 4px;
+    color: #333;
 }
 
 .sidebar button {
-    background: #3498db;
+    width: 100%;
+    padding: 10px;
+    background-color: #3b82f6;
     color: white;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    margin-bottom: 6px;
 }
 
 .sidebar button:hover {
-    background: #2980b9;
+    background-color: #2563eb;
 }
 
-.cadastro-lateral input {
-    background: #34495e;
-    color: white;
+.cadastro input {
+    margin-bottom: 6px;
 }
 
-.cadastro-lateral input::placeholder {
-    color: #bdc3c7;
-}
-
-/* Conteúdo Principal */
-.conteudo-principal {
+/* CONTEÚDO PRINCIPAL */
+.conteudo {
     flex: 1;
     margin-left: 280px;
-    padding: 20px;
+    padding: 20px 30px;
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
     padding-bottom: 15px;
     border-bottom: 2px solid #ddd;
 }
 
+header h1 {
+    color: #1e3a8a;
+    font-size: 24px;
+}
+
 .btn-sair {
-    background: #e74c3c;
+    padding: 10px 20px;
+    background-color: #ef4444;
     color: white;
     border: none;
-    padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
 }
 
-section {
+.btn-sair:hover {
+    background-color: #dc2626;
+}
+
+/* BLOCOS */
+.bloco {
     background: white;
     padding: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-h2 {
+.bloco h2 {
+    font-size: 18px;
+    color: #1e3a8a;
     margin-bottom: 15px;
-    color: #2c3e50;
-    border-bottom: 1px solid #ddd;
     padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
 }
 
-.form-linha {
+/* FORMULÁRIO */
+.linha-form {
     display: flex;
-    gap: 8px;
     flex-wrap: wrap;
+    gap: 8px;
     align-items: center;
 }
 
-input, select, button {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
+.linha-form input,
+.linha-form select {
+    padding: 10px;
+    border: 1px solid #ccc;
     border-radius: 4px;
+    flex: 1;
+    min-width: 120px;
 }
 
-button {
-    background: #3498db;
+.linha-form button {
+    padding: 10px 20px;
+    background-color: #10b981;
     color: white;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
 }
 
+.linha-form button:hover {
+    background-color: #059669;
+}
+
+/* TABELAS */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
 }
 
-th, td {
-    padding: 10px;
+table th,
+table td {
+    padding: 12px 10px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #eee;
 }
 
-th {
-    background: #f8f9fa;
+table th {
+    background-color: #f1f5f9;
+    color: #1e3a8a;
     font-weight: bold;
 }
 
-.btn-excluir {
-    background: #e74c3c;
-    padding: 5px 10px;
+table tr:hover {
+    background-color: #f8fafc;
 }
 
-.relatorio-resumido div {
-    margin: 8px 0;
+table button {
+    padding: 5px 12px;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+table button:hover {
+    background-color: #dc2626;
+}
+
+/* RESUMO */
+.resumo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.resumo p {
     font-size: 16px;
+    padding: 8px 15px;
+    background: #f1f5f9;
+    border-radius: 4px;
 }
 
 .valor-total {
-    font-size: 18px;
     font-weight: bold;
-    color: #27ae60;
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 2px solid #ddd;
+    font-size: 18px;
+    color: #16a34a;
+    background: #dcfce7 !important;
 }
 
-#resultado-relatorio {
-    display: none;
+/* ÁREA DO RELATÓRIO */
+.relatorio {
+    background: #eff6ff;
 }
 
-.oculto {
-    display: none !important;
+#conteudo-relatorio {
+    min-height: 150px;
+    padding: 15px;
+    background: white;
+    border: 2px solid #bfdbfe;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 220px;
+    }
+    .conteudo {
+        margin-left: 220px;
+    }
 }
