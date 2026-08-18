@@ -1,12 +1,22 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORTA = process.env.PORT || 3000;
 
-// Conecta no banco SQLite
-const db = new sqlite3.Database('estoque.db', function(erro) {
+// Nome do banco
+const BANCO = 'estoque.db';
+
+// Apaga o banco antigo se existir
+if (fs.existsSync(BANCO)) {
+  fs.unlinkSync(BANCO);
+  console.log('Banco antigo apagado!');
+}
+
+// Cria banco novo
+const db = new sqlite3.Database(BANCO, function(erro) {
   if (erro) {
     console.log('Erro ao abrir banco:', erro);
   } else {
@@ -15,7 +25,7 @@ const db = new sqlite3.Database('estoque.db', function(erro) {
   }
 });
 
-// Cria as tabelas
+// Cria as tabelas COM a coluna de preço
 function criarTabelas() {
   db.run(`
     CREATE TABLE IF NOT EXISTS produtos (
@@ -27,7 +37,9 @@ function criarTabelas() {
       quantidade INTEGER DEFAULT 0,
       data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-  `);
+  `, function() {
+    console.log('Tabela produtos pronta!');
+  });
 
   db.run(`
     CREATE TABLE IF NOT EXISTS movimentacoes (
@@ -39,9 +51,9 @@ function criarTabelas() {
       data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (produto_codigo) REFERENCES produtos(codigo) ON DELETE CASCADE
     )
-  `);
-
-  console.log('Tabelas prontas!');
+  `, function() {
+    console.log('Tabela movimentacoes pronta!');
+  });
 }
 
 // Configurações
@@ -171,4 +183,5 @@ app.get('/', function(req, res) {
 // Inicia servidor
 app.listen(PORTA, function() {
   console.log('Servidor rodando na porta ' + PORTA);
+  console.log('Banco criado do zero com coluna preco_unitario! ✅');
 });
