@@ -274,3 +274,38 @@ function sair() {
 }
 
 window.onload = atualizarTudo;
+
+// ========== IMPRIMIR RELATÓRIO ==========
+function imprimirRelatorio() {
+  const conteudo = document.getElementById('conteudo-relatorio').innerHTML;
+  if (!conteudo || conteudo.length < 20) {
+    alert('Gere um relatório primeiro antes de imprimir!');
+    return;
+  }
+
+  const janela = window.open('', '', 'width=800,height=600');
+  janela.document.write(`
+    <html>
+    <head>
+      <title>Relatório de Estoque</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 30px; color: #333; }
+        h2 { color: #1e3a8a; border-bottom: 2px solid #ddd; padding-bottom:10px; }
+        table { width:100%; border-collapse:collapse; margin-top:15px; }
+        th, td { padding:10px; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#1e3a8a; color:white; }
+        .rodape { margin-top:30px; text-align:right; font-size:12px; color:#666; }
+      </style>
+    </head>
+    <body>
+      <h2>Relatório de Controle de Estoque</h2>
+      ${conteudo}
+      <div class="rodape">
+        Emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+      </div>
+      <script>window.onload = function() { window.print(); };<\/script>
+    </body>
+    </html>
+  `);
+  janela.document.close();
+}
