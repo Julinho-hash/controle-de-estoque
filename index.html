@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,130 +7,131 @@
     <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
-
-    <!-- ================= TELA DE LOGIN ================= -->
-    <div id="telaLogin" class="tela-login">
-        <div class="caixa-login">
-            <h2>🔒 Acesso ao Sistema</h2>
-            <p>Digite a senha para entrar</p>
-            <input type="password" id="senha" placeholder="Senha de acesso">
-            <button id="btnEntrar">Entrar no Sistema</button>
-            <p id="avisoErro" style="color:red;display:none;">Senha incorreta!</p>
-        </div>
-    </div>
-
-    <!-- ================= SISTEMA PRINCIPAL ================= -->
-    <div id="sistemaPrincipal" style="display:none;padding:20px;">
-
-        <button id="btnSair" style="float:right;background:#dc3545;color:white;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;">🚪 Sair</button>
-
-        <h1>Controle de Estoque</h1>
-
-        <!-- ============================================= -->
-        <!-- NOVA MOVIMENTAÇÃO -->
-        <!-- ============================================= -->
-        <h2>Nova Movimentação</h2>
-        <div class="linha">
-            <input type="number" id="codigoMov" placeholder="Código do Produto" onblur="buscarProdutoPorCodigo()">
-            <input type="text" id="prod" placeholder="Nome do Produto" readonly>
-            <input type="text" id="cat" placeholder="Categoria" readonly>
-            <input type="number" id="preco" step="0.01" placeholder="Preço Unitário" readonly>
-            <input type="number" id="qtdMov" placeholder="Quantidade" required>
-            <input type="text" id="respMov" placeholder="Responsável" required>
-            <select id="tipoMov">
-                <option value="entrada">Entrada (+)</option>
-                <option value="saida">Saída (-)</option>
-            </select>
-            <button onclick="registrarMovimentacao()">Registrar</button>
-        </div>
-
-        <!-- ============================================= -->
-        <!-- RELATÓRIO POR PERÍODO -->
-        <!-- ============================================= -->
-        <div style="margin-top:15px; padding:10px; border:1px solid #ccc;">
-            <h4>Relatório por Período</h4>
-            <input type="date" id="dataInicio">
-            <input type="date" id="dataFim">
-            <button onclick="gerarRelatorioPorPeriodo()">📅 Gerar Período</button>
-        </div>
-
-        <!-- ============================================= -->
-        <!-- MOSTRAR/OCULTAR LISTA DE PRODUTOS CADASTRADOS -->
-        <!-- ============================================= -->
-        <h2>
-            Produtos Cadastrados
-            <button onclick="mostrarOcultarLista()" style="margin-left:10px;">Mostrar/Ocultar</button>
-        </h2>
-
-        <div id="areaListaProdutos" style="display:none; margin-top:10px;">
-            <p>Lista: Código | Produto | Categoria | Preço</p>
-            <ul id="lista-codigos"></ul>
-        </div>
-
-        <!-- ============================================= -->
-        <!-- ESTOQUE ATUAL + MOSTRAR/OCULTAR TABELA -->
-        <!-- ============================================= -->
-        <h2>
-            Estoque Atual
-            <button onclick="atualizarDoBanco()" style="margin-left:15px; padding:6px 12px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">🔄 Atualizar</button>
-            <button onclick="mostrarOcultarEstoque()" style="margin-left:10px;">Mostrar/Ocultar</button>
-        </h2>
-
-        <!-- A TABELA DENTRO DA ÁREA QUE OCULTA -->
-        <div id="areaEstoqueAtual">
-            <table id="tabelaEstoque">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Produto</th>
-                        <th>Categoria</th>
-                        <th>Preço Unit.</th>
-                        <th>Qtd</th>
-                        <th>Total Item</th>
-                        <th>Última Atualização</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela"></tbody>
-            </table>
-        </div>
-
-        <!-- ============================================= -->
-        <!-- RELATÓRIO RESUMIDO -->
-        <!-- ============================================= -->
-        <h2>Relatório Resumido</h2>
-        <p>Total Itens: <span id="res_totalItens">0</span></p>
-        <p>Qtd Total: <span id="res_qtdTotal">0</span></p>
-        <p>Entradas: <span id="res_entradas">0</span></p>
-        <p>Saídas: <span id="res_saidas">0</span></p>
-        <p><strong>Valor Total: R$ <span id="res_valorTotal">0,00</span></strong></p>
-
-        <!-- ============================================= -->
-        <!-- RELATÓRIOS -->
-        <!-- ============================================= -->
-        <div class="area-relatorios">
-            <button onclick="gerarRelatorioCompleto()">📄 Relatório Completo</button>
-            <button onclick="gerarRelatorioMovimentacoes()">📋 Histórico de Movimentações</button>
-            <div style="margin-top:15px;">
-                <select id="categoriaFiltro">
-                    <option value="">Escolha Categoria</option>
-                </select>
-                <button onclick="gerarRelatorioPorCategoria()">Por Categoria</button>
+    <div class="app-container">
+        <!-- BARRA LATERAL DE RELATÓRIOS -->
+        <aside class="sidebar">
+            <h3>Relatórios</h3>
+            
+            <div class="sidebar-section">
+                <h4>Período</h4>
+                <input type="date" id="dataInicio">
+                <input type="date" id="dataFim">
+                <button onclick="gerarRelatorioPeriodo()">Gerar Período</button>
             </div>
-        </div>
 
-        <!-- ============================================= -->
-        <!-- CADASTRO DE NOVO PRODUTO -->
-        <!-- ============================================= -->
-        <div class="cadastro-produto" style="margin-top:30px; padding:15px; border-top:2px solid #ccc;">
-            <h3>Cadastrar Produto</h3>
-            <input type="number" id="novoCodigo" placeholder="Código">
-            <input type="text" id="novoNome" placeholder="Nome">
-            <input type="text" id="novaCategoria" placeholder="Categoria">
-            <input type="number" step="0.01" id="novoPreco" placeholder="Preço">
-            <button onclick="cadastrarProduto()">Cadastrar</button>
-        </div>
+            <div class="sidebar-section">
+                <button onclick="mostrarOcultarProdutos()">Mostrar/Ocultar Produtos</button>
+            </div>
 
+            <div class="sidebar-section">
+                <button onclick="relatorioCompleto()">Relatório Completo</button>
+                <button onclick="historicoMovimentacoes()">Histórico de Movimentações</button>
+            </div>
+
+            <div class="sidebar-section">
+                <h4>Por Categoria</h4>
+                <select id="filtroCategoria">
+                    <option value="">Todas</option>
+                    <option value="LIMPEZA">Limpeza</option>
+                    <option value="CEREALIS">Cereais</option>
+                    <option value="LEGUMINOSAS">Leguminosas</option>
+                    <option value="BEBIDAS">Bebidas</option>
+                </select>
+                <button onclick="filtrarPorCategoria()">Filtrar</button>
+            </div>
+
+            <div class="sidebar-section cadastro-lateral">
+                <h4>Cadastrar Produto</h4>
+                <input type="number" id="codigoNovo" placeholder="Código">
+                <input type="text" id="nomeNovo" placeholder="Nome">
+                <input type="text" id="categoriaNova" placeholder="Categoria">
+                <input type="number" step="0.01" id="precoNovo" placeholder="Preço">
+                <button onclick="cadastrarProduto()">Cadastrar</button>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="conteudo-principal">
+            <header>
+                <h1>Controle de Estoque</h1>
+                <button class="btn-sair" onclick="sair()">Sair</button>
+            </header>
+
+            <!-- Nova Movimentação -->
+            <section class="nova-movimentacao">
+                <h2>Nova Movimentação</h2>
+                <div class="form-linha">
+                    <input type="number" id="codigoProd" placeholder="Código do Produto" onblur="buscarProduto()">
+                    <input type="text" id="nomeProd" placeholder="Nome do Produto" readonly>
+                    <input type="text" id="categoriaProd" placeholder="Categoria" readonly>
+                    <input type="number" step="0.01" id="precoProd" placeholder="Preço Unitário" readonly>
+                    <input type="number" id="qtdProd" placeholder="Quantidade">
+                    <input type="text" id="responsavel" placeholder="Responsável">
+                    <select id="tipoMov">
+                        <option value="entrada">Entrada (+)</option>
+                        <option value="saída">Saída (-)</option>
+                    </select>
+                    <button onclick="registrarMovimentacao()">Registrar</button>
+                </div>
+            </section>
+
+            <!-- Produtos Cadastrados -->
+            <section id="sec-produtos">
+                <h2>Produtos Cadastrados</h2>
+                <table id="tabela-produtos">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Preço Unit.</th>
+                            <th>Qtd</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <!-- Estoque Atual -->
+            <section>
+                <h2>Estoque Atual
+                    <button onclick="atualizarEstoque()">Atualizar</button>
+                    <button onclick="mostrarOcultarEstoque()">Mostrar/Ocultar</button>
+                </h2>
+                <table id="tabela-estoque">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Preço Unit.</th>
+                            <th>Qtd</th>
+                            <th>Total Item</th>
+                            <th>Última Atualização</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <!-- Relatório Resumido -->
+            <section class="relatorio-resumido">
+                <h2>Relatório Resumido</h2>
+                <div class="resumo-item">Total Itens: <span id="r-total-itens">0</span></div>
+                <div class="resumo-item">Qtd Total: <span id="r-qtd-total">0</span></div>
+                <div class="resumo-item">Entradas: <span id="r-entradas">0</span></div>
+                <div class="resumo-item">Saídas: <span id="r-saidas">0</span></div>
+                <div class="resumo-item valor-total">Valor Total: R$ <span id="r-valor-total">0,00</span></div>
+            </section>
+
+            <!-- Área de Resultado dos Relatórios -->
+            <section id="resultado-relatorio">
+                <h2>Resultado do Relatório</h2>
+                <div id="conteudo-relatorio"></div>
+            </section>
+        </main>
     </div>
 
     <script src="script.js"></script>

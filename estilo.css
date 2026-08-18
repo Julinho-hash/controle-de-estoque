@@ -1,6 +1,3 @@
-/* Remove as margens e espaçamentos padrão do navegador.
-   O box-sizing: border-box faz com que padding e borda
-   sejam incluídos no tamanho total dos elementos. */
 * {
     margin: 0;
     padding: 0;
@@ -8,141 +5,176 @@
     font-family: Arial, sans-serif;
 }
 
-/* Configura o corpo da página */
 body {
-    background: #f0f4f8; /* Cor de fundo */
-    padding: 25px;       /* Espaçamento interno */
-    max-width: 1100px;   /* Largura máxima */
-    margin: 0 auto;      /* Centraliza o conteúdo */
+    background: #f0f2f5;
 }
 
-/* Estiliza os títulos */
-h1, h2 {
-    color: #1e40af;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #bfdbfe;
-    padding-bottom: 8px;
+/* Layout Principal — Lado a Lado */
+.app-container {
+    display: flex;
+    min-height: 100vh;
 }
 
-/* Cria uma grade responsiva para os campos */
-.linha {
-    display: grid;
+/* Barra Lateral */
+.sidebar {
+    width: 280px;
+    background: #2c3e50;
+    color: white;
+    padding: 20px 15px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
 
-    /* Cria colunas automaticamente conforme o tamanho da tela */
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+.sidebar h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3498db;
+}
 
-    gap: 12px;
-    align-items: end;
+.sidebar h4 {
+    margin: 15px 0 8px;
+    font-size: 14px;
+    color: #bdc3c7;
+}
+
+.sidebar-section {
     margin-bottom: 20px;
 }
 
-/* Estilização dos campos */
-input, select, button {
-    padding: 10px;
-    border: 1px solid #93c5fd;
-    border-radius: 6px;
-    font-size: 15px;
+.sidebar button,
+.sidebar input,
+.sidebar select {
+    width: 100%;
+    padding: 8px;
+    margin: 4px 0;
+    border: none;
+    border-radius: 4px;
 }
 
-/* Estilo dos botões */
+.sidebar button {
+    background: #3498db;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.sidebar button:hover {
+    background: #2980b9;
+}
+
+.cadastro-lateral input {
+    background: #34495e;
+    color: white;
+}
+
+.cadastro-lateral input::placeholder {
+    color: #bdc3c7;
+}
+
+/* Conteúdo Principal */
+.conteudo-principal {
+    flex: 1;
+    margin-left: 280px;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ddd;
+}
+
+.btn-sair {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+section {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h2 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.form-linha {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+input, select, button {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
 button {
-    background: #2563eb;
+    background: #3498db;
     color: white;
     border: none;
     cursor: pointer;
     font-weight: bold;
-
-    /* Cria uma pequena animação */
-    transition: background 0.2s;
 }
 
-/* Quando o mouse passa sobre o botão */
-button:hover {
-    background: #1d4ed8;
-}
-
-/* Configuração da tabela */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
-    background: white;
-    border-radius: 6px;
-
-    /* Sombra ao redor da tabela */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-top: 10px;
 }
 
-/* Células da tabela */
 th, td {
-    padding: 12px;
+    padding: 10px;
     text-align: left;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #ddd;
 }
 
-/* Cabeçalho da tabela */
 th {
-    background: #eff6ff;
-    color: #1e40af;
+    background: #f8f9fa;
     font-weight: bold;
 }
 
-/* Muda o fundo da linha quando o mouse passa sobre ela */
-tr:hover {
-    background: #f8fafc;
+.btn-excluir {
+    background: #e74c3c;
+    padding: 5px 10px;
 }
 
-/* Botão de excluir */
-.excluir {
-    background: #ef4444 !important;
-    color: white !important;
-    border: none !important;
-    padding: 6px 12px !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-}
-
-/* Configuração dos parágrafos */
-p {
+.relatorio-resumido div {
     margin: 8px 0;
     font-size: 16px;
 }
 
-/* Deixa elementos strong azuis */
-strong {
-    color: #1e40af;
+.valor-total {
+    font-size: 18px;
+    font-weight: bold;
+    color: #27ae60;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 2px solid #ddd;
 }
 
-/* Área que mostra a lista de produtos */
-.lista-produtos {
-    margin: 15px 0;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 6px;
+#resultado-relatorio {
+    display: none;
 }
 
-/* Lista dentro da área de produtos */
-.lista-produtos ul {
-    margin-top: 8px;
-    padding-left: 20px;
+.oculto {
+    display: none !important;
 }
-
-/* Cada item da lista */
-.lista-produtos li {
-    padding: 3px 0;
-}
-
-.botao-excluir {
-  background-color: #dc3545; /* vermelho */
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.botao-excluir:hover {
-  background-color: #c82333; /* vermelho mais escuro ao passar o mouse */
-}
-
-
