@@ -5,34 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Estoque</title>
     <link rel="stylesheet" href="estilo.css">
-    <link rel="icon" href="data:;base64,=">
 </head>
+
+<script>
+        // VERIFICA SE ESTÁ LOGADO
+        if (localStorage.getItem('logado') !== 'sim') {
+            window.location.href = 'login.html';
+        }
+    </script>
 <body>
     <div class="app-container">
-        <!-- BARRA LATERAL -->
+        <!-- BARRA LATERAL DE RELATÓRIOS -->
         <aside class="sidebar">
-            <h2>Relatórios</h2>
-            <hr>
-
-            <div class="grupo">
+            <h3>Relatórios</h3>
+            
+            <div class="sidebar-section">
                 <h4>Período</h4>
                 <input type="date" id="dataInicio">
                 <input type="date" id="dataFim">
                 <button onclick="gerarRelatorioPeriodo()">Gerar Período</button>
             </div>
 
-            <div class="grupo">
+            <div class="sidebar-section">
                 <button onclick="mostrarOcultarProdutos()">Mostrar/Ocultar Produtos</button>
             </div>
 
-            <div class="grupo">
-                <button onclick="gerarRelatorioPeriodo()">Gerar Período</button>
+            <div class="sidebar-section">
                 <button onclick="relatorioCompleto()">Relatório Completo</button>
                 <button onclick="historicoMovimentacoes()">Histórico de Movimentações</button>
+            </div>
+
+            <div class="sidebar-section">
+                <h4>Por Categoria</h4>
+                <select id="filtroCategoria">
+                    <option value="">Todas</option>
+                    <option value="LIMPEZA">Limpeza</option>
+                    <option value="CEREALIS">Cereais</option>
+                    <option value="LEGUMINOSAS">Leguminosas</option>
+                    <option value="BEBIDAS">Bebidas</option>
+                </select>
                 <button onclick="filtrarPorCategoria()">Filtrar</button>
             </div>
 
-            <div class="grupo cadastro">
+            <div class="sidebar-section cadastro-lateral">
                 <h4>Cadastrar Produto</h4>
                 <input type="number" id="codigoNovo" placeholder="Código">
                 <input type="text" id="nomeNovo" placeholder="Nome">
@@ -43,20 +58,20 @@
         </aside>
 
         <!-- CONTEÚDO PRINCIPAL -->
-        <main class="conteudo">
+        <main class="conteudo-principal">
             <header>
                 <h1>Controle de Estoque</h1>
                 <button class="btn-sair" onclick="sair()">Sair</button>
             </header>
 
-            <!-- NOVA MOVIMENTAÇÃO -->
-            <section class="bloco">
+            <!-- Nova Movimentação -->
+            <section class="nova-movimentacao">
                 <h2>Nova Movimentação</h2>
-                <div class="linha-form">
-                    <input type="number" id="codigoProd" placeholder="Código" onblur="buscarProduto()">
-                    <input type="text" id="nomeProd" placeholder="Nome" readonly>
+                <div class="form-linha">
+                    <input type="number" id="codigoProd" placeholder="Código do Produto" onblur="buscarProduto()">
+                    <input type="text" id="nomeProd" placeholder="Nome do Produto" readonly>
                     <input type="text" id="categoriaProd" placeholder="Categoria" readonly>
-                    <input type="number" step="0.01" id="precoProd" placeholder="Preço" readonly>
+                    <input type="number" step="0.01" id="precoProd" placeholder="Preço Unitário" readonly>
                     <input type="number" id="qtdProd" placeholder="Quantidade">
                     <input type="text" id="responsavel" placeholder="Responsável">
                     <select id="tipoMov">
@@ -67,10 +82,10 @@
                 </div>
             </section>
 
-            <!-- PRODUTOS CADASTRADOS -->
-            <section id="sec-produtos" class="bloco">
+            <!-- Produtos Cadastrados -->
+            <section id="sec-produtos">
                 <h2>Produtos Cadastrados</h2>
-                <table id="tabela-prod">
+                <table id="tabela-produtos">
                     <thead>
                         <tr>
                             <th>Código</th>
@@ -85,8 +100,8 @@
                 </table>
             </section>
 
-            <!-- ESTOQUE ATUAL -->
-            <section class="bloco">
+            <!-- Estoque Atual -->
+            <section>
                 <h2>Estoque Atual
                     <button onclick="atualizarEstoque()">Atualizar</button>
                     <button onclick="mostrarOcultarEstoque()">Mostrar/Ocultar</button>
@@ -108,34 +123,19 @@
                 </table>
             </section>
 
-            <!-- RELATÓRIO RESUMIDO -->
-            <section class="bloco">
-                <h2>Relatório Resumido</h2>
-                <div class="resumo">
-                    <p>Total de Itens: <span id="r-total-itens">0</span></p>
-                    <p>Quantidade Total: <span id="r-qtd-total">0</span></p>
-                    <p>Entradas: <span id="r-entradas">0</span></p>
-                    <p>Saídas: <span id="r-saidas">0</span></p>
-                    <p class="valor-total">Valor Total: R$ <span id="r-valor-total">0.00</span></p>
-                </div>
-            </section>
-
-            <!-- RESULTADO DOS RELATÓRIOS -->
+            <!-- RESULTADO DO RELATÓRIO -->
             <section class="bloco relatorio">
                 <h2>Resultado do Relatório</h2>
                 <div id="conteudo-relatorio">
                     Clique em um botão de relatório ao lado para visualizar...
                 </div>
-                <!-- BOTÃO IMPRIMIR -->
                 <button onclick="imprimirRelatorio()" style="margin-top:15px; padding:10px 25px; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
                     🖨️ Imprimir / Salvar PDF
                 </button>
-
-            
             </section>
+
         </main>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
