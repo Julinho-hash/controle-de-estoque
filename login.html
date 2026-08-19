@@ -4,101 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Controle de Estoque</title>
-    <link rel="stylesheet" href="estilo.css">
-    <link rel="icon" href="data:;base64,=">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
-            font-family: Arial, sans-serif;
         }
         .login-box {
             background: white;
             padding: 40px 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 400px;
-            text-align: center;
         }
-        .login-box h1 {
-            color: #1e3a8a;
-            margin-bottom: 30px;
-            font-size: 24px;
+        h1 { text-align: center; color: #1e3a8a; margin-bottom: 30px; font-size: 24px; }
+        input {
+            width: 100%; padding: 14px; margin: 10px 0 20px;
+            border: 2px solid #ddd; border-radius: 8px;
+            font-size: 16px; outline: none;
         }
-        .login-box input {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 20px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
+        input:focus { border-color: #3b82f6; }
+        button {
+            width: 100%; padding: 14px;
+            background: #1e3a8a; color: white;
+            border: none; border-radius: 8px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
         }
-        .login-box input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        .login-box button {
-            width: 100%;
-            padding: 14px;
-            background: #1e3a8a;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .login-box button:hover {
-            background: #2563eb;
-        }
-        .erro {
-            color: #dc2626;
-            margin-top: 15px;
-            display: none;
-        }
+        button:hover { background: #3b82f6; }
+        .erro { color: red; text-align: center; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
     <div class="login-box">
-        <h1>🔐 Controle de Estoque</h1>
-        <input type="text" id="usuario" placeholder="Usuário" autocomplete="off">
-        <input type="password" id="senha" placeholder="Senha">
-        <button onclick="fazerLogin()">Entrar no Sistema</button>
-        <div class="erro" id="msgErro">Usuário ou senha incorretos!</div>
+        <h1>🔐 Acesso ao Sistema</h1>
+        <input type="password" id="senha" placeholder="Digite a senha de acesso">
+        <button onclick="entrar()">Entrar no Sistema</button>
+        <div class="erro" id="msgErro">Senha incorreta! Tente novamente.</div>
     </div>
 
     <script>
-        // 🔑 DADOS DE ACESSO — ALTERE AQUI SE QUISER!
-        const USUARIO_CORRETO = "admin";
-        const SENHA_CORRETA = "estoque123";
+        // 🔐 SENHA DE ACESSO — PODE MUDAR AQUI!
+        const SENHA_CORRETA = "123456";
 
-        function fazerLogin() {
-            const usuario = document.getElementById('usuario').value.trim();
+        function entrar() {
             const senha = document.getElementById('senha').value;
-            const msgErro = document.getElementById('msgErro');
-
-            if (usuario === USUARIO_CORRETO && senha === SENHA_CORRETA) {
-                // Salva que está logado
+            if (senha === SENHA_CORRETA) {
                 localStorage.setItem('logado', 'sim');
-                // Vai para a página principal
                 window.location.href = 'index.html';
             } else {
-                // Mostra mensagem de erro
-                msgErro.style.display = 'block';
+                document.getElementById('msgErro').style.display = 'block';
                 document.getElementById('senha').value = '';
             }
         }
 
-        // Permite apertar Enter para entrar
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') fazerLogin();
+        // Aperta Enter pra entrar
+        document.getElementById('senha').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') entrar();
         });
     </script>
 </body>

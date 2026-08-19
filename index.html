@@ -8,11 +8,17 @@
 </head>
 
 <script>
-        // VERIFICA SE ESTÁ LOGADO
-        if (localStorage.getItem('logado') !== 'sim') {
-            window.location.href = 'login.html';
-        }
-    </script>
+        // 🔐 VERIFICAÇÃO DE LOGIN
+    if (localStorage.getItem('logado') !== 'sim') {
+        window.location.href = 'login.html';
+    }
+
+    // SAIR DO SISTEMA
+    function sair() {
+        localStorage.removeItem('logado');
+        window.location.href = 'login.html';
+    }
+</script>
 <body>
     <div class="app-container">
         <!-- BARRA LATERAL DE RELATÓRIOS -->
@@ -99,9 +105,13 @@
                 </div>
             </section>
 
-            <!-- Produtos Cadastrados -->
+            <!-- PRODUTOS CADASTRADOS -->
             <section id="sec-produtos">
-                <h2>Produtos Cadastrados</h2>
+                <h2>Produtos Cadastrados 
+                    <button id="btn-prod" onclick="alternarProdutos()" style="margin-left:12px; padding:5px 12px; font-size:13px; background:#6366f1; color:white; border:none; border-radius:4px; cursor:pointer;">
+                        Ocultar
+                    </button>
+                </h2>
                 <table id="tabela-produtos">
                     <thead>
                         <tr>

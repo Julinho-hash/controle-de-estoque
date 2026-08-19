@@ -1,3 +1,23 @@
+// ==============================================
+// 🔘 MOSTRAR / OCULTAR — PRODUTOS CADASTRADOS
+// ==============================================
+let produtosVisiveis = true;
+
+function alternarProdutos() {
+    produtosVisiveis = !produtosVisiveis;
+    const tabela = document.getElementById('tabela-produtos');
+    const botao = document.getElementById('btn-prod');
+
+    if (tabela) {
+        tabela.style.display = produtosVisiveis ? 'table' : 'none';
+    }
+    if (botao) {
+        botao.textContent = produtosVisiveis ? 'Ocultar' : 'Mostrar';
+    }
+}
+
+
+
 // ========== BUSCAR PRODUTO ==========
 async function buscarProduto() {
   const codigo = document.getElementById('codigoProd').value;

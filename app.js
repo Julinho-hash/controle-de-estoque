@@ -6,15 +6,18 @@ const fs = require('fs');
 const app = express();
 const PORTA = process.env.PORT || 3000;
 
-// Apaga banco antigo e cria novo do zero
+// ==============================================
+// BANCO DE DADOS
+// ==============================================
 const BANCO = 'estoque.db';
+
+// Apaga banco antigo (só na primeira criação)
 if (fs.existsSync(BANCO)) {
   try { 
     fs.unlinkSync(BANCO); 
     console.log('Banco antigo apagado! Criando banco novo...'); 
-  }
-  catch(e) { 
-    console.log('Não deu pra apagar, usando o existente...'); 
+  } catch(e) { 
+    console.log('Usando banco existente...'); 
   }
 }
 
@@ -28,7 +31,7 @@ const db = new sqlite3.Database(BANCO, function(erro) {
   }
 });
 
-// Cria tabelas COM TODAS as colunas
+// Cria tabelas
 function criarTabelas() {
   db.run(`
     CREATE TABLE IF NOT EXISTS produtos (
@@ -38,7 +41,7 @@ function criarTabelas() {
       categoria TEXT NOT NULL,
       preco_unitario REAL DEFAULT 0,
       quantidade INTEGER DEFAULT 0,
-      data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ultima_atualizacao TEXT
     )
   `, function() {
     console.log('✅ Tabela produtos pronta!');
@@ -51,22 +54,35 @@ function criarTabelas() {
       produto_codigo INTEGER NOT NULL,
       quantidade INTEGER NOT NULL,
       responsavel TEXT NOT NULL,
-      data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (produto_codigo) REFERENCES produtos(codigo) ON DELETE CASCADE
+      data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `, function() {
     console.log('✅ Tabela movimentacoes pronta!');
   });
 }
 
-// Configurações
+// ==============================================
+// CONFIGURAÇÕES
+// ==============================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
-// ==========================================
+// ==============================================
+// 🔐 TELA DE LOGIN — PRIMEIRA PÁGINA
+// ==============================================
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+// PÁGINA PRINCIPAL (após login)
+app.get('/index.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ==============================================
 // PRODUTOS
-// ==========================================
+// ==============================================
 
 // Listar todos
 app.get('/api/produtos', (req, res) => {
@@ -87,10 +103,12 @@ app.get('/api/produtos/:codigo', (req, res) => {
 // Cadastrar
 app.post('/api/produtos', (req, res) => {
   const d = req.body;
+  const data = new Date().toISOString();
+  
   db.run(`
-    INSERT INTO produtos (codigo, nome, categoria, preco_unitario, quantidade)
-    VALUES (?, ?, ?, ?, ?)
-  `, [d.codigo, d.nome, d.categoria, d.preco_unitario || 0, d.quantidade || 0], function(erro) {
+    INSERT INTO produtos (codigo, nome, categoria, preco_unitario, quantidade, ultima_atualizacao)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `, [d.codigo, d.nome, d.categoria, d.preco_unitario || 0, d.quantidade || 0, data], function(erro) {
     if (erro) {
       if (erro.message.includes('UNIQUE')) {
         res.status(400).json({ erro: 'Código já cadastrado!' });
@@ -111,12 +129,13 @@ app.delete('/api/produtos/:codigo', (req, res) => {
   });
 });
 
-// ==========================================
+// ==============================================
 // MOVIMENTAÇÃO
-// ==========================================
+// ==============================================
 
 app.post('/api/movimentacao', (req, res) => {
   const d = req.body;
+  const data = new Date().toISOString();
 
   db.get('SELECT * FROM produtos WHERE codigo = ?', [d.codigo], (erro, prod) => {
     if (erro) return res.status(500).json({ erro: erro.message });
@@ -125,7 +144,7 @@ app.post('/api/movimentacao', (req, res) => {
     let novaQtd;
     if (d.tipo === 'entrada') {
       novaQtd = prod.quantidade + Number(d.quantidade);
-    } else if (d.tipo === 'saída') {
+    } else if (d.tipo === 'saida') {
       if (prod.quantidade < Number(d.quantidade)) {
         return res.status(400).json({ erro: 'Estoque insuficiente!' });
       }
@@ -134,18 +153,18 @@ app.post('/api/movimentacao', (req, res) => {
       return res.status(400).json({ erro: 'Tipo inválido!' });
     }
 
-    // Atualiza quantidade
+    // Atualiza quantidade e data
     db.run(
-      'UPDATE produtos SET quantidade = ? WHERE codigo = ?',
-      [novaQtd, d.codigo],
+      'UPDATE produtos SET quantidade = ?, ultima_atualizacao = ? WHERE codigo = ?',
+      [novaQtd, data, d.codigo],
       (erro) => {
         if (erro) return res.status(500).json({ erro: erro.message });
 
         // Registra movimentação
         db.run(`
-          INSERT INTO movimentacoes (tipo, produto_codigo, quantidade, responsavel)
-          VALUES (?, ?, ?, ?)
-        `, [d.tipo, d.codigo, d.quantidade, d.responsavel], (erro) => {
+          INSERT INTO movimentacoes (tipo, produto_codigo, quantidade, responsavel, data_hora)
+          VALUES (?, ?, ?, ?, ?)
+        `, [d.tipo, d.codigo, d.quantidade, d.responsavel, data], (erro) => {
           if (erro) return res.status(500).json({ erro: erro.message });
           res.json({ sucesso: true, novaQuantidade: novaQtd });
         });
@@ -154,9 +173,9 @@ app.post('/api/movimentacao', (req, res) => {
   });
 });
 
-// ==========================================
-// RELATÓRIOS — CORRIGIDOS E FUNCIONANDO
-// ==========================================
+// ==============================================
+// RELATÓRIOS
+// ==============================================
 
 // Relatório de movimentações (com filtros)
 app.get('/api/movimentacoes', (req, res) => {
@@ -169,19 +188,14 @@ app.get('/api/movimentacoes', (req, res) => {
   `;
   let params = [];
 
-  // Filtro por data inicial
   if (q.inicio) {
     sql += ' AND DATE(m.data_hora) >= ?';
     params.push(q.inicio);
   }
-
-  // Filtro por data final
   if (q.fim) {
     sql += ' AND DATE(m.data_hora) <= ?';
     params.push(q.fim);
   }
-
-  // Filtro por categoria
   if (q.categoria) {
     sql += ' AND p.categoria = ?';
     params.push(q.categoria);
@@ -199,7 +213,7 @@ app.get('/api/movimentacoes', (req, res) => {
   });
 });
 
-// Relatório resumido — CORRIGIDO (retorna 0 em vez de NULL)
+// Relatório resumido
 app.get('/api/resumo', (req, res) => {
   db.get('SELECT COUNT(*) as total FROM produtos', (erro1, p) => {
     db.get('SELECT COALESCE(SUM(quantidade), 0) as total FROM produtos', (erro2, q) => {
@@ -214,16 +228,11 @@ app.get('/api/resumo', (req, res) => {
   });
 });
 
-// ==========================================
-// PÁGINA PRINCIPAL
-// ==========================================
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Inicia servidor
+// ==============================================
+// INICIAR SERVIDOR
+// ==============================================
 app.listen(PORTA, () => {
   console.log('✅ Servidor rodando na porta ' + PORTA);
+  console.log('✅ Acesse: http://localhost:' + PORTA);
   console.log('✅ Sistema de Controle de Estoque - Pronto!');
 });
