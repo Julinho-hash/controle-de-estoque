@@ -439,3 +439,100 @@ function imprimirRelatorio() {
   `);
   janela.document.close();
 }
+
+// ========== EXPORTAR PARA EXCEL ==========
+async function exportarParaExcel() {
+  try {
+    const res = await fetch('/api/produtos');
+    const produtos = await res.json();
+
+    if (!produtos || produtos.length === 0) {
+      alert('Nenhum produto cadastrado!');
+      return;
+    }
+
+    let csv = '\uFEFF';
+    csv += 'Código;Produto;Categoria;Preço;Quantidade;Total\n';
+
+    for (let i = 0; i < produtos.length; i++) {
+      const p = produtos[i];
+      const total = (p.quantidade * (p.preco_unitario || 0)).toFixed(2);
+      csv += p.codigo + ';"' + p.nome + '";"' + p.categoria + '";' + p.preco_unitario + ';' + p.quantidade + ';' + total + '\n';
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'estoque.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    alert('✅ ' + produtos.length + ' produtos exportados!');
+  } catch (erro) {
+    alert('Erro ao exportar: ' + erro.message);
+  }
+}
+
+// ========== IMPORTAR DO EXCEL ==========
+async function importarDoExcel(event) {
+  const arquivo = event.target.files[0];
+  if (!arquivo) return;
+
+  if (!confirm('Importar produtos?\n\nFormato: Código;Nome;Categoria;Preço')) {
+    event.target.value = '';
+    return;
+  }
+
+  const leitor = new FileReader();
+  leitor.onload = async function(e) {
+    const conteudo = e.target.result;
+    const linhas = conteudo.split('\n');
+    let importados = 0;
+    let erros = 0;
+
+    for (let i = 1; i < linhas.length; i++) {
+      const linha = linhas[i].trim();
+      if (!linha) continue;
+
+      const partes = linha.includes(';') ? linha.split(';') : linha.split(',');
+      
+      const codigo = (partes[0] || '').trim().replace(/"/g, '');
+      const nome = (partes[1] || '').trim().replace(/"/g, '');
+      const categoria = (partes[2] || '').trim().replace(/"/g, '');
+      const preco = (partes[3] || '').trim().replace(/"/g, '').replace(',', '.');
+
+      if (!codigo || !nome) {
+        erros++;
+        continue;
+      }
+
+      try {
+        await fetch('/api/produtos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            codigo: codigo,
+            nome: nome,
+            categoria: categoria || 'Sem Categoria',
+            preco_unitario: parseFloat(preco) || 0,
+            quantidade: 0
+          })
+        });
+        importados++;
+      } catch {
+        erros++;
+      }
+    }
+
+    alert('✅ Pronto!\nImportados: ' + importados + '\nErros: ' + erros);
+    
+    if (typeof atualizarTudo === 'function') {
+      atualizarTudo();
+    }
+    
+    event.target.value = '';
+  };
+
+  leitor.readAsText(arquivo, 'UTF-8');
+}

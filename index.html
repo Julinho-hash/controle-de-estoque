@@ -55,6 +55,23 @@
                 <input type="number" step="0.01" id="precoNovo" placeholder="Preço">
                 <button onclick="cadastrarProduto()">Cadastrar</button>
             </div>
+
+            <div class="grupo cadastro">
+                <h4>Cadastrar Produto</h4>
+                <input type="number" id="codigoNovo" placeholder="Código">
+                <input type="text" id="nomeNovo" placeholder="Nome">
+                <input type="text" id="categoriaNova" placeholder="Categoria">
+                <input type="number" step="0.01" id="precoNovo" placeholder="Preço">
+                <button onclick="cadastrarProduto()">Cadastrar</button>
+
+                <!-- SEPARADOR E BOTÕES — SOMENTE CHAMAM AS CLASSES -->
+                <hr class="separador-botoes">
+                <button class="btn-exportar" onclick="exportarParaExcel()">📥 Exportar p/ Excel</button>
+                <input type="file" id="arquivoExcel" accept=".csv,.txt" style="display:none;" onchange="importarDoExcel(event)">
+                <button class="btn-importar" onclick="document.getElementById('arquivoExcel').click()">📤 Importar do Excel</button>
+            </div>
+
+
         </aside>
 
         <!-- CONTEÚDO PRINCIPAL -->

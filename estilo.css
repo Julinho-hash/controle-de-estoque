@@ -178,3 +178,44 @@ th {
 .oculto {
     display: none !important;
 }
+
+/* ===== BOTÕES DE IMPORTAÇÃO E EXPORTAÇÃO ===== */
+.btn-exportar {
+    width: 100%;
+    padding: 10px;
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+
+.btn-exportar:hover {
+    background-color: #059669;
+}
+
+.btn-importar {
+    width: 100%;
+    padding: 10px;
+    background-color: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 6px;
+    transition: background 0.2s;
+}
+
+.btn-importar:hover {
+    background-color: #d97706;
+}
+
+.separador-botoes {
+    margin: 15px 0;
+    border: none;
+    border-top: 1px solid #3b5998;
+}
