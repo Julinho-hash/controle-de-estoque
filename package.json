@@ -1,9 +1,13 @@
 {
-  "name": "controle-estoque",
+  "name": "controle-de-estoque",
   "version": "1.0.0",
+  "description": "Sistema de Controle de Estoque",
   "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
-    "sqlite3": "^5.1.6"
+    "pg": "^8.11.3"
   }
 }
