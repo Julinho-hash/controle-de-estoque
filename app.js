@@ -1,41 +1,32 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const fs = require('fs');
+const { Pool } = require('pg');
 
 const app = express();
 const PORTA = process.env.PORT || 3000;
 
 // ==============================================
-// BANCO DE DADOS
+// BANCO DE DADOS — POSTGRESQL (PERMANENTE!)
 // ==============================================
-const BANCO = 'estoque.db';
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgres://controle_de_estoque_cpuz_user:gnhahsOp979Fv00lHMqfK4aCdmrkYOJE@dpg-da24fvn40ujc7395ej00-a:5432/controle_de_estoque_cpuz',
+  ssl: { rejectUnauthorized: false }
+});
 
-// Apaga banco antigo (só na primeira criação)
-if (fs.existsSync(BANCO)) {
-  try { 
-    fs.unlinkSync(BANCO); 
-    console.log('Banco antigo apagado! Criando banco novo...'); 
-  } catch(e) { 
-    console.log('Usando banco existente...'); 
-  }
-}
-
-// Conecta ao banco
-const db = new sqlite3.Database(BANCO, function(erro) {
-  if (erro) {
-    console.log('Erro ao conectar banco:', erro);
-  } else {
-    console.log('✅ Conectado ao SQLite!');
+// TESTAR CONEXÃO
+db.query('SELECT NOW()', (erro) => {
+  if (erro) console.log('❌ Erro banco:', erro.message);
+  else {
+    console.log('✅ Conectado ao Banco Permanente!');
     criarTabelas();
   }
 });
 
-// Cria tabelas
-function criarTabelas() {
-  db.run(`
+// CRIAR TABELAS
+async function criarTabelas() {
+  await db.query(`
     CREATE TABLE IF NOT EXISTS produtos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       codigo INTEGER UNIQUE NOT NULL,
       nome TEXT NOT NULL,
       categoria TEXT NOT NULL,
@@ -43,22 +34,19 @@ function criarTabelas() {
       quantidade INTEGER DEFAULT 0,
       ultima_atualizacao TEXT
     )
-  `, function() {
-    console.log('✅ Tabela produtos pronta!');
-  });
-
-  db.run(`
+  `);
+  await db.query(`
     CREATE TABLE IF NOT EXISTS movimentacoes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       tipo TEXT NOT NULL,
       produto_codigo INTEGER NOT NULL,
       quantidade INTEGER NOT NULL,
       responsavel TEXT NOT NULL,
       data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-  `, function() {
-    console.log('✅ Tabela movimentacoes pronta!');
-  });
+  `);
+  console.log('✅ Tabelas prontas! Dados SALVOS PARA SEMPRE!');
+  iniciarServidor();
 }
 
 // ==============================================
@@ -69,170 +57,110 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
 // ==============================================
-// 🔐 TELA DE LOGIN — PRIMEIRA PÁGINA
+// PÁGINAS
 // ==============================================
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
-});
-
-// PÁGINA PRINCIPAL (após login)
-app.get('/index.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // ==============================================
 // PRODUTOS
 // ==============================================
-
-// Listar todos
-app.get('/api/produtos', (req, res) => {
-  db.all('SELECT * FROM produtos ORDER BY codigo', (erro, linhas) => {
-    if (erro) res.status(500).json({ erro: erro.message });
-    else res.json(linhas);
-  });
+app.get('/api/produtos', async (req, res) => {
+  const r = await db.query('SELECT * FROM produtos ORDER BY codigo');
+  res.json(r.rows);
 });
 
-// Buscar por código
-app.get('/api/produtos/:codigo', (req, res) => {
-  db.get('SELECT * FROM produtos WHERE codigo = ?', [req.params.codigo], (erro, linha) => {
-    if (erro) res.status(500).json({ erro: erro.message });
-    else res.json(linha || null);
-  });
+app.get('/api/produtos/:codigo', async (req, res) => {
+  const r = await db.query('SELECT * FROM produtos WHERE codigo = $1', [req.params.codigo]);
+  res.json(r.rows[0] || null);
 });
 
-// Cadastrar
-app.post('/api/produtos', (req, res) => {
+app.post('/api/produtos', async (req, res) => {
   const d = req.body;
   const data = new Date().toISOString();
-  
-  db.run(`
-    INSERT INTO produtos (codigo, nome, categoria, preco_unitario, quantidade, ultima_atualizacao)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `, [d.codigo, d.nome, d.categoria, d.preco_unitario || 0, d.quantidade || 0, data], function(erro) {
-    if (erro) {
-      if (erro.message.includes('UNIQUE')) {
-        res.status(400).json({ erro: 'Código já cadastrado!' });
-      } else {
-        res.status(500).json({ erro: erro.message });
-      }
+  try {
+    const r = await db.query(`
+      INSERT INTO produtos (codigo, nome, categoria, preco_unitario, quantidade, ultima_atualizacao)
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *
+    `, [d.codigo, d.nome, d.categoria, d.preco_unitario||0, 0, data]);
+    res.json({ sucesso: true, produto: r.rows[0] });
+  } catch (erro) {
+    if (erro.message.includes('duplicate')) {
+      res.status(400).json({ erro: 'Código já cadastrado!' });
     } else {
-      res.json({ id: this.lastID, ...d });
+      res.status(500).json({ erro: erro.message });
     }
-  });
+  }
 });
 
-// Excluir
-app.delete('/api/produtos/:codigo', (req, res) => {
-  db.run('DELETE FROM produtos WHERE codigo = ?', [req.params.codigo], (erro) => {
-    if (erro) res.status(500).json({ erro: erro.message });
-    else res.json({ sucesso: true });
-  });
+app.delete('/api/produtos/:codigo', async (req, res) => {
+  await db.query('DELETE FROM produtos WHERE codigo = $1', [req.params.codigo]);
+  res.json({ sucesso: true });
 });
 
 // ==============================================
 // MOVIMENTAÇÃO
 // ==============================================
-
-app.post('/api/movimentacao', (req, res) => {
+app.post('/api/movimentacao', async (req, res) => {
   const d = req.body;
   const data = new Date().toISOString();
+  
+  const prodRes = await db.query('SELECT * FROM produtos WHERE codigo = $1', [d.codigo]);
+  const prod = prodRes.rows[0];
+  if (!prod) return res.status(404).json({ erro: 'Produto não encontrado!' });
 
-  db.get('SELECT * FROM produtos WHERE codigo = ?', [d.codigo], (erro, prod) => {
-    if (erro) return res.status(500).json({ erro: erro.message });
-    if (!prod) return res.status(404).json({ erro: 'Produto não encontrado!' });
+  let novaQtd;
+  if (d.tipo === 'entrada') novaQtd = prod.quantidade + Number(d.quantidade);
+  else if (d.tipo === 'saida') {
+    if (prod.quantidade < Number(d.quantidade)) return res.status(400).json({ erro: 'Estoque insuficiente!' });
+    novaQtd = prod.quantidade - Number(d.quantidade);
+  } else return res.status(400).json({ erro: 'Tipo inválido!' });
 
-    let novaQtd;
-    if (d.tipo === 'entrada') {
-      novaQtd = prod.quantidade + Number(d.quantidade);
-    } else if (d.tipo === 'saida') {
-      if (prod.quantidade < Number(d.quantidade)) {
-        return res.status(400).json({ erro: 'Estoque insuficiente!' });
-      }
-      novaQtd = prod.quantidade - Number(d.quantidade);
-    } else {
-      return res.status(400).json({ erro: 'Tipo inválido!' });
-    }
-
-    // Atualiza quantidade e data
-    db.run(
-      'UPDATE produtos SET quantidade = ?, ultima_atualizacao = ? WHERE codigo = ?',
-      [novaQtd, data, d.codigo],
-      (erro) => {
-        if (erro) return res.status(500).json({ erro: erro.message });
-
-        // Registra movimentação
-        db.run(`
-          INSERT INTO movimentacoes (tipo, produto_codigo, quantidade, responsavel, data_hora)
-          VALUES (?, ?, ?, ?, ?)
-        `, [d.tipo, d.codigo, d.quantidade, d.responsavel, data], (erro) => {
-          if (erro) return res.status(500).json({ erro: erro.message });
-          res.json({ sucesso: true, novaQuantidade: novaQtd });
-        });
-      }
-    );
-  });
+  await db.query(
+    'UPDATE produtos SET quantidade = $1, ultima_atualizacao = $2 WHERE codigo = $3',
+    [novaQtd, data, d.codigo]
+  );
+  await db.query(
+    'INSERT INTO movimentacoes (tipo, produto_codigo, quantidade, responsavel, data_hora) VALUES ($1, $2, $3, $4, $5)',
+    [d.tipo, d.codigo, d.quantidade, d.responsavel, data]
+  );
+  res.json({ sucesso: true, novaQuantidade: novaQtd });
 });
 
 // ==============================================
 // RELATÓRIOS
 // ==============================================
-
-// Relatório de movimentações (com filtros)
-app.get('/api/movimentacoes', (req, res) => {
+app.get('/api/movimentacoes', async (req, res) => {
   const q = req.query;
-  let sql = `
-    SELECT m.*, p.nome, p.categoria, p.preco_unitario
-    FROM movimentacoes m
-    LEFT JOIN produtos p ON m.produto_codigo = p.codigo
-    WHERE 1=1
-  `;
+  let sql = SELECT m.*, p.nome, p.categoria FROM movimentacoes m LEFT JOIN produtos p ON m.produto_codigo = p.codigo WHERE 1=1;
   let params = [];
-
-  if (q.inicio) {
-    sql += ' AND DATE(m.data_hora) >= ?';
-    params.push(q.inicio);
-  }
-  if (q.fim) {
-    sql += ' AND DATE(m.data_hora) <= ?';
-    params.push(q.fim);
-  }
-  if (q.categoria) {
-    sql += ' AND p.categoria = ?';
-    params.push(q.categoria);
-  }
-
+  let n = 1;
+  if (q.inicio) { sql += ` AND DATE(m.data_hora) >= $${n++}`; params.push(q.inicio); }
+  if (q.fim)   { sql += ` AND DATE(m.data_hora) <= $${n++}`; params.push(q.fim); }
+  if (q.categoria) { sql += ` AND p.categoria = $${n++}`; params.push(q.categoria); }
   sql += ' ORDER BY m.data_hora DESC';
-
-  db.all(sql, params, (erro, linhas) => {
-    if (erro) {
-      console.log('Erro relatório:', erro);
-      res.status(500).json({ erro: erro.message });
-    } else {
-      res.json(linhas);
-    }
-  });
+  
+  const r = await db.query(sql, params);
+  res.json(r.rows);
 });
 
-// Relatório resumido
-app.get('/api/resumo', (req, res) => {
-  db.get('SELECT COUNT(*) as total FROM produtos', (erro1, p) => {
-    db.get('SELECT COALESCE(SUM(quantidade), 0) as total FROM produtos', (erro2, q) => {
-      db.get('SELECT COALESCE(SUM(quantidade * preco_unitario), 0) as total FROM produtos', (erro3, v) => {
-        res.json({
-          total_produtos: p ? p.total : 0,
-          total_quantidade: q ? q.total : 0,
-          total_valor: v ? v.total : 0
-        });
-      });
-    });
+app.get('/api/resumo', async (req, res) => {
+  const p = await db.query('SELECT COUNT(*) as total FROM produtos');
+  const q = await db.query('SELECT COALESCE(SUM(quantidade), 0) as total FROM produtos');
+  const v = await db.query('SELECT COALESCE(SUM(quantidade * preco_unitario), 0) as total FROM produtos');
+  res.json({
+    total_produtos: parseInt(p.rows[0].total),
+    total_quantidade: parseInt(q.rows[0].total),
+    total_valor: parseFloat(v.rows[0].total)
   });
 });
 
 // ==============================================
-// INICIAR SERVIDOR
+// INICIAR
 // ==============================================
-app.listen(PORTA, () => {
-  console.log('✅ Servidor rodando na porta ' + PORTA);
-  console.log('✅ Acesse: http://localhost:' + PORTA);
-  console.log('✅ Sistema de Controle de Estoque - Pronto!');
-});
+function iniciarServidor() {
+  app.listen(PORTA, () => {
+    console.log(✅ Servidor rodando na porta ${PORTA});
+    console.log(✅ BANCO PERMANENTE — DADOS NUNCA SOMEM! 🎉);
+  });
+}
