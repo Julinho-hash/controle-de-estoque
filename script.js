@@ -1,3 +1,6 @@
+
+
+
 let produtos = [];
 let movimentacoes = [];
 
@@ -231,3 +234,17 @@ window.onload = function () {
     atualizarEstoque();
 };
 
+window.onload = function () {
+    // 🔒 SEMPRE Pede senha ao ABRIR o site
+    sessionStorage.removeItem("senhaAprovada"); // ← SEMPRE apaga ao fechar
+    verificarSenha(); // ← Pede senha OBRIGATORIAMENTE
+
+    if (senhaConfirmada) {
+        const salvo = localStorage.getItem("produtos");
+        if (salvo) produtos = JSON.parse(salvo);
+        const movSalvo = localStorage.getItem("movimentacoes");
+        if (movSalvo) movimentacoes = JSON.parse(movSalvo);
+        listarProdutos();
+        atualizarEstoque();
+    }
+};
