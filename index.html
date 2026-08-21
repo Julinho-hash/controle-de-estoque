@@ -6,14 +6,10 @@
     <title>Controle de Estoque</title>
     <link rel="stylesheet" href="estilo.css">
 </head>
-
 <script>
-        // 🔐 VERIFICAÇÃO DE LOGIN
     if (localStorage.getItem('logado') !== 'sim') {
         window.location.href = 'login.html';
     }
-
-    // SAIR DO SISTEMA
     function sair() {
         localStorage.removeItem('logado');
         window.location.href = 'login.html';
@@ -21,26 +17,21 @@
 </script>
 <body>
     <div class="app-container">
-        <!-- BARRA LATERAL DE RELATÓRIOS -->
         <aside class="sidebar">
             <h3>Relatórios</h3>
-            
             <div class="sidebar-section">
                 <h4>Período</h4>
                 <input type="date" id="dataInicio">
                 <input type="date" id="dataFim">
-                <button onclick="gerarRelatorioPeriodo()">Gerar Período</button>
+                <button onclick="gerarRelatorioPeriodo()">📅 Gerar Período</button>
             </div>
-
             <div class="sidebar-section">
-                <button onclick="mostrarOcultarProdutos()">Mostrar/Ocultar Produtos</button>
+                <button onclick="mostrarOcultarProdutos()">📦 Mostrar/Ocultar Produtos</button>
             </div>
-
             <div class="sidebar-section">
-                <button onclick="relatorioCompleto()">Relatório Completo</button>
-                <button onclick="historicoMovimentacoes()">Histórico de Movimentações</button>
+                <button onclick="relatorioCompleto()">📋 Relatório Completo</button>
+                <button onclick="historicoMovimentacoes()">📜 Histórico de Movimentações</button>
             </div>
-
             <div class="sidebar-section">
                 <h4>Por Categoria</h4>
                 <select id="filtroCategoria">
@@ -50,44 +41,33 @@
                     <option value="LEGUMINOSAS">Leguminosas</option>
                     <option value="BEBIDAS">Bebidas</option>
                 </select>
-                <button onclick="filtrarPorCategoria()">Filtrar</button>
+                <button onclick="filtrarPorCategoria()">🔎 Filtrar</button>
             </div>
-
             <div class="sidebar-section cadastro-lateral">
                 <h4>Cadastrar Produto</h4>
                 <input type="number" id="codigoNovo" placeholder="Código">
                 <input type="text" id="nomeNovo" placeholder="Nome">
                 <input type="text" id="categoriaNova" placeholder="Categoria">
                 <input type="number" step="0.01" id="precoNovo" placeholder="Preço">
-                <button onclick="cadastrarProduto()">Cadastrar</button>
+                <button onclick="cadastrarProduto()">➕ Cadastrar</button>
             </div>
-
-            <div class="grupo cadastro">
-                <h4>Cadastrar Produto</h4>
-                <input type="number" id="codigoNovo" placeholder="Código">
-                <input type="text" id="nomeNovo" placeholder="Nome">
-                <input type="text" id="categoriaNova" placeholder="Categoria">
-                <input type="number" step="0.01" id="precoNovo" placeholder="Preço">
-                <button onclick="cadastrarProduto()">Cadastrar</button>
-
-                <!-- SEPARADOR E BOTÕES — SOMENTE CHAMAM AS CLASSES -->
-                <hr class="separador-botoes">
+            <div class="sidebar-section">
+                <h4>Dados</h4>
                 <button class="btn-exportar" onclick="exportarParaExcel()">📥 Exportar p/ Excel</button>
                 <input type="file" id="arquivoExcel" accept=".csv,.txt" style="display:none;" onchange="importarDoExcel(event)">
                 <button class="btn-importar" onclick="document.getElementById('arquivoExcel').click()">📤 Importar do Excel</button>
             </div>
-
-
         </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <main class="conteudo-principal">
             <header>
-                <h1>Controle de Estoque</h1>
-                <button class="btn-sair" onclick="sair()">Sair</button>
+                <div>
+                    <h1>Controle de Estoque</h1>
+                    <p>Sistema de controle de produtos e movimentações</p>
+                </div>
+                <button class="btn-sair" onclick="sair()">🚪 Sair</button>
             </header>
 
-            <!-- Nova Movimentação -->
             <section class="nova-movimentacao">
                 <h2>Nova Movimentação</h2>
                 <div class="form-linha">
@@ -105,12 +85,9 @@
                 </div>
             </section>
 
-            <!-- PRODUTOS CADASTRADOS -->
             <section id="sec-produtos">
-                <h2>Produtos Cadastrados 
-                    <button id="btn-prod" onclick="alternarProdutos()" style="margin-left:12px; padding:5px 12px; font-size:13px; background:#6366f1; color:white; border:none; border-radius:4px; cursor:pointer;">
-                        Ocultar
-                    </button>
+                <h2>Produtos Cadastrados
+                    <button id="btn-prod" onclick="alternarProdutos()" style="margin-left:12px; padding:5px 12px; font-size:13px; background:#6366f1; color:white; border:none; border-radius:4px; cursor:pointer;">Ocultar</button>
                 </h2>
                 <table id="tabela-produtos">
                     <thead>
@@ -127,11 +104,10 @@
                 </table>
             </section>
 
-            <!-- Estoque Atual -->
-            <section>
+            <section id="sec-estoque">
                 <h2>Estoque Atual
-                    <button onclick="atualizarEstoque()">Atualizar</button>
-                    <button onclick="mostrarOcultarEstoque()">Mostrar/Ocultar</button>
+                    <button onclick="atualizarEstoque()">🔄 Atualizar</button>
+                    <button onclick="mostrarOcultarEstoque()">👁️ Mostrar/Ocultar</button>
                 </h2>
                 <table id="tabela-estoque">
                     <thead>
@@ -150,17 +126,11 @@
                 </table>
             </section>
 
-            <!-- RESULTADO DO RELATÓRIO -->
             <section class="bloco relatorio">
                 <h2>Resultado do Relatório</h2>
-                <div id="conteudo-relatorio">
-                    Clique em um botão de relatório ao lado para visualizar...
-                </div>
-                <button onclick="imprimirRelatorio()" style="margin-top:15px; padding:10px 25px; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
-                    🖨️ Imprimir / Salvar PDF
-                </button>
+                <div id="conteudo-relatorio">Clique em um botão de relatório ao lado para visualizar...</div>
+                <button onclick="imprimirRelatorio()" style="margin-top:15px; padding:10px 25px; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🖨️ Imprimir / Salvar PDF</button>
             </section>
-
         </main>
     </div>
     <script src="script.js"></script>
