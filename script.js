@@ -186,36 +186,153 @@ function gerarRelatorioPeriodo() {
     alert("Informe as datas e clique novamente!");
 }
 
-function relatorioCompleto() {
-    let total = produtos.reduce((s, p) => s + p.quantidade, 0);
-    let valor = produtos.reduce((s, p) => s + p.preco * p.quantidade, 0);
-    // Faltavam os acentos de crase (`)
-    alert(`RELATÓRIO COMPLETO
+// ✅ RELATÓRIO POR PERÍODO — LÊ AS DATAS DA TELA E FUNCIONA!
+function gerarRelatorioPeriodo() {
+    // Pega as datas que o usuário digitou nos campos da tela
+    const dataInicioCampo = document.getElementById('dataInicio').value;
+    const dataFimCampo = document.getElementById('dataFim').value;
 
-Produtos: ${produtos.length}
-Quantidade: ${total}
-Valor Total: R$ ${valor.toFixed(2)}
-Movimentações: ${movimentacoes.length}`);
-}
+    // Verifica se os dois campos estão preenchidos
+    if (!dataInicioCampo || !dataFimCampo) {
+        alert("⚠️ Preencha a Data Inicial e a Data Final nos campos ao lado!");
+        return;
+    }
 
-function historicoMovimentacoes() {
-    if (!movimentacoes.length) return alert("Sem movimentações!");
-    let txt = "HISTÓRICO DE MOVIMENTAÇÕES\n\n";
-    movimentacoes.forEach((m, i) => {
-        // Faltavam os acentos de crase (`)
-        txt += `${i + 1}. ${m.tipo.toUpperCase()} — ${m.produto}
-Qtd: ${m.quantidade} | Resp: ${m.responsavel}
-Data: ${m.data}
+    // Converte as datas para formato de comparação (inclui horário)
+    const dataInicio = new Date(dataInicioCampo + "T00:00:00");
+    const dataFim = new Date(dataFimCampo + "T23:59:59");
 
-`;
+    // Converte data para formato BR para mostrar no relatório
+    const convParaBR = (dataISO) => {
+        const [ano, mes, dia] = dataISO.split("-");
+        return `${dia}/${mes}/${ano}`;
+    };
+
+    const dtInicioBR = convParaBR(dataInicioCampo);
+    const dtFimBR = convParaBR(dataFimCampo);
+
+    // Filtra SOMENTE as movimentações do período escolhido
+    const filtradas = movimentacoes.filter(m => {
+        const partesData = m.data.split(/[\/, :]/);
+        const dia = partesData[0];
+        const mes = partesData[1];
+        const ano = partesData[2];
+        const hora = partesData[3] || "00";
+        const minuto = partesData[4] || "00";
+
+        const dataMov = new Date(ano, mes - 1, dia, hora, minuto);
+        return dataMov >= dataInicio && dataMov <= dataFim;
     });
-    alert(txt);
+
+    // ✅ Reutiliza a função que já funciona e mostra na tela!
+    exibirRelatorioTela(filtradas, dtInicioBR, dtFimBR);
 }
 
-function filtrarPorCategoria() {
-    alert("Selecione uma categoria!");
+// ✅ RELATÓRIO COMPLETO — Mostra na tela!
+function relatorioCompleto() {
+    const hoje = new Date();
+    const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const dataFim = hoje.toLocaleDateString("pt-BR").replaceAll("/", "-");
+    const dataInicio = primeiroDia.toLocaleDateString("pt-BR").replaceAll("/", "-");
+
+    exibirRelatorioTela(movimentacoes, "Todo Período", dataFim);
 }
-// ✅ EXPORTAR PARA EXCEL
+
+
+// ✅ FUNÇÃO PRINCIPAL — Monta e exibe o relatório na TELA
+function exibirRelatorioTela(lista, dtIni, dtFim) {
+    const conteudo = document.getElementById('conteudo-relatorio');
+
+    if (!lista.length) {
+        conteudo.innerHTML = `<p style="color:#e74c3c; font-weight:bold;">⚠️ Nenhuma movimentação encontrada no período!</p>`;
+        return;
+    }
+
+    // Calcula totais
+    const entradas = lista.filter(m => m.tipo === "entrada");
+    const saidas = lista.filter(m => m.tipo === "saida");
+    const qtdEntradas = entradas.reduce((s, m) => s + m.quantidade, 0);
+    const qtdSaidas = saidas.reduce((s, m) => s + m.quantidade, 0);
+
+    // Agrupa por responsável
+    const porUsuario = {};
+    lista.forEach(m => {
+        if (!porUsuario[m.responsavel]) {
+            porUsuario[m.responsavel] = { e: 0, s: 0 };
+        }
+        m.tipo === "entrada" ? porUsuario[m.responsavel].e += m.quantidade : porUsuario[m.responsavel].s += m.quantidade;
+    });
+
+    // Monta HTML
+    let html = `
+        <h3 style="margin:0 0 15px 0; color:#1e293b;">📋 Relatório de Movimentações</h3>
+        <p style="color:#475569; margin:5px 0;"><strong>Período:</strong> ${dtIni} até ${dtFim}</p>
+        <hr style="border:none; border-top:1px solid #e2e8f0; margin:10px 0;">
+
+        <div style="display:flex; gap:20px; flex-wrap:wrap; margin:10px 0;">
+            <div style="background:#dcfce7; padding:10px 15px; border-radius:6px;">
+                <strong>📥 Entradas:</strong> ${qtdEntradas}
+            </div>
+            <div style="background:#fee2e2; padding:10px 15px; border-radius:6px;">
+                <strong>📤 Saídas:</strong> ${qtdSaidas}
+            </div>
+            <div style="background:#dbeafe; padding:10px 15px; border-radius:6px;">
+                <strong>📊 Saldo:</strong> ${qtdEntradas - qtdSaidas}
+            </div>
+            <div style="background:#f3e8ff; padding:10px 15px; border-radius:6px;">
+                <strong>📝 Total de Movs:</strong> ${lista.length}
+            </div>
+        </div>
+
+        <h4 style="margin:15px 0 8px 0;">👤 Por Responsável:</h4>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+            <thead><tr style="background:#f1f5f9;">
+                <th style="padding:8px; text-align:left; border:1px solid #ddd;">Responsável</th>
+                <th style="padding:8px; text-align:center; border:1px solid #ddd;">Entradas</th>
+                <th style="padding:8px; text-align:center; border:1px solid #ddd;">Saídas</th>
+                <th style="padding:8px; text-align:center; border:1px solid #ddd;">Saldo</th>
+            </tr></thead>
+            <tbody>
+    `;
+
+    for (const [nome, d] of Object.entries(porUsuario)) {
+        html += `
+            <tr>
+                <td style="padding:8px; border:1px solid #ddd;">${nome}</td>
+                <td style="padding:8px; text-align:center; border:1px solid #ddd;">${d.e}</td>
+                <td style="padding:8px; text-align:center; border:1px solid #ddd;">${d.s}</td>
+                <td style="padding:8px; text-align:center; border:1px solid #ddd;">${d.e - d.s}</td>
+            </tr>`;
+    }
+
+    html += `</tbody></table>
+        <h4 style="margin:15px 0 8px 0;">📝 Detalhe das Movimentações:</h4>
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead><tr style="background:#f1f5f9;">
+                <th style="padding:7px; border:1px solid #ddd;">Data/Hora</th>
+                <th style="padding:7px; border:1px solid #ddd;">Tipo</th>
+                <th style="padding:7px; border:1px solid #ddd;">Produto</th>
+                <th style="padding:7px; border:1px solid #ddd;">Qtd</th>
+                <th style="padding:7px; border:1px solid #ddd;">Responsável</th>
+            </tr></thead>
+            <tbody>`;
+
+    lista.forEach(m => {
+        const cor = m.tipo === "entrada" ? "#16a34a" : "#dc2626";
+        const icone = m.tipo === "entrada" ? "ENTRADA" : "SAÍDA";
+        html += `
+            <tr>
+                <td style="padding:6px; border:1px solid #ddd;">${m.data}</td>
+                <td style="padding:6px; border:1px solid #ddd; color:${cor}; font-weight:bold;">${icone}</td>
+                <td style="padding:6px; border:1px solid #ddd;">${m.produto}</td>
+                <td style="padding:6px; border:1px solid #ddd; text-align:center;">${m.quantidade}</td>
+                <td style="padding:6px; border:1px solid #ddd;">${m.responsavel}</td>
+            </tr>`;
+    });
+
+    html += `</tbody></table>`;
+    conteudo.innerHTML = html;
+}
 function exportarParaExcel() {
     if (produtos.length === 0) {
         alert("Nenhum produto cadastrado para exportar!");
@@ -295,20 +412,50 @@ function importarDoExcel(e) {
     };
     leitor.readAsText(arquivo);
 }
+
+// ✅ IMPRIMIR — Agora imprime SOMENTE o Relatório!
 function imprimirRelatorio() {
-    window.print();
+    const conteudo = document.getElementById('conteudo-relatorio').innerHTML;
+    
+    if (!conteudo || conteudo.includes("Clique em um botão")) {
+        alert("⚠️ Primeiro gere um relatório para poder imprimir!");
+        return;
+    }
+
+    const janela = window.open('', '', 'width=900, height=700');
+    janela.document.write(`
+        <html>
+        <head>
+            <title>Relatório de Movimentações</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; font-size: 14px; }
+                h3 { color: #1e293b; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin: 10px 0 20px 0; }
+                th { background: #f1f5f9; padding: 10px; text-align: left; border: 1px solid #ddd; }
+                td { padding: 8px; border: 1px solid #ddd; }
+                .entrada { color: #16a34a; font-weight: bold; }
+                .saida { color: #dc2626; font-weight: bold; }
+                .caixa { display: inline-block; padding: 10px 15px; margin: 5px; border-radius: 6px; }
+                .entradas { background: #dcfce7; }
+                .saidas { background: #fee2e2; }
+                .saldo { background: #dbeafe; }
+                .total { background: #f3e8ff; }
+                hr { border: none; border-top: 1px solid #ccc; margin: 15px 0; }
+            </style>
+        </head>
+        <body>
+            <h2>📋 Relatório de Movimentações</h2>
+            <hr>
+            ${conteudo}
+        </body>
+        </html>
+    `);
+    janela.document.close();
+    janela.focus();
+    janela.print();
+    janela.close();
 }
 
-window.onload = function () {
-    const salvo = localStorage.getItem("produtos");
-    if (salvo) produtos = JSON.parse(salvo);
-    const movSalvo = localStorage.getItem("movimentacoes");
-    if (movSalvo) movimentacoes = JSON.parse(movSalvo);
-    listarProdutos();
-    atualizarEstoque();
-};
-
-window.onload = function () {
     // 🔒 SEMPRE Pede senha ao ABRIR o site
     sessionStorage.removeItem("senhaAprovada"); // ← SEMPRE apaga ao fechar
     verificarSenha(); // ← Pede senha OBRIGATORIAMENTE
@@ -321,4 +468,4 @@ window.onload = function () {
         listarProdutos();
         atualizarEstoque();
     }
-};
+
