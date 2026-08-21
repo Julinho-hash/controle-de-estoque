@@ -550,3 +550,22 @@ function imprimirRelatorio() {
 window.onload = function () {
   carregarDadosNuvem();
 };
+
+// ==============================================
+// ✅ TORNA TODAS AS FUNÇÕES VISÍVEIS PARA O HTML
+// ==============================================
+window.buscarProduto = buscarProduto;
+window.cadastrarProduto = cadastrarProduto;
+window.registrarMovimentacao = registrarMovimentacao;
+window.atualizarEstoque = atualizarEstoque;
+window.excluirProduto = excluirProduto;
+window.mostrarOcultarEstoque = mostrarOcultarEstoque;
+window.alternarProdutos = alternarProdutos;
+window.mostrarOcultarProdutos = mostrarOcultarProdutos;
+window.gerarRelatorioPeriodo = gerarRelatorioPeriodo;
+window.relatorioCompleto = relatorioCompleto;
+window.historicoMovimentacoes = historicoMovimentacoes;
+window.filtrarPorCategoria = filtrarPorCategoria;
+window.exportarParaExcel = exportarParaExcel;
+window.importarDoExcel = importarDoExcel;
+window.imprimirRelatorio = imprimirRelatorio;
