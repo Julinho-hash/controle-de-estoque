@@ -215,11 +215,85 @@ Data: ${m.data}
 function filtrarPorCategoria() {
     alert("Selecione uma categoria!");
 }
+// ✅ EXPORTAR PARA EXCEL
 function exportarParaExcel() {
-    alert("Exportação: em desenvolvimento");
+    if (produtos.length === 0) {
+        alert("Nenhum produto cadastrado para exportar!");
+        return;
+    }
+
+    let linhas = ["Código;Nome;Categoria;Preço;Quantidade;Valor Total;Última Atualização"];
+    produtos.forEach(p => {
+        linhas.push(
+            `${p.codigo};${p.nome};${p.categoria};${p.preco.toFixed(2)};${p.quantidade};${(p.preco * p.quantidade).toFixed(2)};${p.ultimaAtualizacao}`
+        );
+    });
+
+    linhas.push("");
+    linhas.push("=== MOVIMENTAÇÕES ===");
+    linhas.push("Nº;Tipo;Produto;Quantidade;Responsável;Data");
+    movimentacoes.forEach((m, i) => {
+        linhas.push(
+            `${i+1};${m.tipo};${m.produto};${m.quantidade};${m.responsavel};${m.data}`
+        );
+    });
+
+    const arquivo = new Blob([linhas.join("\n")], {type: "text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(arquivo);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `estoque_${new Date().toLocaleDateString("pt-BR").replaceAll("/","-")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert("✅ Exportado com sucesso! Abra com o Excel.");
 }
+
+
+// ✅ IMPORTAR DO EXCEL
 function importarDoExcel(e) {
-    alert("Importação: em desenvolvimento");
+    const arquivo = e.target.files[0];
+    if (!arquivo) return;
+
+    const leitor = new FileReader();
+    leitor.onload = function(event) {
+        const texto = event.target.result;
+        const linhas = texto.split("\n");
+        let contador = 0;
+        let erros = 0;
+
+        for (let i = 1; i < linhas.length; i++) {
+            const colunas = linhas[i].split(";");
+            if (colunas.length < 5 || !colunas[0].trim()) continue;
+
+            const codigo = colunas[0].trim();
+            const nome = colunas[1].trim();
+            const categoria = colunas[2].trim();
+            const preco = parseFloat(colunas[3].replace(",", "."));
+            const quantidade = parseInt(colunas[4]) || 0;
+            const ultima = colunas[6] || new Date().toLocaleString("pt-BR");
+
+            if (!codigo || !nome || isNaN(preco)) { erros++; continue; }
+
+            const existe = produtos.find(x => String(x.codigo) === String(codigo));
+            if (existe) {
+                existe.nome = nome;
+                existe.categoria = categoria;
+                existe.preco = preco;
+                existe.quantidade = quantidade;
+                existe.ultimaAtualizacao = ultima;
+            } else {
+                produtos.push({codigo, nome, categoria, preco, quantidade, ultimaAtualizacao: ultima});
+            }
+            contador++;
+        }
+
+        salvarDados();
+        listarProdutos();
+        atualizarEstoque();
+        e.target.value = "";
+        alert(`✅ Importação concluída!\n${contador} produtos importados.\n${erros} linhas com erro.`);
+    };
+    leitor.readAsText(arquivo);
 }
 function imprimirRelatorio() {
     window.print();
