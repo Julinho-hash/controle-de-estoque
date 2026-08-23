@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entradaEstoque>
+  <responsavel>Seu Nome Completo</responsavel>
+  
+  <itens>
+    <!-- Produto 1 -->
+    <item>
+      <codigo>1</codigo>
+      <nome>SABÃO</nome>
+      <quantidade>50</quantidade>
+      <preco>2.50</preco>
+      <validade>2026-12-31</validade>
+    </item>
+
+    <!-- Produto 2 -->
+    <item>
+      <codigo>2</codigo>
+      <nome>DETERGENTE</nome>
+      <quantidade>30</quantidade>
+      <preco>8.00</preco>
+      <validade>2027-03-15</validade>
+    </item>
+
+    <!-- Produto 3 -->
+    <item>
+      <codigo>3</codigo>
+      <nome>PAPEL HIGIÊNICO</nome>
+      <quantidade>100</quantidade>
+      <preco>10.00</preco>
+      <validade>2026-10-20</validade>
+    </item>
+  </itens>
+</entradaEstoque>

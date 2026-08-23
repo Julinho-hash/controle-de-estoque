@@ -569,3 +569,86 @@ window.filtrarPorCategoria = filtrarPorCategoria;
 window.exportarParaExcel = exportarParaExcel;
 window.importarDoExcel = importarDoExcel;
 window.imprimirRelatorio = imprimirRelatorio;
+
+// ========== FUNÇÃO DE IMPORTAÇÃO DE ENTRADA POR XML ==========
+function importarEntradaXML() {
+  const inputArquivo = document.getElementById('arquivoXml');
+  const caixaMensagem = document.getElementById('mensagemImportacao');
+
+  if (!inputArquivo.files || inputArquivo.files.length === 0) {
+    caixaMensagem.innerHTML = '<span style="color:red;">⚠️ Selecione um arquivo XML primeiro!</span>';
+    return;
+  }
+
+  const arquivo = inputArquivo.files[0];
+  const leitor = new FileReader();
+
+  leitor.onload = function (eventoLeitura) {
+    const conteudoXML = eventoLeitura.target.result;
+    const leitorXML = new DOMParser();
+    const documentoXML = leitorXML.parseFromString(conteudoXML, "text/xml");
+
+    let contadorSucesso = 0;
+    let listaErros = [];
+
+    // === AJUSTE AQUI SE O SEU XML TIVER NOMES DIFERENTES ===
+    const itensXML = documentoXML.getElementsByTagName("item");
+    const responsavelXML = documentoXML.getElementsByTagName("responsavel")[0]?.textContent || "Importação XML";
+
+    if (itensXML.length === 0) {
+      caixaMensagem.innerHTML = '<span style="color:red;">❌ Nenhum item encontrado no XML!</span>';
+      return;
+    }
+
+    // Percorre cada item do XML
+    for (let i = 0; i < itensXML.length; i++) {
+      const codigo = itensXML[i].getElementsByTagName("codigo")[0]?.textContent?.trim();
+      const quantidadeTexto = itensXML[i].getElementsByTagName("quantidade")[0]?.textContent?.trim();
+      const quantidade = parseFloat(quantidadeTexto);
+
+      // Validação dos dados
+      if (!codigo) {
+        listaErros.push(`Item ${i + 1}: sem código`);
+        continue;
+      }
+      if (isNaN(quantidade) || quantidade <= 0) {
+        listaErros.push(`Produto ${codigo}: quantidade inválida`);
+        continue;
+      }
+
+      // ✅ Busca produto e registra entrada
+      const produto = listaProdutos.find(p => String(p.codigo) === String(codigo));
+      if (!produto) {
+        listaErros.push(`Código ${codigo}: produto não cadastrado`);
+        continue;
+      }
+
+      // Atualiza quantidade em estoque
+      produto.quantidade += quantidade;
+
+      // Registra no histórico de movimentações
+      movimentacoes.push({
+        codigo: produto.codigo,
+        nome: produto.nome,
+        quantidade: quantidade,
+        tipo: "Entrada",
+        responsavel: responsavelXML,
+        data: new Date().toLocaleDateString('pt-BR')
+      });
+
+      contadorSucesso++;
+    }
+
+    // === Mostra resultado para o usuário ===
+    let mensagemFinal = `<span style="color:green;">✅ ${contadorSucesso} entrada(s) registrada(s) com sucesso!</span>`;
+    if (listaErros.length > 0) {
+      mensagemFinal += `<br><span style="color:red;">⚠️ Avisos: ${listaErros.join(" | ")}</span>`;
+    }
+    caixaMensagem.innerHTML = mensagemFinal;
+
+    // Recarrega a tabela de produtos automaticamente
+    carregarProdutos();
+  };
+
+  leitor.readAsText(arquivo);
+}

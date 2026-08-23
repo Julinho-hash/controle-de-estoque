@@ -59,6 +59,7 @@
             </div>
         </aside>
 
+
         <main class="conteudo-principal">
             <header>
                 <div>
@@ -67,6 +68,7 @@
                 </div>
                 <button class="btn-sair" onclick="sair()">🚪 Sair</button>
             </header>
+
 
             <section class="nova-movimentacao">
                 <h2>Nova Movimentação</h2>
@@ -84,6 +86,18 @@
                     <button onclick="registrarMovimentacao()">Registrar</button>
                 </div>
             </section>
+
+            <!-- ========== ÁREA DE IMPORTAÇÃO DE ENTRADA VIA XML ========== -->
+            <section style="margin: 20px 0; padding: 15px; background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px;">
+                <h3 style="margin:0 0 12px 0; color:#004d99;">📥 Importar Entrada via XML</h3>
+                <input type="file" id="arquivoXml" accept=".xml" style="padding: 6px; margin-right: 10px;" />
+                <button onclick="importarEntradaXML()" style="padding: 7px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                    ✅ Importar Entrada
+                </button>
+                <div id="mensagemImportacao" style="margin-top: 10px; font-size: 14px;"></div>
+            </section>
+            <!-- ============================================================ -->
+
 
             <section id="sec-produtos">
                 <h2>Produtos Cadastrados
@@ -103,6 +117,7 @@
                     <tbody></tbody>
                 </table>
             </section>
+
 
             <section id="sec-estoque">
                 <h2>Estoque Atual
@@ -125,6 +140,7 @@
                     <tbody></tbody>
                 </table>
             </section>
+
 
             <section class="bloco relatorio">
                 <h2>Resultado do Relatório</h2>
