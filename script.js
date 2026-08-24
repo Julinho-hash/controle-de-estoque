@@ -652,3 +652,65 @@ function importarEntradaXML() {
 
   leitor.readAsText(arquivo);
 }
+
+// ========== FORNECEDORES ==========
+
+let fornecedoresVisivel = true;
+
+function alternarFornecedores() {
+    fornecedoresVisivel = !fornecedoresVisivel;
+    const form = document.getElementById('form-fornecedor');
+    const tabela = document.getElementById('tabela-fornecedores');
+    const btn = document.getElementById('btn-forn');
+
+    if (fornecedoresVisivel) {
+        form.style.display = 'flex';
+        tabela.style.display = 'table';
+        btn.textContent = 'Ocultar';
+    } else {
+        form.style.display = 'none';
+        tabela.style.display = 'none';
+        btn.textContent = 'Exibir';
+    }
+}
+
+function cadastrarFornecedor() {
+    const cnpj = document.getElementById('cnpjForn').value.trim();
+    const razao = document.getElementById('razaoForn').value.trim();
+    const fantasia = document.getElementById('fantasiaForn').value.trim();
+    const ie = document.getElementById('ieForn').value.trim();
+    const endereco = document.getElementById('enderecoForn').value.trim();
+    const telefone = document.getElementById('telefoneForn').value.trim();
+    const cep = document.getElementById('cepForn').value.trim();
+    const cidade = document.getElementById('cidadeForn').value.trim();
+
+    if (!cnpj || !razao) {
+        alert('⚠️ Preencha pelo menos CNPJ e Razão Social!');
+        return;
+    }
+
+    const tbody = document.querySelector('#tabela-fornecedores tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${cnpj}</td>
+        <td>${razao}</td>
+        <td>${fantasia}</td>
+        <td>${ie}</td>
+        <td>${endereco}</td>
+        <td>${telefone}</td>
+        <td>${cep}</td>
+        <td>${cidade}</td>
+        <td><button onclick="this.closest('tr').remove()" style="background:#e53e3e; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">🗑️</button></td>
+    `;
+    tbody.appendChild(tr);
+
+    // Limpar campos
+    ['cnpjForn','razaoForn','fantasiaForn','ieForn','enderecoForn','telefoneForn','cepForn','cidadeForn'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+
+    alert('✅ Fornecedor cadastrado com sucesso!');
+}
+
+window.alternarFornecedores = alternarFornecedores;
+window.cadastrarFornecedor = cadastrarFornecedor;

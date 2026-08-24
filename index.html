@@ -59,7 +59,6 @@
             </div>
         </aside>
 
-
         <main class="conteudo-principal">
             <header>
                 <div>
@@ -68,7 +67,6 @@
                 </div>
                 <button class="btn-sair" onclick="sair()">🚪 Sair</button>
             </header>
-
 
             <section class="nova-movimentacao">
                 <h2>Nova Movimentação</h2>
@@ -87,7 +85,7 @@
                 </div>
             </section>
 
-            <!-- ========== ÁREA DE IMPORTAÇÃO DE ENTRADA VIA XML ========== -->
+            <!-- ========== IMPORTAÇÃO XML ========== -->
             <section style="margin: 20px 0; padding: 15px; background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px;">
                 <h3 style="margin:0 0 12px 0; color:#004d99;">📥 Importar Entrada via XML</h3>
                 <input type="file" id="arquivoXml" accept=".xml" style="padding: 6px; margin-right: 10px;" />
@@ -96,9 +94,8 @@
                 </button>
                 <div id="mensagemImportacao" style="margin-top: 10px; font-size: 14px;"></div>
             </section>
-            <!-- ============================================================ -->
 
-
+            <!-- ========== PRODUTOS CADASTRADOS ========== -->
             <section id="sec-produtos">
                 <h2>Produtos Cadastrados
                     <button id="btn-prod" onclick="alternarProdutos()" style="margin-left:12px; padding:5px 12px; font-size:13px; background:#6366f1; color:white; border:none; border-radius:4px; cursor:pointer;">Ocultar</button>
@@ -118,7 +115,68 @@
                 </table>
             </section>
 
+            <!-- ========== FORNECEDORES CADASTRADOS (NOVO) ========== -->
+            <section id="sec-fornecedores">
+                <h2>Fornecedores Cadastrados
+                    <button id="btn-forn" onclick="alternarFornecedores()" style="margin-left:12px; padding:5px 12px; font-size:13px; background:#6366f1; color:white; border:none; border-radius:4px; cursor:pointer;">Ocultar</button>
+                </h2>
 
+                <div id="form-fornecedor" style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">CNPJ</label>
+                        <input type="text" id="cnpjForn" placeholder="00.000.000/0000-00" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:180px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">Razão Social</label>
+                        <input type="text" id="razaoForn" placeholder="Razão Social" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:220px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">Nome Fantasia</label>
+                        <input type="text" id="fantasiaForn" placeholder="Nome Fantasia" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:200px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">Inscrição Estadual</label>
+                        <input type="text" id="ieForn" placeholder="IE" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:150px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">Endereço</label>
+                        <input type="text" id="enderecoForn" placeholder="Endereço completo" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:250px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">Telefone</label>
+                        <input type="text" id="telefoneForn" placeholder="(00) 00000-0000" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:160px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">CEP</label>
+                        <input type="text" id="cepForn" placeholder="00000-000" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:120px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555; display:block;">Cidade / UF</label>
+                        <input type="text" id="cidadeForn" placeholder="Cidade - UF" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:180px;">
+                    </div>
+                    <button onclick="cadastrarFornecedor()" style="padding:8px 16px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; height:36px;">✅ Salvar Fornecedor</button>
+                </div>
+
+                <table id="tabela-fornecedores">
+                    <thead>
+                        <tr>
+                            <th>CNPJ</th>
+                            <th>Razão Social</th>
+                            <th>Nome Fantasia</th>
+                            <th>IE</th>
+                            <th>Endereço</th>
+                            <th>Telefone</th>
+                            <th>CEP</th>
+                            <th>Cidade/UF</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+            <!-- ===================================================== -->
+
+            <!-- ========== ESTOQUE ATUAL ========== -->
             <section id="sec-estoque">
                 <h2>Estoque Atual
                     <button onclick="atualizarEstoque()">🔄 Atualizar</button>
@@ -141,7 +199,7 @@
                 </table>
             </section>
 
-
+            <!-- ========== RELATÓRIO ========== -->
             <section class="bloco relatorio">
                 <h2>Resultado do Relatório</h2>
                 <div id="conteudo-relatorio">Clique em um botão de relatório ao lado para visualizar...</div>
