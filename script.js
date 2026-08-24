@@ -1,5 +1,5 @@
 // ==============================================
-// 🔒 CONFIGURAÇÃO DO FIREBASE — JÁ ESTÁ CERTO!
+// 🔒 CONFIGURAÇÃO DO FIREBASE
 // ==============================================
 const firebaseConfig = {
   apiKey: "AIzaSyA2HT3sfwCcRxds26wZef1ULkvgW2elO9Q",
@@ -11,9 +11,8 @@ const firebaseConfig = {
 };
 
 // ==============================================
-// NÃO ALTERE NADA DAQUI PARA BAIXO!
+// INICIALIZAÇÃO
 // ==============================================
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -22,17 +21,20 @@ const db = getFirestore(app);
 
 let produtos = [];
 let movimentacoes = [];
+let fornecedores = [];
 let dadosCarregados = false;
 
 // ✅ SALVAR DADOS NA NUVEM
 async function salvarDados() {
   localStorage.setItem("produtos", JSON.stringify(produtos));
   localStorage.setItem("movimentacoes", JSON.stringify(movimentacoes));
-  
+  localStorage.setItem("fornecedores", JSON.stringify(fornecedores));
+
   try {
     await setDoc(doc(db, "sistema", "dados"), {
       produtos: produtos,
       movimentacoes: movimentacoes,
+      fornecedores: fornecedores,
       atualizadoEm: new Date().toISOString()
     });
   } catch (e) {
@@ -48,8 +50,10 @@ async function carregarDadosNuvem() {
       const dados = snap.data();
       produtos = dados.produtos || [];
       movimentacoes = dados.movimentacoes || [];
+      fornecedores = dados.fornecedores || [];
       localStorage.setItem("produtos", JSON.stringify(produtos));
       localStorage.setItem("movimentacoes", JSON.stringify(movimentacoes));
+      localStorage.setItem("fornecedores", JSON.stringify(fornecedores));
       console.log("✅ Dados carregados da nuvem!");
     }
   } catch (e) {
@@ -58,14 +62,17 @@ async function carregarDadosNuvem() {
     if (salvo) produtos = JSON.parse(salvo);
     const movSalvo = localStorage.getItem("movimentacoes");
     if (movSalvo) movimentacoes = JSON.parse(movSalvo);
+    const fornSalvo = localStorage.getItem("fornecedores");
+    if (fornSalvo) fornecedores = JSON.parse(fornSalvo);
   }
   dadosCarregados = true;
   listarProdutos();
   atualizarEstoque();
+  listarFornecedores();
 }
 
 // ==============================================
-// RESTO DAS FUNÇÕES
+// FUNÇÕES — PRODUTOS
 // ==============================================
 
 function buscarProduto() {
@@ -207,7 +214,7 @@ function atualizarEstoque() {
       <td>R$ ${total}</td>
       <td>${p.ultimaAtualizacao}</td>
       <td>
-        <button style="background:#e74c3c; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;" 
+        <button style="background:#e74c3c; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;"
                 onclick="excluirProduto('${p.codigo}')">
           Excluir
         </button>
@@ -226,6 +233,10 @@ function excluirProduto(cod) {
   atualizarEstoque();
 }
 
+// ==============================================
+// EXIBIÇÃO — TABELAS
+// ==============================================
+
 let estoqueVisivel = true;
 function mostrarOcultarEstoque() {
   const tbl = document.getElementById('tabela-estoque');
@@ -238,18 +249,23 @@ function alternarProdutos() {
   const tbl = document.getElementById('tabela-produtos');
   produtosVisiveis = !produtosVisiveis;
   tbl.style.display = produtosVisiveis ? '' : 'none';
-  document.querySelector('#sec-produtos button').textContent = produtosVisiveis ? 'Ocultar' : 'Mostrar';
+  document.getElementById('btn-prod').textContent = produtosVisiveis ? 'Ocultar' : 'Mostrar';
 }
+
 function mostrarOcultarProdutos() {
   alternarProdutos();
 }
+
+// ==============================================
+// RELATÓRIOS
+// ==============================================
 
 function gerarRelatorioPeriodo() {
   const dataInicioCampo = document.getElementById('dataInicio').value;
   const dataFimCampo = document.getElementById('dataFim').value;
 
   if (!dataInicioCampo || !dataFimCampo) {
-    alert("⚠️ Preencha a Data Inicial e a Data Final nos campos ao lado!");
+    alert("⚠️ Preencha a Data Inicial e a Data Final!");
     return;
   }
 
@@ -270,8 +286,8 @@ function gerarRelatorioPeriodo() {
     const mes = partesData[1];
     const ano = partesData[2];
     const hora = partesData[3] || "00";
-    const minuto = partesData[4] || "00";
-    const dataMov = new Date(ano, mes - 1, dia, hora, minuto);
+    const minute = partesData[4] || "00";
+    const dataMov = new Date(ano, mes - 1, dia, hora, minute);
     return dataMov >= dataInicio && dataMov <= dataFim;
   });
 
@@ -380,6 +396,10 @@ function historicoMovimentacoes() {
   alert(txt);
 }
 
+// ==============================================
+// FILTROS / IMPORTAÇÃO / EXPORTAÇÃO
+// ==============================================
+
 function filtrarPorCategoria() {
   if (!dadosCarregados) return;
   if (produtos.length === 0) return alert("Sem produtos cadastrados!");
@@ -388,7 +408,7 @@ function filtrarPorCategoria() {
   if (categorias.length === 0) return alert("Nenhuma categoria cadastrada!");
 
   const lista = categorias.map((c, i) => `${i + 1}. ${c}`).join("\n");
-  const escolha = prompt(`Categorias disponíveis:\n\n${lista}\n\nDigite o NOME da categoria para filtrar ou deixe em branco para mostrar TODOS:`);
+  const escolha = prompt(`Categorias disponíveis:\n\n${lista}\n\nDigite o NOME da categoria ou deixe em branco para TODOS:`);
 
   const corpoP = document.querySelector('#tabela-produtos tbody');
   const corpoE = document.querySelector('#tabela-estoque tbody');
@@ -547,30 +567,10 @@ function imprimirRelatorio() {
   janela.close();
 }
 
-window.onload = function () {
-  carregarDadosNuvem();
-};
-
 // ==============================================
-// ✅ TORNA TODAS AS FUNÇÕES VISÍVEIS PARA O HTML
+// IMPORTAÇÃO DE ENTRADA POR XML
 // ==============================================
-window.buscarProduto = buscarProduto;
-window.cadastrarProduto = cadastrarProduto;
-window.registrarMovimentacao = registrarMovimentacao;
-window.atualizarEstoque = atualizarEstoque;
-window.excluirProduto = excluirProduto;
-window.mostrarOcultarEstoque = mostrarOcultarEstoque;
-window.alternarProdutos = alternarProdutos;
-window.mostrarOcultarProdutos = mostrarOcultarProdutos;
-window.gerarRelatorioPeriodo = gerarRelatorioPeriodo;
-window.relatorioCompleto = relatorioCompleto;
-window.historicoMovimentacoes = historicoMovimentacoes;
-window.filtrarPorCategoria = filtrarPorCategoria;
-window.exportarParaExcel = exportarParaExcel;
-window.importarDoExcel = importarDoExcel;
-window.imprimirRelatorio = imprimirRelatorio;
 
-// ========== FUNÇÃO DE IMPORTAÇÃO DE ENTRADA POR XML ==========
 function importarEntradaXML() {
   const inputArquivo = document.getElementById('arquivoXml');
   const caixaMensagem = document.getElementById('mensagemImportacao');
@@ -591,7 +591,6 @@ function importarEntradaXML() {
     let contadorSucesso = 0;
     let listaErros = [];
 
-    // === AJUSTE AQUI SE O SEU XML TIVER NOMES DIFERENTES ===
     const itensXML = documentoXML.getElementsByTagName("item");
     const responsavelXML = documentoXML.getElementsByTagName("responsavel")[0]?.textContent || "Importação XML";
 
@@ -600,13 +599,11 @@ function importarEntradaXML() {
       return;
     }
 
-    // Percorre cada item do XML
     for (let i = 0; i < itensXML.length; i++) {
       const codigo = itensXML[i].getElementsByTagName("codigo")[0]?.textContent?.trim();
       const quantidadeTexto = itensXML[i].getElementsByTagName("quantidade")[0]?.textContent?.trim();
       const quantidade = parseFloat(quantidadeTexto);
 
-      // Validação dos dados
       if (!codigo) {
         listaErros.push(`Item ${i + 1}: sem código`);
         continue;
@@ -616,101 +613,154 @@ function importarEntradaXML() {
         continue;
       }
 
-      // ✅ Busca produto e registra entrada
-      const produto = listaProdutos.find(p => String(p.codigo) === String(codigo));
+      const produto = produtos.find(p => String(p.codigo) === String(codigo));
       if (!produto) {
         listaErros.push(`Código ${codigo}: produto não cadastrado`);
         continue;
       }
 
-      // Atualiza quantidade em estoque
       produto.quantidade += quantidade;
+      produto.ultimaAtualizacao = new Date().toLocaleString("pt-BR");
 
-      // Registra no histórico de movimentações
       movimentacoes.push({
         codigo: produto.codigo,
-        nome: produto.nome,
+        produto: produto.nome,
+        categoria: produto.categoria,
         quantidade: quantidade,
-        tipo: "Entrada",
+        tipo: "entrada",
         responsavel: responsavelXML,
-        data: new Date().toLocaleDateString('pt-BR')
+        data: new Date().toLocaleString("pt-BR")
       });
 
       contadorSucesso++;
     }
 
-    // === Mostra resultado para o usuário ===
     let mensagemFinal = `<span style="color:green;">✅ ${contadorSucesso} entrada(s) registrada(s) com sucesso!</span>`;
     if (listaErros.length > 0) {
       mensagemFinal += `<br><span style="color:red;">⚠️ Avisos: ${listaErros.join(" | ")}</span>`;
     }
     caixaMensagem.innerHTML = mensagemFinal;
 
-    // Recarrega a tabela de produtos automaticamente
-    carregarProdutos();
+    salvarDados();
+    listarProdutos();
+    atualizarEstoque();
+    inputArquivo.value = '';
   };
 
   leitor.readAsText(arquivo);
 }
 
-// ========== FORNECEDORES ==========
+// ==============================================
+// FORNECEDORES
+// ==============================================
 
 let fornecedoresVisivel = true;
 
 function alternarFornecedores() {
-    fornecedoresVisivel = !fornecedoresVisivel;
-    const form = document.getElementById('form-fornecedor');
-    const tabela = document.getElementById('tabela-fornecedores');
-    const btn = document.getElementById('btn-forn');
+  fornecedoresVisivel = !fornecedoresVisivel;
+  const form = document.getElementById('form-fornecedor');
+  const tabela = document.getElementById('tabela-fornecedores');
+  const btn = document.getElementById('btn-forn');
 
-    if (fornecedoresVisivel) {
-        form.style.display = 'flex';
-        tabela.style.display = 'table';
-        btn.textContent = 'Ocultar';
-    } else {
-        form.style.display = 'none';
-        tabela.style.display = 'none';
-        btn.textContent = 'Exibir';
-    }
+  if (fornecedoresVisivel) {
+    if (form) form.style.display = 'flex';
+    if (tabela) tabela.style.display = 'table';
+    if (btn) btn.textContent = 'Ocultar';
+  } else {
+    if (form) form.style.display = 'none';
+    if (tabela) tabela.style.display = 'none';
+    if (btn) btn.textContent = 'Exibir';
+  }
 }
 
 function cadastrarFornecedor() {
-    const cnpj = document.getElementById('cnpjForn').value.trim();
-    const razao = document.getElementById('razaoForn').value.trim();
-    const fantasia = document.getElementById('fantasiaForn').value.trim();
-    const ie = document.getElementById('ieForn').value.trim();
-    const endereco = document.getElementById('enderecoForn').value.trim();
-    const telefone = document.getElementById('telefoneForn').value.trim();
-    const cep = document.getElementById('cepForn').value.trim();
-    const cidade = document.getElementById('cidadeForn').value.trim();
+  const cnpj = document.getElementById('cnpjForn').value.trim();
+  const razao = document.getElementById('razaoForn').value.trim();
+  const fantasia = document.getElementById('fantasiaForn').value.trim();
+  const ie = document.getElementById('ieForn').value.trim();
+  const endereco = document.getElementById('enderecoForn').value.trim();
+  const telefone = document.getElementById('telefoneForn').value.trim();
+  const cep = document.getElementById('cepForn').value.trim();
+  const cidade = document.getElementById('cidadeForn').value.trim();
 
-    if (!cnpj || !razao) {
-        alert('⚠️ Preencha pelo menos CNPJ e Razão Social!');
-        return;
-    }
+  if (!cnpj || !razao) {
+    alert('⚠️ Preencha pelo menos CNPJ e Razão Social!');
+    return;
+  }
 
-    const tbody = document.querySelector('#tabela-fornecedores tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td>${cnpj}</td>
-        <td>${razao}</td>
-        <td>${fantasia}</td>
-        <td>${ie}</td>
-        <td>${endereco}</td>
-        <td>${telefone}</td>
-        <td>${cep}</td>
-        <td>${cidade}</td>
-        <td><button onclick="this.closest('tr').remove()" style="background:#e53e3e; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">🗑️</button></td>
-    `;
-    tbody.appendChild(tr);
+  const existe = fornecedores.some(f => String(f.cnpj) === String(cnpj));
+  if (existe) {
+    alert('⚠️ Fornecedor com este CNPJ já cadastrado!');
+    return;
+  }
 
-    // Limpar campos
-    ['cnpjForn','razaoForn','fantasiaForn','ieForn','enderecoForn','telefoneForn','cepForn','cidadeForn'].forEach(id => {
-        document.getElementById(id).value = '';
-    });
+  fornecedores.push({ cnpj, razao, fantasia, ie, endereco, telefone, cep, cidade });
+  salvarDados();
+  listarFornecedores();
 
-    alert('✅ Fornecedor cadastrado com sucesso!');
+  ['cnpjForn','razaoForn','fantasiaForn','ieForn','enderecoForn','telefoneForn','cepForn','cidadeForn'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  alert('✅ Fornecedor cadastrado com sucesso!');
 }
 
+function listarFornecedores() {
+  if (!dadosCarregados) return;
+  const corpo = document.querySelector('#tabela-fornecedores tbody');
+  if (!corpo) return;
+  corpo.innerHTML = '';
+
+  fornecedores.forEach((f, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.cnpj}</td>
+      <td>${f.razao}</td>
+      <td>${f.fantasia}</td>
+      <td>${f.ie}</td>
+      <td>${f.endereco}</td>
+      <td>${f.telefone}</td>
+      <td>${f.cep}</td>
+      <td>${f.cidade}</td>
+      <td>
+        <button onclick="excluirFornecedor(${index})" style="background:#e53e3e; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">🗑️</button>
+      </td>
+    `;
+    corpo.appendChild(tr);
+  });
+}
+
+function excluirFornecedor(indice) {
+  if (!confirm("Excluir este fornecedor?")) return;
+  fornecedores.splice(indice, 1);
+  salvarDados();
+  listarFornecedores();
+}
+
+// ==============================================
+// INICIALIZAÇÃO E EXPORTAÇÃO PARA HTML
+// ==============================================
+
+window.onload = function () {
+  carregarDadosNuvem();
+};
+
+window.buscarProduto = buscarProduto;
+window.cadastrarProduto = cadastrarProduto;
+window.registrarMovimentacao = registrarMovimentacao;
+window.atualizarEstoque = atualizarEstoque;
+window.excluirProduto = excluirProduto;
+window.mostrarOcultarEstoque = mostrarOcultarEstoque;
+window.alternarProdutos = alternarProdutos;
+window.mostrarOcultarProdutos = mostrarOcultarProdutos;
+window.gerarRelatorioPeriodo = gerarRelatorioPeriodo;
+window.relatorioCompleto = relatorioCompleto;
+window.historicoMovimentacoes = historicoMovimentacoes;
+window.filtrarPorCategoria = filtrarPorCategoria;
+window.exportarParaExcel = exportarParaExcel;
+window.importarDoExcel = importarDoExcel;
+window.imprimirRelatorio = imprimirRelatorio;
+window.importarEntradaXML = importarEntradaXML;
 window.alternarFornecedores = alternarFornecedores;
 window.cadastrarFornecedor = cadastrarFornecedor;
+window.excluirFornecedor = excluirFornecedor;
