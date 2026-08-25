@@ -4,209 +4,732 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Estoque</title>
-    <link rel="stylesheet" href="estilo.css">
+    <style>
+        /* ==============================================
+           RESET E CONFIGURAÇÕES GERAIS
+           ============================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        :root {
+            --cor-primaria: #2563eb;
+            --cor-primaria-escura: #1d4ed8;
+            --cor-sucesso: #16a34a;
+            --cor-aviso: #d97706;
+            --cor-perigo: #dc2626;
+            --cor-fundo: #f1f5f9;
+            --cor-fundo-card: #ffffff;
+            --cor-texto: #1e293b;
+            --cor-texto-claro: #64748b;
+            --cor-borda: #e2e8f0;
+            --sombra: 0 2px 8px rgba(0,0,0,0.08);
+            --sombra-hover: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        body {
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* ==============================================
+           TELA DE LOGIN
+           ============================================== */
+        #tela-login {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .caixa-login {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .caixa-login h2 {
+            color: var(--cor-primaria);
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        .caixa-login input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0 20px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .caixa-login button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+        .erro-senha {
+            color: var(--cor-perigo);
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* ==============================================
+           CABEÇALHO
+           ============================================== */
+        header {
+            background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-escura));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: var(--sombra);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { font-size: 28px; margin-bottom: 5px; }
+        header p { font-size: 15px; opacity: 0.9; }
+        .botao-sair { background: rgba(255,255,255,0.2); padding: 8px 16px; font-size: 14px; }
+        .botao-sair:hover { background: rgba(255,255,255,0.3); }
+
+        /* ==============================================
+           NAVEGAÇÃO DE ABAS — Todas na horizontal!
+           ============================================== */
+        .navegacao-abas {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--cor-borda);
+            overflow-x: auto;
+        }
+        .aba {
+            padding: 12px 18px;
+            background-color: #e2e8f0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--cor-texto);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .aba:hover { background-color: #cbd5e1; }
+        .aba.ativa {
+            background-color: var(--cor-fundo-card);
+            color: var(--cor-primaria);
+            font-weight: 600;
+            border-bottom: 3px solid var(--cor-primaria);
+            margin-bottom: -2px;
+        }
+        .conteudo-aba { display: none; animation: aparecer 0.3s ease; }
+        .conteudo-aba.visivel { display: block; }
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==============================================
+           CARDS E SEÇÕES
+           ============================================== */
+        .secao {
+            background-color: var(--cor-fundo-card);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: var(--sombra);
+        }
+        .secao h2 {
+            font-size: 19px;
+            color: var(--cor-primaria);
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--cor-borda);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .secao h3 { font-size: 16px; color: var(--cor-aviso); margin: 16px 0 10px; }
+
+        /* ==============================================
+           FORMULÁRIOS E CAMPOS
+           ============================================== */
+        .grupo-form {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: nowrap;
+        }
+        .grupo-form label {
+            font-weight: 500;
+            color: var(--cor-texto);
+            min-width: 150px;
+            text-align: right;
+        }
+        .grupo-form input, .grupo-form select {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+        input, select, button {
+            padding: 10px 14px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        button {
+            background-color: var(--cor-primaria);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+        }
+        button:hover {
+            background-color: var(--cor-primaria-escura);
+            transform: translateY(-1px);
+            box-shadow: var(--sombra-hover);
+        }
+        button.sucesso { background-color: var(--cor-sucesso); }
+        button.sucesso:hover { background-color: #15803d; }
+        button.aviso { background-color: var(--cor-aviso); }
+        button.aviso:hover { background-color: #b45309; }
+        button.perigo { background-color: var(--cor-perigo); padding: 4px 8px; font-size: 13px; }
+        button.perigo:hover { background-color: #b91c1c; }
+        button.secundario { background-color: #64748b; padding: 5px 12px; font-size: 13px; }
+        button.secundario:hover { background-color: #475569; }
+        .grupo-botoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        label.arquivo {
+            padding: 10px 18px;
+            background: #64748b;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        label.arquivo:hover { background: #475569; }
+        label.arquivo input { display: none; }
+
+        /* ==============================================
+           TABELAS
+           ============================================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #f8fafc;
+            padding: 11px 9px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--cor-primaria);
+            border-bottom: 2px solid var(--cor-borda);
+            font-size: 14px;
+        }
+        td { padding: 10px 9px; border-bottom: 1px solid var(--cor-borda); font-size: 14px; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        tr:hover { background-color: #eff6ff; }
+
+        /* ==============================================
+           ÁREA DE RELATÓRIO
+           ============================================== */
+        #conteudo-relatorio {
+            margin-top: 18px;
+            padding: 18px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--cor-borda);
+        }
+
+        /* ==============================================
+           MENSAGENS
+           ============================================== */
+        .mensagem { margin-top: 12px; padding: 12px; border-radius: 6px; font-weight: 500; }
+        .sucesso { background-color: #dcfce7; color: #166534; }
+        .erro { background-color: #fee2e2; color: #b91c1c; }
+        pre { background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--cor-borda); margin-top: 10px; overflow-x: auto; font-size: 13px; }
+
+        /* ==============================================
+           RESPONSIVIDADE
+           ============================================== */
+        @media (max-width: 900px) {
+            .grupo-form { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .grupo-form label { text-align: left; min-width: auto; width: 100%; }
+            .grupo-form input, .grupo-form select { width: 100%; max-width: 100%; }
+        }
+        @media print {
+            header, .navegacao-abas, button, .grupo-form, #mensagemImportacao { display: none !important; }
+            .secao { box-shadow: none; border: none; }
+            body { background: white; padding: 0; }
+        }
+    </style>
 </head>
-<script>
-    if (localStorage.getItem('logado') !== 'sim') {
-        window.location.href = 'login.html';
-    }
-    function sair() {
-        localStorage.removeItem('logado');
-        window.location.href = 'login.html';
-    }
-</script>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <h3>Relatórios</h3>
-            <div class="sidebar-section">
-                <h4>Período</h4>
-                <input type="date" id="dataInicio">
-                <input type="date" id="dataFim">
-                <button onclick="gerarRelatorioPeriodo()">📅 Gerar Período</button>
-            </div>
-            <div class="sidebar-section">
-                <button onclick="mostrarOcultarProdutos()">📦 Mostrar/Ocultar Produtos</button>
-            </div>
-            <div class="sidebar-section">
-                <button onclick="relatorioCompleto()">📋 Relatório Completo</button>
-                <button onclick="historicoMovimentacoes()">📜 Histórico de Movimentações</button>
-            </div>
-            <div class="sidebar-section">
-                <h4>Por Categoria</h4>
-                <select id="filtroCategoria">
-                    <option value="">Todas</option>
-                    <option value="LIMPEZA">Limpeza</option>
-                    <option value="CEREALIS">Cereais</option>
-                    <option value="LEGUMINOSAS">Leguminosas</option>
-                    <option value="BEBIDAS">Bebidas</option>
-                </select>
-                <button onclick="filtrarPorCategoria()">🔎 Filtrar</button>
-            </div>
-            <div class="sidebar-section cadastro-lateral">
-                <h4>Cadastrar Produto</h4>
-                <input type="number" id="codigoNovo" placeholder="Código">
-                <input type="text" id="nomeNovo" placeholder="Nome">
-                <input type="text" id="categoriaNova" placeholder="Categoria">
-                <input type="number" step="0.01" id="precoNovo" placeholder="Preço">
-                <button onclick="cadastrarProduto()">➕ Cadastrar</button>
-            </div>
-            <div class="sidebar-section">
-                <h4>Dados</h4>
-                <button class="btn-exportar" onclick="exportarParaExcel()">📥 Exportar p/ Excel</button>
-                <input type="file" id="arquivoExcel" accept=".csv,.txt" style="display:none;" onchange="importarDoExcel(event)">
-                <button class="btn-importar" onclick="document.getElementById('arquivoExcel').click()">📤 Importar do Excel</button>
-            </div>
-        </aside>
 
-        <main class="conteudo-principal">
-            <header>
-                <div>
-                    <h1>Controle de Estoque</h1>
-                    <p>Sistema de controle de produtos e movimentações</p>
-                </div>
-                <button class="btn-sair" onclick="sair()">🚪 Sair</button>
-            </header>
-
-            <section class="nova-movimentacao">
-                <h2>Nova Movimentação</h2>
-                <div class="form-linha">
-                    <input type="number" id="codigoProd" placeholder="Código do Produto" onblur="buscarProduto()">
-                    <input type="text" id="nomeProd" placeholder="Nome do Produto" readonly>
-                    <input type="text" id="categoriaProd" placeholder="Categoria" readonly>
-                    <input type="number" step="0.01" id="precoProd" placeholder="Preço Unitário" readonly>
-                    <input type="number" id="qtdProd" placeholder="Quantidade">
-                    <input type="text" id="responsavel" placeholder="Responsável">
-                    <select id="tipoMov">
-                        <option value="entrada">Entrada (+)</option>
-                        <option value="saida">Saída (-)</option>
-                    </select>
-                    <button onclick="registrarMovimentacao()">Registrar</button>
-                </div>
-            </section>
-
-            <!-- ========== IMPORTAÇÃO XML ========== -->
-            <section style="margin: 20px 0; padding: 15px; background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px;">
-                <h3 style="margin:0 0 12px 0; color:#004d99;">📥 Importar Entrada via XML</h3>
-                <input type="file" id="arquivoXml" accept=".xml" style="padding: 6px; margin-right: 10px;" />
-                <button onclick="importarEntradaXML()" style="padding: 7px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                    ✅ Importar Entrada
-                </button>
-                <div id="mensagemImportacao" style="margin-top: 10px; font-size: 14px;"></div>
-            </section>
-
-            <!-- ========== PRODUTOS CADASTRADOS ========== -->
-            <section id="sec-produtos">
-                <h2>Produtos Cadastrados
-                    <button id="btn-prod" onclick="alternarProdutos()" style="margin-left:12px; padding:5px 12px; font-size:13px; background:#6366f1; color:white; border:none; border-radius:4px; cursor:pointer;">Ocultar</button>
-                </h2>
-                <table id="tabela-produtos">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Produto</th>
-                            <th>Categoria</th>
-                            <th>Preço Unit.</th>
-                            <th>Qtd</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-
-            <!-- ========== FORNECEDORES CADASTRADOS (NOVO) ========== -->
-            <section id="sec-fornecedores">
-                <h2>Fornecedores Cadastrados
-                    <button id="btn-forn" onclick="alternarFornecedores()" style="margin-left:12px; padding:5px 12px; font-size:13px; background:#6366f1; color:white; border:none; border-radius:4px; cursor:pointer;">Ocultar</button>
-                </h2>
-
-                <div id="form-fornecedor" style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">CNPJ</label>
-                        <input type="text" id="cnpjForn" placeholder="00.000.000/0000-00" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:180px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">Razão Social</label>
-                        <input type="text" id="razaoForn" placeholder="Razão Social" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:220px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">Nome Fantasia</label>
-                        <input type="text" id="fantasiaForn" placeholder="Nome Fantasia" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:200px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">Inscrição Estadual</label>
-                        <input type="text" id="ieForn" placeholder="IE" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:150px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">Endereço</label>
-                        <input type="text" id="enderecoForn" placeholder="Endereço completo" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:250px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">Telefone</label>
-                        <input type="text" id="telefoneForn" placeholder="(00) 00000-0000" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:160px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">CEP</label>
-                        <input type="text" id="cepForn" placeholder="00000-000" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:120px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:#555; display:block;">Cidade / UF</label>
-                        <input type="text" id="cidadeForn" placeholder="Cidade - UF" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:180px;">
-                    </div>
-                    <button onclick="cadastrarFornecedor()" style="padding:8px 16px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; height:36px;">✅ Salvar Fornecedor</button>
-                </div>
-
-                <table id="tabela-fornecedores">
-                    <thead>
-                        <tr>
-                            <th>CNPJ</th>
-                            <th>Razão Social</th>
-                            <th>Nome Fantasia</th>
-                            <th>IE</th>
-                            <th>Endereço</th>
-                            <th>Telefone</th>
-                            <th>CEP</th>
-                            <th>Cidade/UF</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-            <!-- ===================================================== -->
-
-            <!-- ========== ESTOQUE ATUAL ========== -->
-            <section id="sec-estoque">
-                <h2>Estoque Atual
-                    <button onclick="atualizarEstoque()">🔄 Atualizar</button>
-                    <button onclick="mostrarOcultarEstoque()">👁️ Mostrar/Ocultar</button>
-                </h2>
-                <table id="tabela-estoque">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Produto</th>
-                            <th>Categoria</th>
-                            <th>Preço Unit.</th>
-                            <th>Qtd</th>
-                            <th>Total Item</th>
-                            <th>Última Atualização</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-
-            <!-- ========== RELATÓRIO ========== -->
-            <section class="bloco relatorio">
-                <h2>Resultado do Relatório</h2>
-                <div id="conteudo-relatorio">Clique em um botão de relatório ao lado para visualizar...</div>
-                <button onclick="imprimirRelatorio()" style="margin-top:15px; padding:10px 25px; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🖨️ Imprimir / Salvar PDF</button>
-            </section>
-        </main>
+<!-- ==============================================
+     TELA DE LOGIN — APARECE PRIMEIRO
+     ============================================== -->
+<div id="tela-login">
+    <div class="caixa-login">
+        <h2>🔐 Controle de Estoque</h2>
+        <p>Digite a senha para acessar o sistema</p>
+        <input type="password" id="campo-senha" placeholder="Digite a senha..." onkeypress="if(event.key==='Enter')entrarSistema()">
+        <button onclick="entrarSistema()" class="sucesso">✅ Entrar</button>
+        <div class="erro-senha" id="aviso-erro">❌ Senha incorreta! Tente novamente.</div>
     </div>
-    <script type="module" src="script.js"></script>
+</div>
+
+<!-- ==============================================
+     CONTEÚDO PRINCIPAL — ESCONDIDO ATÉ LOGAR
+     ============================================== -->
+<div id="sistema" style="display: none;">
+
+<header>
+    <div>
+        <h1>Controle de Estoque</h1>
+        <p>Sistema de gestão de produtos, fornecedores e movimentações</p>
+    </div>
+    <button class="botao-sair" onclick="sairSistema()">🚪 Sair</button>
+</header>
+
+<div class="navegacao-abas">
+    <button class="aba ativa" onclick="trocarAba(0)">Produtos</button>
+    <button class="aba" onclick="trocarAba(1)">Fornecedores</button>
+    <button class="aba" onclick="trocarAba(2)">Entrada Rápida</button>
+    <button class="aba" onclick="trocarAba(3)">Importar NF / XML</button>
+    <button class="aba" onclick="trocarAba(4)">Relatórios</button>
+</div>
+
+<main>
+
+<!-- ABA 0 → PRODUTOS -->
+<section class="conteudo-aba visivel" id="aba0">
+    <div class="secao">
+        <h2>🔍 Buscar Produto e Registrar Movimentação</h2>
+        <div class="grupo-form"><label>Código do Produto:</label><input type="text" id="codigoProd" placeholder="Digite o código" onblur="buscarProduto()"></div>
+        <div class="grupo-form"><label>Nome:</label><input type="text" id="nomeProd" readonly placeholder="Preencha pelo código"></div>
+        <div class="grupo-form"><label>Categoria:</label><input type="text" id="categoriaProd" readonly placeholder="Preencha pelo código"></div>
+        <div class="grupo-form"><label>Preço R$:</label><input type="text" id="precoProd" readonly value="0.00"></div>
+        <div class="grupo-form"><label>Quantidade:</label><input type="number" id="qtdProd" min="1" value="1"></div>
+        <div class="grupo-form"><label>Tipo de Movimento:</label><select id="tipoMov"><option value="entrada">📥 Entrada</option><option value="saida">📤 Saída</option></select></div>
+        <div class="grupo-form"><label>Responsável:</label><input type="text" id="responsavel" placeholder="Nome de quem registrou"></div>
+        <button class="sucesso" onclick="registrarMovimentacao()">✅ Registrar Movimento</button>
+    </div>
+
+    <div class="secao">
+        <h2>➕ Cadastrar Novo Produto</h2>
+        <div class="grupo-form"><label>Código:</label><input type="text" id="codigoNovo" placeholder="Ex: 001"></div>
+        <div class="grupo-form"><label>Nome do Produto:</label><input type="text" id="nomeNovo" placeholder="Nome completo"></div>
+        <div class="grupo-form"><label>Categoria:</label><input type="text" id="categoriaNova" placeholder="Ex: Limpeza"></div>
+        <div class="grupo-form"><label>Preço Unitário R$:</label><input type="text" id="precoNovo" value="0.00"></div>
+        <button class="sucesso" onclick="cadastrarProduto()">➕ Cadastrar Produto</button>
+    </div>
+
+    <div class="secao">
+        <h2>📦 Produtos em Estoque <button class="secundario" onclick="mostrarOcultarProdutos()">Ocultar</button></h2>
+        <table id="tabela-produtos">
+            <thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="secao">
+        <h2>📊 Controle Geral de Estoque <button class="secundario" onclick="mostrarOcultarEstoque()">Ocultar</button></h2>
+        <table id="tabela-estoque">
+            <thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th><th>Última Atualização</th><th>Ação</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="secao">
+        <h2>🛠️ Ferramentas</h2>
+        <div class="grupo-botoes">
+            <button onclick="filtrarPorCategoria()">🔍 Filtrar por Categoria</button>
+            <button onclick="exportarParaExcel()">📁 Exportar para Excel</button>
+            <label class="arquivo">📂 Importar do Excel<input type="file" accept=".csv,.txt" onchange="importarDoExcel(event)"></label>
+        </div>
+    </div>
+</section>
+
+<!-- ABA 1 → FORNECEDORES -->
+<section class="conteudo-aba" id="aba1">
+    <div class="secao">
+        <h2>🏢 Fornecedores <button class="secundario" onclick="alternarFornecedores()">Ocultar</button></h2>
+        <div id="form-fornecedor">
+            <div class="grupo-form"><label>CNPJ:</label><input type="text" id="cnpjForn" placeholder="00.000.000/0000-00"></div>
+            <div class="grupo-form"><label>Razão Social:</label><input type="text" id="razaoForn"></div>
+            <div class="grupo-form"><label>Nome Fantasia:</label><input type="text" id="fantasiaForn"></div>
+            <div class="grupo-form"><label>Endereço:</label><input type="text" id="enderecoForn"></div>
+            <div class="grupo-form"><label>Telefone:</label><input type="text" id="telefoneForn"></div>
+            <div class="grupo-form"><label>Cidade:</label><input type="text" id="cidadeForn"></div>
+        </div>
+        <button class="sucesso" onclick="cadastrarFornecedor()">✅ Cadastrar Fornecedor</button>
+        <table id="tabela-fornecedores">
+            <thead><tr><th>CNPJ</th><th>Razão Social</th><th>Fantasia</th><th>Endereço</th><th>Telefone</th><th>Cidade</th><th>Ação</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ABA 2 → ENTRADA RÁPIDA -->
+<section class="conteudo-aba" id="aba2">
+    <div class="secao">
+        <h2>📥 Entrada Rápida por Fornecedor</h2>
+        <div class="grupo-form"><label>Fornecedor:</label><select id="selectFornecedorEntrada" onchange="carregarProdutosFornecedor()"><option value="">-- Selecione --</option></select></div>
+        <div class="grupo-form"><label>Responsável:</label><input type="text" id="responsavelEntradaForn" placeholder="Quem recebeu"></div>
+        <div id="area-entrada-frn" style="display:none;">
+            <table><thead><tr><th>Código</th><th>Produto</th><th>Quantidade</th></tr></thead><tbody id="corpo-entrada"></tbody></table><br>
+            <button class="sucesso" onclick="registrarEntradaForn()">✅ Registrar Entrada</button>
+        </div>
+        <div id="msg-entrada"></div>
+    </div>
+</section>
+
+<!-- ABA 3 → XML -->
+<section class="conteudo-aba" id="aba3">
+    <div class="secao">
+        <h2>📄 Importar Nota Fiscal (XML)</h2>
+        <p style="margin-bottom:10px;">Selecione o arquivo XML da NF para dar entrada no estoque.</p>
+        <div class="grupo-form"><label>Arquivo XML:</label><input type="file" id="arquivoXml" accept=".xml"></div>
+        <button class="sucesso" onclick="importarEntradaXML()">📥 Importar Entrada do XML</button>
+        <div id="mensagemImportacao"></div>
+        <h3>Formato esperado:</h3>
+<pre>&lt;nota&gt;
+  &lt;responsavel&gt;Nome&lt;/responsavel&gt;
+  &lt;item&gt;&lt;codigo&gt;001&lt;/codigo&gt;&lt;quantidade&gt;10&lt;/quantidade&gt;&lt;/item&gt;
+&lt;/nota&gt;</pre>
+    </div>
+</section>
+
+<!-- ABA 4 → RELATÓRIOS -->
+<section class="conteudo-aba" id="aba4">
+    <div class="secao">
+        <h2>📋 Relatórios</h2>
+        <div class="grupo-form"><label>Data Inicial:</label><input type="date" id="dataInicio"></div>
+        <div class="grupo-form"><label>Data Final:</label><input type="date" id="dataFim"></div>
+        <div class="grupo-botoes">
+            <button onclick="gerarRelatorio()">📊 Gerar Período</button>
+            <button class="aviso" onclick="relatorioCompleto()">📋 Completo</button>
+            <button class="sucesso" onclick="window.print()">🖨️ Imprimir</button>
+        </div>
+        <div id="conteudo-relatorio" class="mensagem" style="background:#f8fafc;">Clique em um botão acima...</div>
+    </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// ==============================================
+// 🔐 SENHA DO SISTEMA — ALTERE AQUI SE QUISER
+// ==============================================
+const SENHA_SISTEMA = "1234"; // ← TROQUE AQUI A SENHA!
+
+// ==============================================
+// LOGIN E SAIR
+// ==============================================
+function entrarSistema() {
+    const senha = document.getElementById('campo-senha').value;
+    if (senha === SENHA_SISTEMA) {
+        document.getElementById('tela-login').style.display = 'none';
+        document.getElementById('sistema').style.display = 'block';
+        carregarDados();
+    } else {
+        document.getElementById('aviso-erro').style.display = 'block';
+        document.getElementById('campo-senha').value = '';
+        document.getElementById('campo-senha').focus();
+    }
+}
+function sairSistema() {
+    if (confirm("Deseja realmente sair do sistema?")) {
+        document.getElementById('sistema').style.display = 'none';
+        document.getElementById('tela-login').style.display = 'flex';
+        document.getElementById('campo-senha').value = '';
+        document.getElementById('aviso-erro').style.display = 'none';
+    }
+}
+
+// ==============================================
+// DADOS
+// ==============================================
+let produtos = [];
+let movimentacoes = [];
+let fornecedores = [];
+
+function salvar() {
+    localStorage.setItem("produtos", JSON.stringify(produtos));
+    localStorage.setItem("movimentacoes", JSON.stringify(movimentacoes));
+    localStorage.setItem("fornecedores", JSON.stringify(fornecedores));
+}
+function carregarDados() {
+    produtos = JSON.parse(localStorage.getItem("produtos") || "[]");
+    movimentacoes = JSON.parse(localStorage.getItem("movimentacoes") || "[]");
+    fornecedores = JSON.parse(localStorage.getItem("fornecedores") || "[]");
+    listarProdutos(); atualizarEstoque(); listarFornecedores(); atualizarSelectFornecedores();
+}
+
+// ==============================================
+// ABAS
+// ==============================================
+function trocarAba(n) {
+    document.querySelectorAll('.conteudo-aba').forEach((el,i)=>el.classList.toggle('visivel',i===n));
+    document.querySelectorAll('.aba').forEach((el,i)=>el.classList.toggle('ativa',i===n));
+}
+
+// ==============================================
+// PRODUTOS
+// ==============================================
+function buscarProduto() {
+    const cod = document.getElementById('codigoProd').value.trim();
+    if (!cod) { limparCampos(); return; }
+    const p = produtos.find(x=>String(x.codigo)===String(cod));
+    if (p) {
+        document.getElementById('nomeProd').value = p.nome;
+        document.getElementById('categoriaProd').value = p.categoria;
+        document.getElementById('precoProd').value = p.preco.toFixed(2);
+    } else limparCampos();
+}
+function limparCampos() {
+    document.getElementById('nomeProd').value = '';
+    document.getElementById('categoriaProd').value = '';
+    document.getElementById('precoProd').value = '';
+}
+function cadastrarProduto() {
+    const codigo = document.getElementById('codigoNovo').value.trim();
+    const nome = document.getElementById('nomeNovo').value.trim();
+    const cat = document.getElementById('categoriaNova').value.trim();
+    const preco = parseFloat(document.getElementById('precoNovo').value.replace(',','.'));
+    if (!codigo||!nome||!cat||isNaN(preco)||preco<=0) return alert("Preencha todos os campos corretamente!");
+    if (produtos.some(x=>String(x.codigo)===String(codigo))) return alert("Já existe produto com este código!");
+    produtos.push({codigo, nome, categoria:cat, preco, quantidade:0, ultima: new Date().toLocaleString('pt-BR')});
+    salvar(); listarProdutos(); atualizarEstoque();
+    alert("✅ Produto cadastrado com sucesso!");
+    document.getElementById('codigoNovo').value='';document.getElementById('nomeNovo').value='';
+    document.getElementById('categoriaNova').value='';document.getElementById('precoNovo').value='';
+}
+function listarProdutos() {
+    const tb = document.querySelector('#tabela-produtos tbody');
+    tb.innerHTML = '';
+    produtos.forEach(p=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco*p.quantidade).toFixed(2)}</td>`;
+        tb.appendChild(tr);
+    });
+}
+function registrarMovimentacao() {
+    const cod = document.getElementById('codigoProd').value.trim();
+    const qtd = parseInt(document.getElementById('qtdProd').value);
+    const resp = document.getElementById('responsavel').value.trim();
+    const tipo = document.getElementById('tipoMov').value;
+    if (!cod||isNaN(qtd)||qtd<=0||!resp) return alert("Preencha todos os campos corretamente!");
+    const p = produtos.find(x=>String(x.codigo)===String(cod));
+    if (!p) return alert("Produto não encontrado! Cadastre-o primeiro.");
+    if (tipo==='entrada') p.quantidade += qtd;
+    else { if (p.quantidade<qtd) return alert("Estoque insuficiente! Disponível: "+p.quantidade); p.quantidade -= qtd; }
+    p.ultima = new Date().toLocaleString('pt-BR');
+    movimentacoes.push({codigo:cod, produto:p.nome, categoria:p.categoria, quantidade:qtd, tipo, responsavel:resp, data:p.ultima});
+    salvar(); listarProdutos(); atualizarEstoque(); limparCampos();
+    document.getElementById('qtdProd').value='1';document.getElementById('responsavel').value='';document.getElementById('codigoProd').value='';
+    alert("✅ Movimentação registrada com sucesso!");
+}
+function atualizarEstoque() {
+    const tb = document.querySelector('#tabela-estoque tbody');
+    tb.innerHTML='';
+    produtos.forEach(p=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco*p.quantidade).toFixed(2)}</td><td>${p.ultima}</td><td><button class="perigo" onclick="excluirProduto('${p.codigo}')">Excluir</button></td>`;
+        tb.appendChild(tr);
+    });
+}
+function excluirProduto(cod) {
+    if (!confirm("Deseja excluir este produto?")) return;
+    produtos = produtos.filter(x=>String(x.codigo)!==String(cod));
+    salvar(); listarProdutos(); atualizarEstoque();
+}
+let visivelProd = true;
+function mostrarOcultarProdutos() {
+    visivelProd = !visivelProd;
+    document.getElementById('tabela-produtos').style.display = visivelProd ? '' : 'none';
+    event.target.textContent = visivelProd ? 'Ocultar' : 'Mostrar';
+}
+let visivelEstoque = true;
+function mostrarOcultarEstoque() {
+    visivelEstoque = !visivelEstoque;
+    document.getElementById('tabela-estoque').style.display = visivelEstoque ? '' : 'none';
+    event.target.textContent = visivelEstoque ? 'Ocultar' : 'Mostrar';
+}
+function filtrarPorCategoria() {
+    const cat = prompt("Digite a categoria para filtrar (deixe vazio para todas):", "");
+    const filtrados = (!cat)?produtos:produtos.filter(p=>p.categoria.toLowerCase().includes(cat.toLowerCase()));
+    const tb = document.querySelector('#tabela-produtos tbody'); tb.innerHTML='';
+    filtrados.forEach(p=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco*p.quantidade).toFixed(2)}</td>`;
+        tb.appendChild(tr);
+    });
+}
+function exportarParaExcel() {
+    if (!produtos.length) return alert("Não há produtos para exportar!");
+    let csv = "Código;Nome;Categoria;Preço;Quantidade;Valor Total\n";
+    produtos.forEach(p=>csv += `${p.codigo};${p.nome};${p.categoria};${p.preco.toFixed(2)};${p.quantidade};${(p.preco*p.quantidade).toFixed(2)}\n`);
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `estoque_${new Date().toLocaleDateString('pt-BR').replaceAll('/','-')}.csv`;
+    a.click();
+}
+function importarDoExcel(e) {
+    const arq = e.target.files[0]; if (!arq) return;
+    const leitor = new FileReader();
+    leitor.onload = evt=>{
+        const linhas = evt.target.result.split('\n');
+        let cont=0;
+        for(let i=1;i<linhas.length;i++){
+            const [cod, nome, cat, preco, qtd] = linhas[i].split(';');
+            if (!cod) continue;
+            const ex = produtos.find(p=>String(p.codigo.trim())===String(cod.trim()));
+            if(ex){ ex.nome=nome.trim(); ex.categoria=cat.trim(); ex.preco=+preco.replace(',','.'); }
+            else {
+                produtos.push({
+                    codigo:cod.trim(), nome:nome.trim(), categoria:cat.trim(),
+                    preco:+preco.replace(',','.'), quantidade:parseInt(qtd)||0,
+                    ultima: new Date().toLocaleString('pt-BR')
+                });
+                cont++;
+            }
+        }
+        salvar(); listarProdutos(); atualizarEstoque(); alert(`✅ Importado! ${cont} novo(s) produto(s).`);
+    };
+    leitor.readAsText(arq);
+}
+
+// ==============================================
+// FORNECEDORES
+// ==============================================
+let visivelForn = true;
+function alternarFornecedores() {
+    visivelForn = !visivelForn;
+    document.getElementById('form-fornecedor').style.display = visivelForn?'block':'none';
+    document.getElementById('tabela-fornecedores').style.display = visivelForn?'table':'none';
+    event.target.textContent = visivelForn?'Ocultar':'Mostrar';
+}
+function cadastrarFornecedor() {
+    const f = {
+        cnpj: document.getElementById('cnpjForn').value.trim(),
+        razao: document.getElementById('razaoForn').value.trim(),
+        fantasia: document.getElementById('fantasiaForn').value.trim(),
+        endereco: document.getElementById('enderecoForn').value.trim(),
+        telefone: document.getElementById('telefoneForn').value.trim(),
+        cidade: document.getElementById('cidadeForn').value.trim()
+    };
+    if (!f.cnpj||!f.razao) return alert("CNPJ e Razão Social são obrigatórios!");
+    fornecedores.push(f); salvar(); listarFornecedores(); atualizarSelectFornecedores();
+    alert("✅ Fornecedor cadastrado com sucesso!");
+    document.getElementById('cnpjForn').value='';document.getElementById('razaoForn').value='';
+    document.getElementById('fantasiaForn').value='';document.getElementById('enderecoForn').value='';
+    document.getElementById('telefoneForn').value='';document.getElementById('cidadeForn').value='';
+}
+function listarFornecedores() {
+    const tb = document.querySelector('#tabela-fornecedores tbody'); tb.innerHTML='';
+    fornecedores.forEach((f,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${f.cnpj}</td><td>${f.razao}</td><td>${f.fantasia||''}</td><td>${f.endereco||''}</td><td>${f.telefone||''}</td><td>${f.cidade||''}</td><td><button class="perigo" onclick="excluirFornecedor(${i})">Excluir</button></td>`;
+        tb.appendChild(tr);
+    });
+}
+function excluirFornecedor(i) { fornecedores.splice(i,1); salvar(); listarFornecedores(); atualizarSelectFornecedores(); }
+function atualizarSelectFornecedores() {
+    const sel = document.getElementById('selectFornecedorEntrada');
+    sel.innerHTML = '<option value="">-- Selecione o fornecedor --</option>';
+    fornecedores.forEach((f,i)=>{const o=new Option(f.razao,i); sel.appendChild(o);});
+}
+function carregarProdutosFornecedor() {
+    const idx = document.getElementById('selectFornecedorEntrada').value;
+    document.getElementById('area-entrada-frn').style.display = idx===''?'none':'block';
+}
+function registrarEntradaForn() { alert("✅ Use a aba Produtos informando o código e quantidade para dar entrada!"); }
+
+// ==============================================
+// XML
+// ==============================================
+function importarEntradaXML() {
+    const arq = document.getElementById('arquivoXml').files[0];
+    if (!arq) return alert("Selecione o arquivo XML primeiro!");
+    const leitor = new FileReader();
+    leitor.onload = evt=>{
+        const xml = new DOMParser().parseFromString(evt.target.result, "text/xml");
+        const itens = xml.getElementsByTagName('item');
+        const resp = xml.getElementsByTagName('responsavel')[0]?.textContent?.trim() || "Importado do XML";
+        let ok=0, erros=[];
+        for(let i=0;i<itens.length;i++){
+            const cod = itens[i].getElementsByTagName('codigo')[0]?.textContent?.trim();
+            const qtd = parseFloat(itens[i].getElementsByTagName('quantidade')[0]?.textContent);
+            if(!cod||isNaN(qtd)||qtd<=0){ erros.push(`Item ${i+1}: dados inválidos`); continue; }
+            const p = produtos.find(x=>String(x.codigo)===String(cod));
+            if(!p){ erros.push(`${cod}: produto não cadastrado`); continue; }
+            p.quantidade += qtd;
+            p.ultima = new Date().toLocaleString('pt-BR');
+            movimentacoes.push({codigo:cod, produto:p.nome, quantidade:qtd, tipo:'entrada', responsavel:resp, data:p.ultima});
+            ok++;
+        }
+        salvar(); listarProdutos(); atualizarEstoque();
+        document.getElementById('mensagemImportacao').innerHTML=
+          `<div class="mensagem sucesso">✅ ${ok} entrada(s) registrada(s)! ${erros.length?'<br>⚠️ '+erros.join(', '):''}</div>`;
+    };
+    leitor.readAsText(arq);
+}
+
+// ==============================================
+// RELATÓRIOS
+// ==============================================
+function gerarRelatorio() {
+    const i = document.getElementById('dataInicio').value;
+    const f = document.getElementById('dataFim').value;
+    if (!i||!f) return alert("Informe a data inicial e final!");
+    const dtIni = new Date(i+'T00:00:00');
+    const dtFim = new Date(f+'T23:59:59');
+    const filtro = movimentacoes.filter(m=>{
+        const [dia,mes,ano] = m.data.split('/');
+        const dataMov = new Date(`${ano.substring(0,4)}-${mes}-${dia.split(' ')[0]}`);
+        return dataMov>=dtIni && dataMov<=dtFim;
+    });
+    exibirRelatorio(filtro, i.split('-').reverse().join('/'), f.split('-').reverse().join('/'));
+}
+function relatorioCompleto() { exibirRelatorio(movimentacoes, "Todo", "Período"); }
+function exibirRelatorio(lista, ini, fim) {
+    const div = document.getElementById('conteudo-relatorio');
+    if (!lista.length) { div.innerHTML="<p>⚠️ Nenhuma movimentação encontrada neste período.</p>"; return; }
+    div.innerHTML = `<h4>📋 Relatório de Movimentações — ${ini} a ${fim}</h4><table style="width:100%;border-collapse:collapse;margin-top:10px;"><thead><tr style="background:#e2e8f0;"><th>Data</th><th>Tipo</th><th>Produto</th><th>Quantidade</th><th>Responsável</th></tr></thead><tbody>` +
+        lista.map(m=>`<tr><td>${m.data}</td><td>${m.tipo==='entrada'?'📥 Entrada':'📤 Saída'}</td><td>${m.produto}</td><td>${m.quantidade}</td><td>${m.responsavel}</td></tr>`).join('') + `</tbody></table>`;
+}
+</script>
+
 </body>
 </html>
