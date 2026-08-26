@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,9 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Estoque</title>
     <style>
-        /* ==============================================
-           RESET E CONFIGURAÇÕES GERAIS
-           ============================================== */
         * {
             margin: 0;
             padding: 0;
@@ -20,13 +19,12 @@
             --cor-sucesso: #16a34a;
             --cor-aviso: #d97706;
             --cor-perigo: #dc2626;
+            --cor-nf: #7c3aed;
+            --cor-nf-escura: #6d28d9;
             --cor-fundo: #f1f5f9;
             --cor-fundo-card: #ffffff;
             --cor-texto: #1e293b;
-            --cor-texto-claro: #64748b;
             --cor-borda: #e2e8f0;
-            --sombra: 0 2px 8px rgba(0,0,0,0.08);
-            --sombra-hover: 0 4px 12px rgba(0,0,0,0.12);
         }
         body {
             background-color: var(--cor-fundo);
@@ -34,87 +32,20 @@
             line-height: 1.6;
             padding: 20px;
         }
-
-        /* ==============================================
-           TELA DE LOGIN
-           ============================================== */
-        #tela-login {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .caixa-login {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 14px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        .caixa-login h2 {
-            color: var(--cor-primaria);
-            margin-bottom: 25px;
-            font-size: 24px;
-        }
-        .caixa-login input {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0 20px;
-            border: 1px solid var(--cor-borda);
-            border-radius: 8px;
-            font-size: 16px;
-            text-align: center;
-        }
-        .caixa-login button {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            border-radius: 8px;
-        }
-        .erro-senha {
-            color: var(--cor-perigo);
-            margin-top: 12px;
-            display: none;
-        }
-
-        /* ==============================================
-           CABEÇALHO
-           ============================================== */
         header {
             background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-escura));
             color: white;
             padding: 25px 30px;
             border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: var(--sombra);
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        header h1 { font-size: 28px; margin-bottom: 5px; }
-        header p { font-size: 15px; opacity: 0.9; }
-        .botao-sair { background: rgba(255,255,255,0.2); padding: 8px 16px; font-size: 14px; }
+        header h1 { font-size: 26px; margin-bottom: 4px; }
+        .botao-sair { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; color: white; border: none; cursor: pointer; }
         .botao-sair:hover { background: rgba(255,255,255,0.3); }
-
-        /* ==============================================
-           NAVEGAÇÃO DE ABAS — Todas na horizontal!
-           ============================================== */
-        .navegacao-abas {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 5px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--cor-borda);
-            overflow-x: auto;
-        }
+        .navegacao-abas { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--cor-borda); flex-wrap: wrap; }
         .aba {
             padding: 12px 18px;
             background-color: #e2e8f0;
@@ -123,38 +54,23 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-            color: var(--cor-texto);
-            transition: all 0.25s ease;
-            white-space: nowrap;
-            flex-shrink: 0;
         }
-        .aba:hover { background-color: #cbd5e1; }
         .aba.ativa {
-            background-color: var(--cor-fundo-card);
+            background-color: white;
+            border-bottom: 3px solid var(--cor-primaria);
             color: var(--cor-primaria);
             font-weight: 600;
-            border-bottom: 3px solid var(--cor-primaria);
-            margin-bottom: -2px;
         }
-        .conteudo-aba { display: none; animation: aparecer 0.3s ease; }
+        .conteudo-aba { display: none; }
         .conteudo-aba.visivel { display: block; }
-        @keyframes aparecer {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ==============================================
-           CARDS E SEÇÕES
-           ============================================== */
         .secao {
-            background-color: var(--cor-fundo-card);
+            background-color: white;
             padding: 25px;
             border-radius: 10px;
             margin-bottom: 20px;
-            box-shadow: var(--sombra);
         }
         .secao h2 {
-            font-size: 19px;
+            font-size: 18px;
             color: var(--cor-primaria);
             margin-bottom: 18px;
             padding-bottom: 10px;
@@ -163,154 +79,146 @@
             justify-content: space-between;
             align-items: center;
         }
-        .secao h3 { font-size: 16px; color: var(--cor-aviso); margin: 16px 0 10px; }
-
-        /* ==============================================
-           FORMULÁRIOS E CAMPOS
-           ============================================== */
         .grupo-form {
             display: flex;
-            flex-direction: row;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-            flex-wrap: nowrap;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
         }
-        .grupo-form label {
-            font-weight: 500;
-            color: var(--cor-texto);
-            min-width: 150px;
-            text-align: right;
-        }
-        .grupo-form input, .grupo-form select {
-            flex: 1;
-            min-width: 200px;
-            max-width: 300px;
-        }
-        input, select, button {
-            padding: 10px 14px;
+        .grupo-form label { min-width: 180px; font-weight: 500; }
+        input, select {
+            padding: 10px 12px;
             border: 1px solid var(--cor-borda);
             border-radius: 6px;
             font-size: 14px;
-            transition: all 0.2s ease;
+            min-width: 200px;
         }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--cor-primaria);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-        }
+        input[readonly] { background-color: #f8fafc; color: #475569; }
         button {
-            background-color: var(--cor-primaria);
-            color: white;
+            padding: 10px 16px;
             border: none;
-            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 500;
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+            cursor: pointer;
+            color: white;
+            background-color: var(--cor-primaria);
         }
-        button:hover {
-            background-color: var(--cor-primaria-escura);
-            transform: translateY(-1px);
-            box-shadow: var(--sombra-hover);
-        }
+        button:hover { background-color: var(--cor-primaria-escura); }
         button.sucesso { background-color: var(--cor-sucesso); }
         button.sucesso:hover { background-color: #15803d; }
         button.aviso { background-color: var(--cor-aviso); }
         button.aviso:hover { background-color: #b45309; }
-        button.perigo { background-color: var(--cor-perigo); padding: 4px 8px; font-size: 13px; }
-        button.perigo:hover { background-color: #b91c1c; }
-        button.secundario { background-color: #64748b; padding: 5px 12px; font-size: 13px; }
+        button.perigo { background-color: var(--cor-perigo); padding: 6px 10px; font-size: 13px; }
+        button.secundario { background-color: #64748b; padding: 8px 14px; font-size: 13px; }
+        button.nf { background-color: var(--cor-nf); }
+        button.nf:hover { background-color: var(--cor-nf-escura); }
         button.secundario:hover { background-color: #475569; }
-        .grupo-botoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .grupo-botoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--cor-borda);
+            font-size: 14px;
+        }
+        th { background-color: #f8fafc; color: var(--cor-primaria); font-weight: 600; }
+        tr:hover { background-color: #f8fafc; }
+
+        #form-entrada-nf {
+            background: linear-gradient(135deg, #f0f7ff, #eef2ff);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid var(--cor-nf);
+            margin-top: 20px;
+            display: none;
+        }
+        #form-entrada-nf h3 {
+            color: var(--cor-nf);
+            margin-bottom: 20px;
+            font-size: 17px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd6fe;
+        }
+        .card-calculo {
+            background: #dcfce7;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin: 16px 0;
+            border-left: 4px solid var(--cor-sucesso);
+            font-size: 15px;
+        }
+        .card-calculo strong { font-size: 16px; }
+        .exemplo {
+            background: #fef3c7;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            border-left: 3px solid var(--cor-aviso);
+            font-size: 13px;
+        }
+        .mensagem { margin-top: 12px; padding: 12px; border-radius: 6px; }
+        .sucesso { background: #dcfce7; color: #166534; }
+        .erro { background: #fee2e2; color: #b91c1c; }
+        pre { background: #f8fafc; padding: 15px; border-radius: 6px; margin-top: 10px; font-size: 13px; }
+        #tela-login {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        .caixa-login {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .caixa-login h2 { color: var(--cor-primaria); margin-bottom: 20px; }
+        .caixa-login input { width: 100%; padding: 14px; margin: 10px 0 20px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 16px; text-align: center; }
+        .erro-senha { color: var(--cor-perigo); margin-top: 12px; display: none; }
         label.arquivo {
-            padding: 10px 18px;
+            padding: 8px 16px;
             background: #64748b;
             color: white;
             border-radius: 6px;
             cursor: pointer;
             display: inline-block;
         }
-        label.arquivo:hover { background: #475569; }
         label.arquivo input { display: none; }
-
-        /* ==============================================
-           TABELAS
-           ============================================== */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            background-color: white;
+        .destaque-nf {
+            background: #ede9fe;
+            padding: 12px;
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        }
-        th {
-            background-color: #f8fafc;
-            padding: 11px 9px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--cor-primaria);
-            border-bottom: 2px solid var(--cor-borda);
+            margin-bottom: 15px;
             font-size: 14px;
-        }
-        td { padding: 10px 9px; border-bottom: 1px solid var(--cor-borda); font-size: 14px; }
-        tr:nth-child(even) { background-color: #f8fafc; }
-        tr:hover { background-color: #eff6ff; }
-
-        /* ==============================================
-           ÁREA DE RELATÓRIO
-           ============================================== */
-        #conteudo-relatorio {
-            margin-top: 18px;
-            padding: 18px;
-            background-color: #f8fafc;
-            border-radius: 8px;
-            border: 1px solid var(--cor-borda);
-        }
-
-        /* ==============================================
-           MENSAGENS
-           ============================================== */
-        .mensagem { margin-top: 12px; padding: 12px; border-radius: 6px; font-weight: 500; }
-        .sucesso { background-color: #dcfce7; color: #166534; }
-        .erro { background-color: #fee2e2; color: #b91c1c; }
-        pre { background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--cor-borda); margin-top: 10px; overflow-x: auto; font-size: 13px; }
-
-        /* ==============================================
-           RESPONSIVIDADE
-           ============================================== */
-        @media (max-width: 900px) {
-            .grupo-form { flex-direction: column; align-items: flex-start; gap: 6px; }
-            .grupo-form label { text-align: left; min-width: auto; width: 100%; }
-            .grupo-form input, .grupo-form select { width: 100%; max-width: 100%; }
-        }
-        @media print {
-            header, .navegacao-abas, button, .grupo-form, #mensagemImportacao { display: none !important; }
-            .secao { box-shadow: none; border: none; }
-            body { background: white; padding: 0; }
+            color: #5b21b6;
         }
     </style>
 </head>
 <body>
 
-<!-- ==============================================
-     TELA DE LOGIN — APARECE PRIMEIRO
-     ============================================== -->
 <div id="tela-login">
     <div class="caixa-login">
         <h2>🔐 Controle de Estoque</h2>
         <p>Digite a senha para acessar o sistema</p>
-        <input type="password" id="campo-senha" placeholder="Digite a senha..." onkeypress="if(event.key==='Enter')entrarSistema()">
-        <button onclick="entrarSistema()" class="sucesso">✅ Entrar</button>
+        <input type="password" id="campo-senha" placeholder="Digite a senha..." onkeypress="if(event.key==='Enter') entrarSistema()">
+        <button class="sucesso" onclick="entrarSistema()">✅ Entrar</button>
         <div class="erro-senha" id="aviso-erro">❌ Senha incorreta! Tente novamente.</div>
     </div>
 </div>
 
-<!-- ==============================================
-     CONTEÚDO PRINCIPAL — ESCONDIDO ATÉ LOGAR
-     ============================================== -->
 <div id="sistema" style="display: none;">
-
 <header>
     <div>
         <h1>Controle de Estoque</h1>
@@ -323,24 +231,76 @@
     <button class="aba ativa" onclick="trocarAba(0)">Produtos</button>
     <button class="aba" onclick="trocarAba(1)">Fornecedores</button>
     <button class="aba" onclick="trocarAba(2)">Entrada Rápida</button>
-    <button class="aba" onclick="trocarAba(3)">Importar NF / XML</button>
+    <button class="aba" onclick="trocarAba(3)">Importar XML</button>
     <button class="aba" onclick="trocarAba(4)">Relatórios</button>
 </div>
 
 <main>
-
-<!-- ABA 0 → PRODUTOS -->
 <section class="conteudo-aba visivel" id="aba0">
     <div class="secao">
         <h2>🔍 Buscar Produto e Registrar Movimentação</h2>
         <div class="grupo-form"><label>Código do Produto:</label><input type="text" id="codigoProd" placeholder="Digite o código" onblur="buscarProduto()"></div>
-        <div class="grupo-form"><label>Nome:</label><input type="text" id="nomeProd" readonly placeholder="Preencha pelo código"></div>
-        <div class="grupo-form"><label>Categoria:</label><input type="text" id="categoriaProd" readonly placeholder="Preencha pelo código"></div>
+        <div class="grupo-form"><label>Nome:</label><input type="text" id="nomeProd" readonly placeholder="Preenchido automaticamente"></div>
+        <div class="grupo-form"><label>Categoria:</label><input type="text" id="categoriaProd" readonly placeholder="Preenchido automaticamente"></div>
         <div class="grupo-form"><label>Preço R$:</label><input type="text" id="precoProd" readonly value="0.00"></div>
         <div class="grupo-form"><label>Quantidade:</label><input type="number" id="qtdProd" min="1" value="1"></div>
-        <div class="grupo-form"><label>Tipo de Movimento:</label><select id="tipoMov"><option value="entrada">📥 Entrada</option><option value="saida">📤 Saída</option></select></div>
+        <div class="grupo-form"><label>Tipo de Movimento:</label>
+            <select id="tipoMov">
+                <option value="entrada">📥 Entrada</option>
+                <option value="saida">📤 Saída</option>
+            </select>
+        </div>
         <div class="grupo-form"><label>Responsável:</label><input type="text" id="responsavel" placeholder="Nome de quem registrou"></div>
-        <button class="sucesso" onclick="registrarMovimentacao()">✅ Registrar Movimento</button>
+        <div class="grupo-botoes">
+            <button class="sucesso" onclick="registrarMovimentacao()">✅ Registrar Movimentação</button>
+            <button class="nf" onclick="abrirFormularioNF()">📥 Entrada por NF com Conversão</button>
+        </div>
+
+        <div id="form-entrada-nf">
+            <h3>📥 Entrada por NF — Conversão Automática de Unidades</h3>
+            <div class="destaque-nf">
+                💡 <strong>Como funciona:</strong> Informe quantas unidades vieram e o volume/peso de cada uma.<br>
+                O sistema calcula automaticamente → Exemplo: 10 unidades × 2L = <strong>20L</strong> registrados no estoque
+            </div>
+
+            <div class="grupo-form"><label>CNPJ do Fornecedor:</label><input type="text" id="nf-cnpj" placeholder="Digite o CNPJ" onblur="buscarFornecedorNF()"></div>
+            <div class="grupo-form"><label>Razão Social:</label><input type="text" id="nf-razao" readonly placeholder="✅ Preenchido automaticamente"></div>
+            <hr style="border:none; border-top:1px solid #ddd6fe; margin:10px 0;">
+            <div class="grupo-form"><label>Código do Produto:</label><input type="text" id="nf-codigo" placeholder="Digite o código" onblur="buscarProdutoNF()"></div>
+            <div class="grupo-form"><label>Nome do Produto:</label><input type="text" id="nf-nome" readonly placeholder="✅ Preenchido automaticamente"></div>
+            <div class="grupo-form"><label>Quantidade de Unidades:</label><input type="number" id="nf-quantidade" min="1" value="1" oninput="calcularTotalNF()"></div>
+            <div class="grupo-form"><label>Preço Unitário da NF R$:</label><input type="text" id="nf-preco" value="0.00" oninput="calcularTotalNF()"></div>
+            <div class="grupo-form"><label>Volume/Peso por Unidade:</label><input type="number" id="nf-fator" step="0.001" min="0.001" value="1" oninput="calcularTotalNF()"></div>
+            <div class="grupo-form"><label>Unidade de Medida:</label>
+                <select id="nf-unidade" onchange="calcularTotalNF()">
+                    <option value="L">L — Litros</option>
+                    <option value="ml">ml — Mililitros</option>
+                    <option value="kg">kg — Quilogramas</option>
+                    <option value="g">g — Gramas</option>
+                    <option value="cx">cx — Caixas</option>
+                    <option value="pc">pc — Pacotes</option>
+                    <option value="fd">fd — Fardos</option>
+                    <option value="un" selected>un — Unidades</option>
+                </select>
+            </div>
+
+            <div class="card-calculo">
+                🧮 <strong>Cálculo:</strong> <span id="nf-formula">1 un × 1 = 1</span><br>
+                ✅ <strong>Total a Registrar:</strong> <span id="nf-total">1.00</span> <span id="nf-sigla">un</span>
+            </div>
+            <div class="exemplo">
+                📌 <strong>Exemplo prático:</strong> 10 unidades de detergente de 2 litros → sistema registra <strong>20L</strong> de entrada no estoque
+            </div>
+            <div class="grupo-form"><label>Responsável pela Entrada:</label><input type="text" id="nf-responsavel" placeholder="Nome de quem recebeu"></div>
+            <div class="grupo-botoes">
+                <button class="sucesso" onclick="adicionarItemNF()">➕ Adicionar Item à NF</button>
+                <button class="aviso" onclick="registrarEntradaNF()">✅ Registrar Entrada da NF</button>
+                <button class="secundario" onclick="limparFormNF()">🗑️ Limpar Formulário</button>
+            </div>
+
+            <h3 style="margin-top:20px; color:var(--cor-nf);">📋 Itens da Nota Fiscal</h3>
+            <table><thead><tr><th>Código</th><th>Produto</th><th>Qtd</th><th>Fator</th><th>Total Calculado</th><th>Un</th><th>Preço Unit.</th><th>Ação</th></tr></thead><tbody id="tabela-itens-nf"></tbody></table>
+        </div>
     </div>
 
     <div class="secao">
@@ -354,18 +314,12 @@
 
     <div class="secao">
         <h2>📦 Produtos em Estoque <button class="secundario" onclick="mostrarOcultarProdutos()">Ocultar</button></h2>
-        <table id="tabela-produtos">
-            <thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th></tr></thead>
-            <tbody></tbody>
-        </table>
+        <table id="tabela-produtos"><thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th></tr></thead><tbody></tbody></table>
     </div>
 
     <div class="secao">
         <h2>📊 Controle Geral de Estoque <button class="secundario" onclick="mostrarOcultarEstoque()">Ocultar</button></h2>
-        <table id="tabela-estoque">
-            <thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th><th>Última Atualização</th><th>Ação</th></tr></thead>
-            <tbody></tbody>
-        </table>
+        <table id="tabela-estoque"><thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th><th>Última Atualização</th><th>Ação</th></tr></thead><tbody></tbody></table>
     </div>
 
     <div class="secao">
@@ -378,7 +332,6 @@
     </div>
 </section>
 
-<!-- ABA 1 → FORNECEDORES -->
 <section class="conteudo-aba" id="aba1">
     <div class="secao">
         <h2>🏢 Fornecedores <button class="secundario" onclick="alternarFornecedores()">Ocultar</button></h2>
@@ -391,44 +344,30 @@
             <div class="grupo-form"><label>Cidade:</label><input type="text" id="cidadeForn"></div>
         </div>
         <button class="sucesso" onclick="cadastrarFornecedor()">✅ Cadastrar Fornecedor</button>
-        <table id="tabela-fornecedores">
-            <thead><tr><th>CNPJ</th><th>Razão Social</th><th>Fantasia</th><th>Endereço</th><th>Telefone</th><th>Cidade</th><th>Ação</th></tr></thead>
-            <tbody></tbody>
-        </table>
+        <table id="tabela-fornecedores"><thead><tr><th>CNPJ</th><th>Razão Social</th><th>Fantasia</th><th>Endereço</th><th>Telefone</th><th>Cidade</th><th>Ação</th></tr></thead><tbody></tbody></table>
     </div>
 </section>
 
-<!-- ABA 2 → ENTRADA RÁPIDA -->
 <section class="conteudo-aba" id="aba2">
     <div class="secao">
         <h2>📥 Entrada Rápida por Fornecedor</h2>
         <div class="grupo-form"><label>Fornecedor:</label><select id="selectFornecedorEntrada" onchange="carregarProdutosFornecedor()"><option value="">-- Selecione --</option></select></div>
         <div class="grupo-form"><label>Responsável:</label><input type="text" id="responsavelEntradaForn" placeholder="Quem recebeu"></div>
-        <div id="area-entrada-frn" style="display:none;">
-            <table><thead><tr><th>Código</th><th>Produto</th><th>Quantidade</th></tr></thead><tbody id="corpo-entrada"></tbody></table><br>
-            <button class="sucesso" onclick="registrarEntradaForn()">✅ Registrar Entrada</button>
-        </div>
-        <div id="msg-entrada"></div>
+        <div id="area-entrada-frn" style="display:none; margin-top:15px;"><table><thead><tr><th>Código</th><th>Produto</th><th>Quantidade</th></tr></thead><tbody id="corpo-entrada"></tbody></table><br><button class="sucesso" onclick="registrarEntradaForn()">✅ Registrar Entrada</button></div>
+        <div id="msg-entrada" class="mensagem" style="display:none;"></div>
     </div>
 </section>
 
-<!-- ABA 3 → XML -->
 <section class="conteudo-aba" id="aba3">
     <div class="secao">
         <h2>📄 Importar Nota Fiscal (XML)</h2>
-        <p style="margin-bottom:10px;">Selecione o arquivo XML da NF para dar entrada no estoque.</p>
+        <p style="margin-bottom:10px;">Selecione o arquivo XML da NF para dar entrada no estoque automaticamente.</p>
         <div class="grupo-form"><label>Arquivo XML:</label><input type="file" id="arquivoXml" accept=".xml"></div>
         <button class="sucesso" onclick="importarEntradaXML()">📥 Importar Entrada do XML</button>
-        <div id="mensagemImportacao"></div>
-        <h3>Formato esperado:</h3>
-<pre>&lt;nota&gt;
-  &lt;responsavel&gt;Nome&lt;/responsavel&gt;
-  &lt;item&gt;&lt;codigo&gt;001&lt;/codigo&gt;&lt;quantidade&gt;10&lt;/quantidade&gt;&lt;/item&gt;
-&lt;/nota&gt;</pre>
+        <div id="mensagemImportacao" class="mensagem" style="display:none;"></div>
     </div>
 </section>
 
-<!-- ABA 4 → RELATÓRIOS -->
 <section class="conteudo-aba" id="aba4">
     <div class="secao">
         <h2>📋 Relatórios</h2>
@@ -436,49 +375,18 @@
         <div class="grupo-form"><label>Data Final:</label><input type="date" id="dataFim"></div>
         <div class="grupo-botoes">
             <button onclick="gerarRelatorio()">📊 Gerar Período</button>
-            <button class="aviso" onclick="relatorioCompleto()">📋 Completo</button>
+            <button class="aviso" onclick="relatorioCompleto()">📋 Relatório Completo</button>
             <button class="sucesso" onclick="window.print()">🖨️ Imprimir</button>
         </div>
-        <div id="conteudo-relatorio" class="mensagem" style="background:#f8fafc;">Clique em um botão acima...</div>
+        <div id="conteudo-relatorio" class="mensagem" style="background:#f8fafc;">Clique em um botão acima para visualizar...</div>
     </div>
 </section>
-
 </main>
 </div>
 
 <script>
-// ==============================================
-// 🔐 SENHA DO SISTEMA — ALTERE AQUI SE QUISER
-// ==============================================
-const SENHA_SISTEMA = "1234"; // ← TROQUE AQUI A SENHA!
-
-// ==============================================
-// LOGIN E SAIR
-// ==============================================
-function entrarSistema() {
-    const senha = document.getElementById('campo-senha').value;
-    if (senha === SENHA_SISTEMA) {
-        document.getElementById('tela-login').style.display = 'none';
-        document.getElementById('sistema').style.display = 'block';
-        carregarDados();
-    } else {
-        document.getElementById('aviso-erro').style.display = 'block';
-        document.getElementById('campo-senha').value = '';
-        document.getElementById('campo-senha').focus();
-    }
-}
-function sairSistema() {
-    if (confirm("Deseja realmente sair do sistema?")) {
-        document.getElementById('sistema').style.display = 'none';
-        document.getElementById('tela-login').style.display = 'flex';
-        document.getElementById('campo-senha').value = '';
-        document.getElementById('aviso-erro').style.display = 'none';
-    }
-}
-
-// ==============================================
-// DADOS
-// ==============================================
+const SENHA_SISTEMA = "1234";
+let itensNF = [];
 let produtos = [];
 let movimentacoes = [];
 let fornecedores = [];
@@ -488,138 +396,285 @@ function salvar() {
     localStorage.setItem("movimentacoes", JSON.stringify(movimentacoes));
     localStorage.setItem("fornecedores", JSON.stringify(fornecedores));
 }
+
 function carregarDados() {
     produtos = JSON.parse(localStorage.getItem("produtos") || "[]");
     movimentacoes = JSON.parse(localStorage.getItem("movimentacoes") || "[]");
     fornecedores = JSON.parse(localStorage.getItem("fornecedores") || "[]");
-    listarProdutos(); atualizarEstoque(); listarFornecedores(); atualizarSelectFornecedores();
+    listarProdutos();
+    atualizarEstoque();
+    listarFornecedores();
+    atualizarSelectFornecedores();
 }
 
-// ==============================================
-// ABAS
-// ==============================================
+function entrarSistema() {
+    const senha = document.getElementById('campo-senha').value;
+    if (senha === SENHA_SISTEMA) {
+        document.getElementById('tela-login').style.display = 'none';
+        document.getElementById('sistema').style.display = 'block';
+        carregarDados();
+    } else {
+        document.getElementById('aviso-erro').style.display = 'block';
+        document.getElementById('campo-senha').value = '';
+    }
+}
+
+function sairSistema() {
+    if (confirm("Deseja realmente sair do sistema?")) {
+        document.getElementById('sistema').style.display = 'none';
+        document.getElementById('tela-login').style.display = 'flex';
+        document.getElementById('campo-senha').value = '';
+        document.getElementById('aviso-erro').style.display = 'none';
+    }
+}
+
 function trocarAba(n) {
-    document.querySelectorAll('.conteudo-aba').forEach((el,i)=>el.classList.toggle('visivel',i===n));
-    document.querySelectorAll('.aba').forEach((el,i)=>el.classList.toggle('ativa',i===n));
+    document.querySelectorAll('.conteudo-aba').forEach((el, i) => el.classList.toggle('visivel', i === n));
+    document.querySelectorAll('.aba').forEach((el, i) => el.classList.toggle('ativa', i === n));
 }
 
-// ==============================================
-// PRODUTOS
-// ==============================================
+function abrirFormularioNF() {
+    const form = document.getElementById('form-entrada-nf');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    itensNF = [];
+    document.getElementById('tabela-itens-nf').innerHTML = '';
+    limparFormNF();
+}
+
+function buscarFornecedorNF() {
+    const cnpj = document.getElementById('nf-cnpj').value.trim().replace(/\D/g, '');
+    const f = fornecedores.find(x => x.cnpj.replace(/\D/g, '') === cnpj);
+    document.getElementById('nf-razao').value = f ? f.razao : '(Fornecedor não cadastrado)';
+}
+
+function buscarProdutoNF() {
+    const cod = document.getElementById('nf-codigo').value.trim();
+    const p = produtos.find(x => String(x.codigo) === String(cod));
+    if (p) {
+        document.getElementById('nf-nome').value = p.nome;
+        document.getElementById('nf-preco').value = p.preco.toFixed(2);
+    } else {
+        document.getElementById('nf-nome').value = '(Produto não cadastrado — cadastre primeiro)';
+    }
+    calcularTotalNF();
+}
+
+function calcularTotalNF() {
+    const qtd = parseFloat(document.getElementById('nf-quantidade').value) || 0;
+    const fator = parseFloat(document.getElementById('nf-fator').value) || 1;
+    const total = qtd * fator;
+    const un = document.getElementById('nf-unidade').value;
+    const nomeUn = document.querySelector('#nf-unidade option:checked').textContent;
+    document.getElementById('nf-formula').textContent = `${qtd} × ${fator} = ${total.toFixed(2)}`;
+    document.getElementById('nf-total').textContent = total.toFixed(2);
+    document.getElementById('nf-sigla').textContent = nomeUn;
+}
+
+function adicionarItemNF() {
+    const cod = document.getElementById('nf-codigo').value.trim();
+    const nome = document.getElementById('nf-nome').value.trim();
+    const qtd = parseFloat(document.getElementById('nf-quantidade').value);
+    const preco = parseFloat(document.getElementById('nf-preco').value.replace(',', '.'));
+    const fator = parseFloat(document.getElementById('nf-fator').value);
+    const un = document.getElementById('nf-unidade').value;
+    const nomeUn = document.querySelector('#nf-unidade option:checked').textContent.split(' — ')[0];
+    const total = qtd * fator;
+    if (!cod || !nome || nome.startsWith('(') || isNaN(qtd) || qtd <= 0) {
+        return alert("⚠️ Preencha o código de um produto JÁ CADASTRADO no sistema!");
+    }
+    itensNF.push({ codigo: cod, nome: nome, quantidade: qtd, fator: fator, total: total, unidade: nomeUn, preco: preco });
+    atualizarTabelaNF();
+    document.getElementById('nf-codigo').value = '';
+    document.getElementById('nf-nome').value = '';
+    document.getElementById('nf-quantidade').value = '1';
+    document.getElementById('nf-fator').value = '1';
+    calcularTotalNF();
+}
+
+function atualizarTabelaNF() {
+    const tb = document.getElementById('tabela-itens-nf');
+    tb.innerHTML = '';
+    itensNF.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${item.codigo}</td><td>${item.nome}</td><td>${item.quantidade}</td><td>${item.fator}</td><td><strong>${item.total.toFixed(2)}</strong></td><td>${item.unidade}</td><td>R$ ${item.preco.toFixed(2)}</td><td><button class="perigo" onclick="removerItemNF(${idx})">Excluir</button></td>`;
+        tb.appendChild(tr);
+    });
+}
+
+function removerItemNF(idx) {
+    itensNF.splice(idx, 1);
+    atualizarTabelaNF();
+}
+
+function registrarEntradaNF() {
+    const resp = document.getElementById('nf-responsavel').value.trim();
+    if (!resp) return alert("⚠️ Informe o responsável pela entrada!");
+    if (itensNF.length === 0) return alert("⚠️ Adicione pelo menos um item na NF!");
+    let adicionados = 0;
+    itensNF.forEach(item => {
+        const p = produtos.find(x => String(x.codigo) === String(item.codigo));
+        if (p) {
+            p.quantidade += item.total;
+            p.ultima = new Date().toLocaleString('pt-BR');
+            movimentacoes.push({
+                codigo: item.codigo, produto: item.nome, quantidade: item.total,
+                tipo: 'entrada (NF)', responsavel: resp, data: p.ultima,
+                unidade: item.unidade, fatorUsado: item.fator
+            });
+            adicionados++;
+        }
+    });
+    salvar(); listarProdutos(); atualizarEstoque();
+    alert(`✅ ENTRADA REGISTRADA! ${adicionados} produto(s) atualizado(s).`);
+    limparFormNF(); itensNF = [];
+    document.getElementById('tabela-itens-nf').innerHTML = '';
+    document.getElementById('form-entrada-nf').style.display = 'none';
+}
+
+function limparFormNF() {
+    document.getElementById('nf-cnpj').value = '';
+    document.getElementById('nf-razao').value = '';
+    document.getElementById('nf-codigo').value = '';
+    document.getElementById('nf-nome').value = '';
+    document.getElementById('nf-quantidade').value = '1';
+    document.getElementById('nf-preco').value = '0.00';
+    document.getElementById('nf-fator').value = '1';
+    document.getElementById('nf-unidade').value = 'un';
+    document.getElementById('nf-responsavel').value = '';
+    calcularTotalNF();
+}
+
 function buscarProduto() {
     const cod = document.getElementById('codigoProd').value.trim();
     if (!cod) { limparCampos(); return; }
-    const p = produtos.find(x=>String(x.codigo)===String(cod));
+    const p = produtos.find(x => String(x.codigo) === String(cod));
     if (p) {
         document.getElementById('nomeProd').value = p.nome;
         document.getElementById('categoriaProd').value = p.categoria;
         document.getElementById('precoProd').value = p.preco.toFixed(2);
     } else limparCampos();
 }
+
 function limparCampos() {
     document.getElementById('nomeProd').value = '';
     document.getElementById('categoriaProd').value = '';
     document.getElementById('precoProd').value = '';
 }
+
 function cadastrarProduto() {
     const codigo = document.getElementById('codigoNovo').value.trim();
     const nome = document.getElementById('nomeNovo').value.trim();
     const cat = document.getElementById('categoriaNova').value.trim();
-    const preco = parseFloat(document.getElementById('precoNovo').value.replace(',','.'));
-    if (!codigo||!nome||!cat||isNaN(preco)||preco<=0) return alert("Preencha todos os campos corretamente!");
-    if (produtos.some(x=>String(x.codigo)===String(codigo))) return alert("Já existe produto com este código!");
-    produtos.push({codigo, nome, categoria:cat, preco, quantidade:0, ultima: new Date().toLocaleString('pt-BR')});
+    const preco = parseFloat(document.getElementById('precoNovo').value.replace(',', '.'));
+    if (!codigo || !nome || !cat || isNaN(preco) || preco <= 0) return alert("Preencha todos os campos corretamente!");
+    if (produtos.some(x => String(x.codigo) === String(codigo))) return alert("Já existe produto com este código!");
+    produtos.push({ codigo, nome, categoria: cat, preco, quantidade: 0, ultima: new Date().toLocaleString('pt-BR') });
     salvar(); listarProdutos(); atualizarEstoque();
     alert("✅ Produto cadastrado com sucesso!");
-    document.getElementById('codigoNovo').value='';document.getElementById('nomeNovo').value='';
-    document.getElementById('categoriaNova').value='';document.getElementById('precoNovo').value='';
+    document.getElementById('codigoNovo').value = '';
+    document.getElementById('nomeNovo').value = '';
+    document.getElementById('categoriaNova').value = '';
+    document.getElementById('precoNovo').value = '';
 }
+
 function listarProdutos() {
     const tb = document.querySelector('#tabela-produtos tbody');
     tb.innerHTML = '';
-    produtos.forEach(p=>{
+    produtos.forEach(p => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco*p.quantidade).toFixed(2)}</td>`;
+        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td>`;
         tb.appendChild(tr);
     });
 }
+
 function registrarMovimentacao() {
     const cod = document.getElementById('codigoProd').value.trim();
-    const qtd = parseInt(document.getElementById('qtdProd').value);
+    const qtd = parseFloat(document.getElementById('qtdProd').value);
     const resp = document.getElementById('responsavel').value.trim();
     const tipo = document.getElementById('tipoMov').value;
-    if (!cod||isNaN(qtd)||qtd<=0||!resp) return alert("Preencha todos os campos corretamente!");
-    const p = produtos.find(x=>String(x.codigo)===String(cod));
+    if (!cod || isNaN(qtd) || qtd <= 0 || !resp) return alert("Preencha todos os campos corretamente!");
+    const p = produtos.find(x => String(x.codigo) === String(cod));
     if (!p) return alert("Produto não encontrado! Cadastre-o primeiro.");
-    if (tipo==='entrada') p.quantidade += qtd;
-    else { if (p.quantidade<qtd) return alert("Estoque insuficiente! Disponível: "+p.quantidade); p.quantidade -= qtd; }
+    if (tipo === 'entrada') p.quantidade += qtd;
+    else { if (p.quantidade < qtd) return alert("Estoque insuficiente! Disponível: " + p.quantidade); p.quantidade -= qtd; }
     p.ultima = new Date().toLocaleString('pt-BR');
-    movimentacoes.push({codigo:cod, produto:p.nome, categoria:p.categoria, quantidade:qtd, tipo, responsavel:resp, data:p.ultima});
+    movimentacoes.push({ codigo: cod, produto: p.nome, categoria: p.categoria, quantidade: qtd, tipo, responsavel: resp, data: p.ultima });
     salvar(); listarProdutos(); atualizarEstoque(); limparCampos();
-    document.getElementById('qtdProd').value='1';document.getElementById('responsavel').value='';document.getElementById('codigoProd').value='';
+    document.getElementById('qtdProd').value = '1';
+    document.getElementById('responsavel').value = '';
+    document.getElementById('codigoProd').value = '';
     alert("✅ Movimentação registrada com sucesso!");
 }
+
 function atualizarEstoque() {
     const tb = document.querySelector('#tabela-estoque tbody');
-    tb.innerHTML='';
-    produtos.forEach(p=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco*p.quantidade).toFixed(2)}</td><td>${p.ultima}</td><td><button class="perigo" onclick="excluirProduto('${p.codigo}')">Excluir</button></td>`;
+    tb.innerHTML = '';
+    produtos.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td><td>${p.ultima || '-'}</td><td><button class="perigo" onclick="excluirProduto('${p.codigo}')">Excluir</button></td>`;
         tb.appendChild(tr);
     });
 }
+
 function excluirProduto(cod) {
     if (!confirm("Deseja excluir este produto?")) return;
-    produtos = produtos.filter(x=>String(x.codigo)!==String(cod));
+    produtos = produtos.filter(x => String(x.codigo) !== String(cod));
     salvar(); listarProdutos(); atualizarEstoque();
 }
+
 let visivelProd = true;
 function mostrarOcultarProdutos() {
     visivelProd = !visivelProd;
     document.getElementById('tabela-produtos').style.display = visivelProd ? '' : 'none';
     event.target.textContent = visivelProd ? 'Ocultar' : 'Mostrar';
 }
+
 let visivelEstoque = true;
 function mostrarOcultarEstoque() {
     visivelEstoque = !visivelEstoque;
     document.getElementById('tabela-estoque').style.display = visivelEstoque ? '' : 'none';
     event.target.textContent = visivelEstoque ? 'Ocultar' : 'Mostrar';
 }
+
 function filtrarPorCategoria() {
     const cat = prompt("Digite a categoria para filtrar (deixe vazio para todas):", "");
-    const filtrados = (!cat)?produtos:produtos.filter(p=>p.categoria.toLowerCase().includes(cat.toLowerCase()));
-    const tb = document.querySelector('#tabela-produtos tbody'); tb.innerHTML='';
-    filtrados.forEach(p=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco*p.quantidade).toFixed(2)}</td>`;
+    const filtrados = (!cat) ? produtos : produtos.filter(p => p.categoria.toLowerCase().includes(cat.toLowerCase()));
+    const tb = document.querySelector('#tabela-produtos tbody'); tb.innerHTML = '';
+    filtrados.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td>`;
         tb.appendChild(tr);
     });
 }
+
 function exportarParaExcel() {
     if (!produtos.length) return alert("Não há produtos para exportar!");
     let csv = "Código;Nome;Categoria;Preço;Quantidade;Valor Total\n";
-    produtos.forEach(p=>csv += `${p.codigo};${p.nome};${p.categoria};${p.preco.toFixed(2)};${p.quantidade};${(p.preco*p.quantidade).toFixed(2)}\n`);
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    produtos.forEach(p => csv += `${p.codigo};${p.nome};${p.categoria};${p.preco.toFixed(2)};${p.quantidade};${(p.preco * p.quantidade).toFixed(2)}\n`);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `estoque_${new Date().toLocaleDateString('pt-BR').replaceAll('/','-')}.csv`;
     a.click();
 }
+
 function importarDoExcel(e) {
     const arq = e.target.files[0]; if (!arq) return;
     const leitor = new FileReader();
-    leitor.onload = evt=>{
+    leitor.onload = evt => {
         const linhas = evt.target.result.split('\n');
-        let cont=0;
-        for(let i=1;i<linhas.length;i++){
-            const [cod, nome, cat, preco, qtd] = linhas[i].split(';');
+        let cont = 0;
+        for (let i = 1; i < linhas.length; i++) {
+            const linha = linhas[i].trim();
+            if (!linha) continue;
+            const [cod, nome, cat, preco, qtd] = linha.split(';');
             if (!cod) continue;
-            const ex = produtos.find(p=>String(p.codigo.trim())===String(cod.trim()));
-            if(ex){ ex.nome=nome.trim(); ex.categoria=cat.trim(); ex.preco=+preco.replace(',','.'); }
+            const ex = produtos.find(p => String(p.codigo.trim()) === String(cod.trim()));
+            if (ex) { ex.nome = nome.trim(); ex.categoria = cat.trim(); ex.preco = +preco.replace(',', '.'); }
             else {
                 produtos.push({
-                    codigo:cod.trim(), nome:nome.trim(), categoria:cat.trim(),
-                    preco:+preco.replace(',','.'), quantidade:parseInt(qtd)||0,
+                    codigo: cod.trim(), nome: nome.trim(), categoria: cat.trim(),
+                    preco: +preco.replace(',', '.'), quantidade: parseInt(qtd) || 0,
                     ultima: new Date().toLocaleString('pt-BR')
                 });
                 cont++;
@@ -630,16 +685,14 @@ function importarDoExcel(e) {
     leitor.readAsText(arq);
 }
 
-// ==============================================
-// FORNECEDORES
-// ==============================================
 let visivelForn = true;
 function alternarFornecedores() {
     visivelForn = !visivelForn;
-    document.getElementById('form-fornecedor').style.display = visivelForn?'block':'none';
-    document.getElementById('tabela-fornecedores').style.display = visivelForn?'table':'none';
-    event.target.textContent = visivelForn?'Ocultar':'Mostrar';
+    document.getElementById('form-fornecedor').style.display = visivelForn ? 'block' : 'none';
+    document.getElementById('tabela-fornecedores').style.display = visivelForn ? 'table' : 'none';
+    event.target.textContent = visivelForn ? 'Ocultar' : 'Mostrar';
 }
+
 function cadastrarFornecedor() {
     const f = {
         cnpj: document.getElementById('cnpjForn').value.trim(),
@@ -649,87 +702,107 @@ function cadastrarFornecedor() {
         telefone: document.getElementById('telefoneForn').value.trim(),
         cidade: document.getElementById('cidadeForn').value.trim()
     };
-    if (!f.cnpj||!f.razao) return alert("CNPJ e Razão Social são obrigatórios!");
+    if (!f.cnpj || !f.razao) return alert("CNPJ e Razão Social são obrigatórios!");
     fornecedores.push(f); salvar(); listarFornecedores(); atualizarSelectFornecedores();
     alert("✅ Fornecedor cadastrado com sucesso!");
-    document.getElementById('cnpjForn').value='';document.getElementById('razaoForn').value='';
-    document.getElementById('fantasiaForn').value='';document.getElementById('enderecoForn').value='';
-    document.getElementById('telefoneForn').value='';document.getElementById('cidadeForn').value='';
+    document.getElementById('cnpjForn').value = '';
+    document.getElementById('razaoForn').value = '';
+    document.getElementById('fantasiaForn').value = '';
+    document.getElementById('enderecoForn').value = '';
+    document.getElementById('telefoneForn').value = '';
+    document.getElementById('cidadeForn').value = '';
 }
+
 function listarFornecedores() {
-    const tb = document.querySelector('#tabela-fornecedores tbody'); tb.innerHTML='';
-    fornecedores.forEach((f,i)=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${f.cnpj}</td><td>${f.razao}</td><td>${f.fantasia||''}</td><td>${f.endereco||''}</td><td>${f.telefone||''}</td><td>${f.cidade||''}</td><td><button class="perigo" onclick="excluirFornecedor(${i})">Excluir</button></td>`;
+    const tb = document.querySelector('#tabela-fornecedores tbody');
+    tb.innerHTML = '';
+    fornecedores.forEach((f, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${f.cnpj}</td><td>${f.razao}</td><td>${f.fantasia || '-'}</td><td>${f.endereco || '-'}</td><td>${f.telefone || '-'}</td><td>${f.cidade || '-'}</td><td><button class="perigo" onclick="excluirFornecedor(${idx})">Excluir</button></td>`;
         tb.appendChild(tr);
     });
 }
-function excluirFornecedor(i) { fornecedores.splice(i,1); salvar(); listarFornecedores(); atualizarSelectFornecedores(); }
+
+function excluirFornecedor(idx) {
+    if (!confirm("Excluir fornecedor?")) return;
+    fornecedores.splice(idx, 1); salvar(); listarFornecedores(); atualizarSelectFornecedores();
+}
+
 function atualizarSelectFornecedores() {
     const sel = document.getElementById('selectFornecedorEntrada');
-    sel.innerHTML = '<option value="">-- Selecione o fornecedor --</option>';
-    fornecedores.forEach((f,i)=>{const o=new Option(f.razao,i); sel.appendChild(o);});
+    sel.innerHTML = '<option value="">-- Selecione --</option>';
+    fornecedores.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.cnpj;
+        opt.textContent = f.razao;
+        sel.appendChild(opt);
+    });
 }
-function carregarProdutosFornecedor() {
-    const idx = document.getElementById('selectFornecedorEntrada').value;
-    document.getElementById('area-entrada-frn').style.display = idx===''?'none':'block';
-}
-function registrarEntradaForn() { alert("✅ Use a aba Produtos informando o código e quantidade para dar entrada!"); }
 
-// ==============================================
-// XML
-// ==============================================
+function carregarProdutosFornecedor() {
+    const sel = document.getElementById('selectFornecedorEntrada').value;
+    if (!sel) { document.getElementById('area-entrada-frn').style.display = 'none'; return; }
+    document.getElementById('area-entrada-frn').style.display = 'block';
+    document.getElementById('corpo-entrada').innerHTML = '<tr><td colspan="3">Use a aba Produtos ou Entrada por NF para registrar quantidades</td></tr>';
+}
+
+function registrarEntradaForn() {
+    alert("✅ Use a aba Produtos ou Entrada por NF para informar quantidades com conversão de unidades!");
+}
+
 function importarEntradaXML() {
-    const arq = document.getElementById('arquivoXml').files[0];
-    if (!arq) return alert("Selecione o arquivo XML primeiro!");
+    const input = document.getElementById('arquivoXml');
+    const arq = input.files[0];
+    if (!arq) return alert("Selecione um arquivo XML!");
     const leitor = new FileReader();
-    leitor.onload = evt=>{
-        const xml = new DOMParser().parseFromString(evt.target.result, "text/xml");
-        const itens = xml.getElementsByTagName('item');
-        const resp = xml.getElementsByTagName('responsavel')[0]?.textContent?.trim() || "Importado do XML";
-        let ok=0, erros=[];
-        for(let i=0;i<itens.length;i++){
-            const cod = itens[i].getElementsByTagName('codigo')[0]?.textContent?.trim();
-            const qtd = parseFloat(itens[i].getElementsByTagName('quantidade')[0]?.textContent);
-            if(!cod||isNaN(qtd)||qtd<=0){ erros.push(`Item ${i+1}: dados inválidos`); continue; }
-            const p = produtos.find(x=>String(x.codigo)===String(cod));
-            if(!p){ erros.push(`${cod}: produto não cadastrado`); continue; }
-            p.quantidade += qtd;
-            p.ultima = new Date().toLocaleString('pt-BR');
-            movimentacoes.push({codigo:cod, produto:p.nome, quantidade:qtd, tipo:'entrada', responsavel:resp, data:p.ultima});
-            ok++;
-        }
-        salvar(); listarProdutos(); atualizarEstoque();
-        document.getElementById('mensagemImportacao').innerHTML=
-          `<div class="mensagem sucesso">✅ ${ok} entrada(s) registrada(s)! ${erros.length?'<br>⚠️ '+erros.join(', '):''}</div>`;
+    leitor.onload = function(e) {
+        try {
+            const texto = e.target.result;
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(texto, "text/xml");
+            const resp = xml.querySelector("responsavel")?.textContent || "";
+            const itens = xml.querySelectorAll("item");
+            if (!resp) return alert("Tag <responsavel> não encontrada no XML!");
+            if (itens.length === 0) return alert("Nenhum <item> encontrado no XML!");
+            let adicionados = 0;
+            for (const item of itens) {
+                const cod = item.querySelector("codigo")?.textContent || "";
+                const qtd = parseFloat(item.querySelector("quantidade")?.textContent || "0");
+                const fator = parseFloat(item.querySelector("fator")?.textContent || "1");
+                if (!cod || qtd <= 0) continue;
+                const p = produtos.find(x => String(x.codigo) === String(cod));
+                if (p) { p.quantidade += qtd * fator; p.ultima = new Date().toLocaleString('pt-BR'); adicionados++; }
+            }
+            salvar(); listarProdutos(); atualizarEstoque();
+            alert(`✅ XML importado! ${adicionados} produto(s) atualizado(s).`);
+        } catch (erro) { alert("❌ Erro ao ler XML: " + erro.message); }
     };
     leitor.readAsText(arq);
 }
 
-// ==============================================
-// RELATÓRIOS
-// ==============================================
 function gerarRelatorio() {
-    const i = document.getElementById('dataInicio').value;
-    const f = document.getElementById('dataFim').value;
-    if (!i||!f) return alert("Informe a data inicial e final!");
-    const dtIni = new Date(i+'T00:00:00');
-    const dtFim = new Date(f+'T23:59:59');
-    const filtro = movimentacoes.filter(m=>{
-        const [dia,mes,ano] = m.data.split('/');
-        const dataMov = new Date(`${ano.substring(0,4)}-${mes}-${dia.split(' ')[0]}`);
-        return dataMov>=dtIni && dataMov<=dtFim;
-    });
-    exibirRelatorio(filtro, i.split('-').reverse().join('/'), f.split('-').reverse().join('/'));
+    const inicio = document.getElementById('dataInicio').value;
+    const fim = document.getElementById('dataFim').value;
+    const rel = document.getElementById('conteudo-relatorio');
+    if (!inicio || !fim) { rel.innerHTML = "<strong>⚠️ Informe as datas inicial e final!</strong>"; return; }
+    rel.innerHTML = `
+        <h3>📊 Relatório de Estoque</h3>
+        <p><strong>Período:</strong> ${inicio} até ${fim}</p>
+        <p><strong>Total de Produtos:</strong> ${produtos.length}</p>
+        <p><strong>Total de Movimentações:</strong> ${movimentacoes.length}</p>
+        <table style="margin-top:15px;">
+            <thead><tr><th>Código</th><th>Produto</th><th>Quantidade Atual</th><th>Valor Total</th></tr></thead>
+            <tbody>${produtos.map(p => `<tr><td>${p.codigo}</td><td>${p.nome}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td></tr>`).join('')}</tbody>
+        </table>
+    `;
 }
-function relatorioCompleto() { exibirRelatorio(movimentacoes, "Todo", "Período"); }
-function exibirRelatorio(lista, ini, fim) {
-    const div = document.getElementById('conteudo-relatorio');
-    if (!lista.length) { div.innerHTML="<p>⚠️ Nenhuma movimentação encontrada neste período.</p>"; return; }
-    div.innerHTML = `<h4>📋 Relatório de Movimentações — ${ini} a ${fim}</h4><table style="width:100%;border-collapse:collapse;margin-top:10px;"><thead><tr style="background:#e2e8f0;"><th>Data</th><th>Tipo</th><th>Produto</th><th>Quantidade</th><th>Responsável</th></tr></thead><tbody>` +
-        lista.map(m=>`<tr><td>${m.data}</td><td>${m.tipo==='entrada'?'📥 Entrada':'📤 Saída'}</td><td>${m.produto}</td><td>${m.quantidade}</td><td>${m.responsavel}</td></tr>`).join('') + `</tbody></table>`;
+
+function relatorioCompleto() {
+    document.getElementById('dataInicio').value = '2000-01-01';
+    document.getElementById('dataFim').value = new Date().toISOString().split('T')[0];
+    gerarRelatorio();
 }
 </script>
-
 </body>
 </html>
+
