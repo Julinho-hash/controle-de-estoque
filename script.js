@@ -66,6 +66,213 @@ function abrirFormularioNF() {
     limparFormNF();
 }
 
+/* ==========================================================
+   SAÍDA POR CONVERSÃO DE UNIDADES
+========================================================== */
+
+function abrirFormularioSaidaNF() {
+    const form = document.getElementById("form-saida-nf");
+    const formEntrada = document.getElementById("form-entrada-nf");
+
+    // Fecha o formulário de entrada por conversão
+    formEntrada.style.display = "none";
+
+    // Abre/fecha o formulário de saída
+    form.style.display = form.style.display === "block" ? "none" : "block";
+
+    // Limpa o formulário ao abrir
+    if (form.style.display === "block") {
+        limparFormSaida();
+    }
+}
+
+
+function buscarProdutoSaida() {
+    const codigo = document.getElementById("saida-codigo").value.trim();
+
+    const produto = produtos.find(
+        p => String(p.codigo) === String(codigo)
+    );
+
+    if (produto) {
+        document.getElementById("saida-nome").value = produto.nome;
+
+        // Calcula o estoque atual do produto
+        let estoque = 0;
+
+        movimentacoes.forEach(m => {
+            if (String(m.codigo) === String(codigo)) {
+                if (m.tipo === "entrada") {
+                    estoque += Number(m.quantidade) || 0;
+                }
+
+                if (m.tipo === "saida") {
+                    estoque -= Number(m.quantidade) || 0;
+                }
+            }
+        });
+
+        // Também considera a quantidade armazenada no produto
+        if (produto.quantidade !== undefined) {
+            estoque = Number(produto.quantidade) || 0;
+        }
+
+        document.getElementById("saida-estoque").value =
+            estoque.toFixed(2);
+
+        calcularTotalSaida();
+
+    } else {
+        document.getElementById("saida-nome").value =
+            "(Produto não cadastrado)";
+
+        document.getElementById("saida-estoque").value = "0.00";
+
+        calcularTotalSaida();
+    }
+}
+
+
+function calcularTotalSaida() {
+    const quantidade =
+        parseFloat(document.getElementById("saida-quantidade").value) || 0;
+
+    const fator =
+        parseFloat(document.getElementById("saida-fator").value) || 1;
+
+    const total = quantidade * fator;
+
+    const select =
+        document.getElementById("saida-unidade");
+
+    const unidade =
+        select.options[select.selectedIndex].textContent;
+
+    document.getElementById("saida-formula").textContent =
+        `${quantidade} × ${fator} = ${total.toFixed(2)}`;
+
+    document.getElementById("saida-total").textContent =
+        total.toFixed(2);
+
+    document.getElementById("saida-sigla").textContent =
+        unidade;
+}
+
+
+function registrarSaidaConversao() {
+
+    const codigo =
+        document.getElementById("saida-codigo").value.trim();
+
+    const nome =
+        document.getElementById("saida-nome").value.trim();
+
+    const quantidade =
+        parseFloat(
+            document.getElementById("saida-quantidade").value
+        );
+
+    const fator =
+        parseFloat(
+            document.getElementById("saida-fator").value
+        );
+
+    const total = quantidade * fator;
+
+    const unidade =
+        document.getElementById("saida-unidade").value;
+
+    const responsavel =
+        document.getElementById("saida-responsavel").value.trim();
+
+    if (!codigo) {
+        return alert("⚠️ Informe o código do produto!");
+    }
+
+    if (!nome || nome.startsWith("(")) {
+        return alert("⚠️ Produto não encontrado!");
+    }
+
+    if (isNaN(quantidade) || quantidade <= 0) {
+        return alert("⚠️ Informe uma quantidade válida!");
+    }
+
+    if (isNaN(fator) || fator <= 0) {
+        return alert("⚠️ Informe um volume/peso válido!");
+    }
+
+    if (!responsavel) {
+        return alert("⚠️ Informe o responsável pela saída!");
+    }
+
+    const produto = produtos.find(
+        p => String(p.codigo) === String(codigo)
+    );
+
+    if (!produto) {
+        return alert("⚠️ Produto não cadastrado!");
+    }
+
+    const estoqueAtual = Number(produto.quantidade) || 0;
+
+    if (total > estoqueAtual) {
+        return alert(
+            `⚠️ Estoque insuficiente!\n\n` +
+            `Estoque disponível: ${estoqueAtual.toFixed(2)} ${unidade}\n` +
+            `Tentativa de saída: ${total.toFixed(2)} ${unidade}`
+        );
+    }
+
+    // Desconta a quantidade convertida do estoque
+    produto.quantidade = estoqueAtual - total;
+
+    // Registra a movimentação
+    movimentacoes.push({
+        codigo: codigo,
+        nome: produto.nome,
+        tipo: "saida",
+        quantidade: total,
+        unidade: unidade,
+        fator: fator,
+        quantidadeUnidades: quantidade,
+        responsavel: responsavel,
+        data: new Date().toLocaleString("pt-BR")
+    });
+
+    // Salva os dados
+    salvar();
+
+    // Atualiza as tabelas
+    listarProdutos();
+    atualizarEstoque();
+
+    alert(
+        `✅ Saída registrada com sucesso!\n\n` +
+        `Produto: ${produto.nome}\n` +
+        `Quantidade descontada: ${total.toFixed(2)} ${unidade}\n` +
+        `Responsável: ${responsavel}`
+    );
+
+    limparFormSaida();
+}
+
+
+function limparFormSaida() {
+
+    document.getElementById("saida-codigo").value = "";
+    document.getElementById("saida-nome").value = "";
+    document.getElementById("saida-estoque").value = "0.00";
+
+    document.getElementById("saida-quantidade").value = "1";
+    document.getElementById("saida-fator").value = "1";
+
+    document.getElementById("saida-unidade").value = "un";
+
+    document.getElementById("saida-responsavel").value = "";
+
+    calcularTotalSaida();
+}
+
 function buscarFornecedorNF() {
     const cnpj = document.getElementById('nf-cnpj').value.trim().replace(/\D/g, '');
     const f = fornecedores.find(x => x.cnpj.replace(/\D/g, '') === cnpj);
