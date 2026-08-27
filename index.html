@@ -1,11 +1,10 @@
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Estoque</title>
+
     <style>
         * {
             margin: 0;
@@ -13,6 +12,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         :root {
             --cor-primaria: #2563eb;
             --cor-primaria-escura: #1d4ed8;
@@ -26,12 +26,14 @@
             --cor-texto: #1e293b;
             --cor-borda: #e2e8f0;
         }
+
         body {
             background-color: var(--cor-fundo);
             color: var(--cor-texto);
             line-height: 1.6;
             padding: 20px;
         }
+
         header {
             background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-escura));
             color: white;
@@ -42,10 +44,33 @@
             justify-content: space-between;
             align-items: center;
         }
-        header h1 { font-size: 26px; margin-bottom: 4px; }
-        .botao-sair { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; color: white; border: none; cursor: pointer; }
-        .botao-sair:hover { background: rgba(255,255,255,0.3); }
-        .navegacao-abas { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--cor-borda); flex-wrap: wrap; }
+
+        header h1 {
+            font-size: 26px;
+            margin-bottom: 4px;
+        }
+
+        .botao-sair {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .botao-sair:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .navegacao-abas {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--cor-borda);
+            flex-wrap: wrap;
+        }
+
         .aba {
             padding: 12px 18px;
             background-color: #e2e8f0;
@@ -55,20 +80,29 @@
             font-size: 14px;
             font-weight: 500;
         }
+
         .aba.ativa {
             background-color: white;
             border-bottom: 3px solid var(--cor-primaria);
             color: var(--cor-primaria);
             font-weight: 600;
         }
-        .conteudo-aba { display: none; }
-        .conteudo-aba.visivel { display: block; }
+
+        .conteudo-aba {
+            display: none;
+        }
+
+        .conteudo-aba.visivel {
+            display: block;
+        }
+
         .secao {
             background-color: white;
             padding: 25px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
+
         .secao h2 {
             font-size: 18px;
             color: var(--cor-primaria);
@@ -79,6 +113,7 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .grupo-form {
             display: flex;
             align-items: center;
@@ -86,15 +121,26 @@
             margin-bottom: 14px;
             flex-wrap: wrap;
         }
-        .grupo-form label { min-width: 180px; font-weight: 500; }
-        input, select {
+
+        .grupo-form label {
+            min-width: 180px;
+            font-weight: 500;
+        }
+
+        input,
+        select {
             padding: 10px 12px;
             border: 1px solid var(--cor-borda);
             border-radius: 6px;
             font-size: 14px;
             min-width: 200px;
         }
-        input[readonly] { background-color: #f8fafc; color: #475569; }
+
+        input[readonly] {
+            background-color: #f8fafc;
+            color: #475569;
+        }
+
         button {
             padding: 10px 16px;
             border: none;
@@ -105,30 +151,81 @@
             color: white;
             background-color: var(--cor-primaria);
         }
-        button:hover { background-color: var(--cor-primaria-escura); }
-        button.sucesso { background-color: var(--cor-sucesso); }
-        button.sucesso:hover { background-color: #15803d; }
-        button.aviso { background-color: var(--cor-aviso); }
-        button.aviso:hover { background-color: #b45309; }
-        button.perigo { background-color: var(--cor-perigo); padding: 6px 10px; font-size: 13px; }
-        button.secundario { background-color: #64748b; padding: 8px 14px; font-size: 13px; }
-        button.nf { background-color: var(--cor-nf); }
-        button.nf:hover { background-color: var(--cor-nf-escura); }
-        button.secundario:hover { background-color: #475569; }
-        .grupo-botoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+        button:hover {
+            background-color: var(--cor-primaria-escura);
+        }
+
+        button.sucesso {
+            background-color: var(--cor-sucesso);
+        }
+
+        button.sucesso:hover {
+            background-color: #15803d;
+        }
+
+        button.aviso {
+            background-color: var(--cor-aviso);
+        }
+
+        button.aviso:hover {
+            background-color: #b45309;
+        }
+
+        button.perigo {
+            background-color: var(--cor-perigo);
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        button.secundario {
+            background-color: #64748b;
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+
+        button.nf {
+            background-color: var(--cor-nf);
+        }
+
+        button.nf:hover {
+            background-color: var(--cor-nf-escura);
+        }
+
+        button.secundario:hover {
+            background-color: #475569;
+        }
+
+        .grupo-botoes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
         }
-        th, td {
+
+        th,
+        td {
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid var(--cor-borda);
             font-size: 14px;
         }
-        th { background-color: #f8fafc; color: var(--cor-primaria); font-weight: 600; }
-        tr:hover { background-color: #f8fafc; }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--cor-primaria);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
 
         #form-entrada-nf {
             background: linear-gradient(135deg, #f0f7ff, #eef2ff);
@@ -138,6 +235,7 @@
             margin-top: 20px;
             display: none;
         }
+
         #form-entrada-nf h3 {
             color: var(--cor-nf);
             margin-bottom: 20px;
@@ -145,6 +243,7 @@
             padding-bottom: 10px;
             border-bottom: 1px solid #ddd6fe;
         }
+
         .card-calculo {
             background: #dcfce7;
             padding: 16px 20px;
@@ -153,7 +252,11 @@
             border-left: 4px solid var(--cor-sucesso);
             font-size: 15px;
         }
-        .card-calculo strong { font-size: 16px; }
+
+        .card-calculo strong {
+            font-size: 16px;
+        }
+
         .exemplo {
             background: #fef3c7;
             padding: 12px 16px;
@@ -162,10 +265,31 @@
             border-left: 3px solid var(--cor-aviso);
             font-size: 13px;
         }
-        .mensagem { margin-top: 12px; padding: 12px; border-radius: 6px; }
-        .sucesso { background: #dcfce7; color: #166534; }
-        .erro { background: #fee2e2; color: #b91c1c; }
-        pre { background: #f8fafc; padding: 15px; border-radius: 6px; margin-top: 10px; font-size: 13px; }
+
+        .mensagem {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .sucesso {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .erro {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        pre {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
         #tela-login {
             position: fixed;
             inset: 0;
@@ -175,6 +299,7 @@
             justify-content: center;
             z-index: 999;
         }
+
         .caixa-login {
             background: white;
             padding: 40px 30px;
@@ -184,9 +309,28 @@
             width: 100%;
             text-align: center;
         }
-        .caixa-login h2 { color: var(--cor-primaria); margin-bottom: 20px; }
-        .caixa-login input { width: 100%; padding: 14px; margin: 10px 0 20px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 16px; text-align: center; }
-        .erro-senha { color: var(--cor-perigo); margin-top: 12px; display: none; }
+
+        .caixa-login h2 {
+            color: var(--cor-primaria);
+            margin-bottom: 20px;
+        }
+
+        .caixa-login input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0 20px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .erro-senha {
+            color: var(--cor-perigo);
+            margin-top: 12px;
+            display: none;
+        }
+
         label.arquivo {
             padding: 8px 16px;
             background: #64748b;
@@ -195,7 +339,11 @@
             cursor: pointer;
             display: inline-block;
         }
-        label.arquivo input { display: none; }
+
+        label.arquivo input {
+            display: none;
+        }
+
         .destaque-nf {
             background: #ede9fe;
             padding: 12px;
@@ -204,75 +352,363 @@
             font-size: 14px;
             color: #5b21b6;
         }
+
+        /* =========================
+           ÁREA DE FORNECEDOR
+        ========================== */
+
+        .form-fornecedor-completo {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--cor-borda);
+            margin-bottom: 20px;
+        }
+
+        .form-fornecedor-completo h3 {
+            color: var(--cor-primaria);
+            margin-bottom: 15px;
+        }
+
+        .linha-fornecedor {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .campo-fornecedor {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .campo-fornecedor label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .campo-fornecedor input,
+        .campo-fornecedor select,
+        .campo-fornecedor textarea {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .campo-fornecedor textarea {
+            min-height: 80px;
+            resize: vertical;
+            padding: 10px 12px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .campo-largo {
+            grid-column: 1 / -1;
+        }
+
+        .tabela-fornecedores-container {
+            overflow-x: auto;
+        }
+
+        @media (max-width: 800px) {
+            .linha-fornecedor {
+                grid-template-columns: 1fr;
+            }
+
+            .campo-largo {
+                grid-column: auto;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .secao {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
 <div id="tela-login">
     <div class="caixa-login">
         <h2>🔐 Controle de Estoque</h2>
         <p>Digite a senha para acessar o sistema</p>
-        <input type="password" id="campo-senha" placeholder="Digite a senha..." onkeypress="if(event.key==='Enter') entrarSistema()">
+
+        <input
+            type="password"
+            id="campo-senha"
+            placeholder="Digite a senha..."
+            onkeypress="if(event.key==='Enter') entrarSistema()"
+        >
+
         <button class="sucesso" onclick="entrarSistema()">✅ Entrar</button>
-        <div class="erro-senha" id="aviso-erro">❌ Senha incorreta! Tente novamente.</div>
+
+        <div class="erro-senha" id="aviso-erro">
+            ❌ Senha incorreta! Tente novamente.
+        </div>
     </div>
 </div>
 
 <div id="sistema" style="display: none;">
+
 <header>
     <div>
         <h1>Controle de Estoque</h1>
         <p>Sistema de gestão de produtos, fornecedores e movimentações</p>
     </div>
+
     <button class="botao-sair" onclick="sairSistema()">🚪 Sair</button>
 </header>
 
 <div class="navegacao-abas">
-    <button class="aba ativa" onclick="trocarAba(0)">Produtos</button>
-    <button class="aba" onclick="trocarAba(1)">Fornecedores</button>
-    <button class="aba" onclick="trocarAba(2)">Entrada Rápida</button>
-    <button class="aba" onclick="trocarAba(3)">Importar XML</button>
-    <button class="aba" onclick="trocarAba(4)">Relatórios</button>
+
+    <button class="aba ativa" onclick="trocarAba(0)">
+        Produtos
+    </button>
+
+    <button class="aba" onclick="trocarAba(1)">
+        Fornecedores
+    </button>
+
+    <button class="aba" onclick="trocarAba(2)">
+        Entrada Rápida
+    </button>
+
+    <button class="aba" onclick="trocarAba(3)">
+        Importar XML
+    </button>
+
+    <button class="aba" onclick="trocarAba(4)">
+        Relatórios
+    </button>
+
 </div>
 
 <main>
+
+<!-- ======================================================
+     ABA 0 - PRODUTOS
+====================================================== -->
+
 <section class="conteudo-aba visivel" id="aba0">
+
     <div class="secao">
+
         <h2>🔍 Buscar Produto e Registrar Movimentação</h2>
-        <div class="grupo-form"><label>Código do Produto:</label><input type="text" id="codigoProd" placeholder="Digite o código" onblur="buscarProduto()"></div>
-        <div class="grupo-form"><label>Nome:</label><input type="text" id="nomeProd" readonly placeholder="Preenchido automaticamente"></div>
-        <div class="grupo-form"><label>Categoria:</label><input type="text" id="categoriaProd" readonly placeholder="Preenchido automaticamente"></div>
-        <div class="grupo-form"><label>Preço R$:</label><input type="text" id="precoProd" readonly value="0.00"></div>
-        <div class="grupo-form"><label>Quantidade:</label><input type="number" id="qtdProd" min="1" value="1"></div>
-        <div class="grupo-form"><label>Tipo de Movimento:</label>
+
+        <div class="grupo-form">
+            <label>Código do Produto:</label>
+            <input
+                type="text"
+                id="codigoProd"
+                placeholder="Digite o código"
+                onblur="buscarProduto()"
+            >
+        </div>
+
+        <div class="grupo-form">
+            <label>Nome:</label>
+            <input
+                type="text"
+                id="nomeProd"
+                readonly
+                placeholder="Preenchido automaticamente"
+            >
+        </div>
+
+        <div class="grupo-form">
+            <label>Categoria:</label>
+            <input
+                type="text"
+                id="categoriaProd"
+                readonly
+                placeholder="Preenchido automaticamente"
+            >
+        </div>
+
+        <div class="grupo-form">
+            <label>Preço R$:</label>
+            <input
+                type="text"
+                id="precoProd"
+                readonly
+                value="0.00"
+            >
+        </div>
+
+        <div class="grupo-form">
+            <label>Quantidade:</label>
+            <input
+                type="number"
+                id="qtdProd"
+                min="1"
+                value="1"
+            >
+        </div>
+
+        <div class="grupo-form">
+            <label>Tipo de Movimento:</label>
+
             <select id="tipoMov">
                 <option value="entrada">📥 Entrada</option>
                 <option value="saida">📤 Saída</option>
             </select>
         </div>
-        <div class="grupo-form"><label>Responsável:</label><input type="text" id="responsavel" placeholder="Nome de quem registrou"></div>
-        <div class="grupo-botoes">
-            <button class="sucesso" onclick="registrarMovimentacao()">✅ Registrar Movimentação</button>
-            <button class="nf" onclick="abrirFormularioNF()">📥 Entrada por NF com Conversão</button>
+
+        <div class="grupo-form">
+            <label>Responsável:</label>
+            <input
+                type="text"
+                id="responsavel"
+                placeholder="Nome de quem registrou"
+            >
         </div>
 
+        <div class="grupo-botoes">
+
+            <button
+                class="sucesso"
+                onclick="registrarMovimentacao()"
+            >
+                ✅ Registrar Movimentação
+            </button>
+
+            <button
+                class="nf"
+                onclick="abrirFormularioNF()"
+            >
+                📥 Entrada por NF com Conversão
+            </button>
+
+        </div>
+
+        <!-- ENTRADA POR NF -->
+
         <div id="form-entrada-nf">
-            <h3>📥 Entrada por NF — Conversão Automática de Unidades</h3>
+
+            <h3>
+                📥 Entrada por NF — Conversão Automática de Unidades
+            </h3>
+
             <div class="destaque-nf">
-                💡 <strong>Como funciona:</strong> Informe quantas unidades vieram e o volume/peso de cada uma.<br>
-                O sistema calcula automaticamente → Exemplo: 10 unidades × 2L = <strong>20L</strong> registrados no estoque
+
+                💡 <strong>Como funciona:</strong>
+                Informe quantas unidades vieram e o volume/peso de cada uma.
+
+                <br>
+
+                O sistema calcula automaticamente.
+
             </div>
 
-            <div class="grupo-form"><label>CNPJ do Fornecedor:</label><input type="text" id="nf-cnpj" placeholder="Digite o CNPJ" onblur="buscarFornecedorNF()"></div>
-            <div class="grupo-form"><label>Razão Social:</label><input type="text" id="nf-razao" readonly placeholder="✅ Preenchido automaticamente"></div>
+            <div class="grupo-form">
+
+                <label>CNPJ do Fornecedor:</label>
+
+                <input
+                    type="text"
+                    id="nf-cnpj"
+                    placeholder="Digite o CNPJ"
+                    onblur="buscarFornecedorNF()"
+                >
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Razão Social:</label>
+
+                <input
+                    type="text"
+                    id="nf-razao"
+                    readonly
+                    placeholder="✅ Preenchido automaticamente"
+                >
+
+            </div>
+
             <hr style="border:none; border-top:1px solid #ddd6fe; margin:10px 0;">
-            <div class="grupo-form"><label>Código do Produto:</label><input type="text" id="nf-codigo" placeholder="Digite o código" onblur="buscarProdutoNF()"></div>
-            <div class="grupo-form"><label>Nome do Produto:</label><input type="text" id="nf-nome" readonly placeholder="✅ Preenchido automaticamente"></div>
-            <div class="grupo-form"><label>Quantidade de Unidades:</label><input type="number" id="nf-quantidade" min="1" value="1" oninput="calcularTotalNF()"></div>
-            <div class="grupo-form"><label>Preço Unitário da NF R$:</label><input type="text" id="nf-preco" value="0.00" oninput="calcularTotalNF()"></div>
-            <div class="grupo-form"><label>Volume/Peso por Unidade:</label><input type="number" id="nf-fator" step="0.001" min="0.001" value="1" oninput="calcularTotalNF()"></div>
-            <div class="grupo-form"><label>Unidade de Medida:</label>
+
+            <div class="grupo-form">
+
+                <label>Código do Produto:</label>
+
+                <input
+                    type="text"
+                    id="nf-codigo"
+                    placeholder="Digite o código"
+                    onblur="buscarProdutoNF()"
+                >
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Nome do Produto:</label>
+
+                <input
+                    type="text"
+                    id="nf-nome"
+                    readonly
+                    placeholder="✅ Preenchido automaticamente"
+                >
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Quantidade de Unidades:</label>
+
+                <input
+                    type="number"
+                    id="nf-quantidade"
+                    min="1"
+                    value="1"
+                    oninput="calcularTotalNF()"
+                >
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Preço Unitário da NF R$:</label>
+
+                <input
+                    type="text"
+                    id="nf-preco"
+                    value="0.00"
+                    oninput="calcularTotalNF()"
+                >
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Volume/Peso por Unidade:</label>
+
+                <input
+                    type="number"
+                    id="nf-fator"
+                    step="0.001"
+                    min="0.001"
+                    value="1"
+                    oninput="calcularTotalNF()"
+                >
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Unidade de Medida:</label>
+
                 <select id="nf-unidade" onchange="calcularTotalNF()">
+
                     <option value="L">L — Litros</option>
                     <option value="ml">ml — Mililitros</option>
                     <option value="kg">kg — Quilogramas</option>
@@ -281,528 +717,2864 @@
                     <option value="pc">pc — Pacotes</option>
                     <option value="fd">fd — Fardos</option>
                     <option value="un" selected>un — Unidades</option>
+
                 </select>
+
             </div>
 
             <div class="card-calculo">
-                🧮 <strong>Cálculo:</strong> <span id="nf-formula">1 un × 1 = 1</span><br>
-                ✅ <strong>Total a Registrar:</strong> <span id="nf-total">1.00</span> <span id="nf-sigla">un</span>
+
+                🧮 <strong>Cálculo:</strong>
+
+                <span id="nf-formula">
+                    1 un × 1 = 1
+                </span>
+
+                <br>
+
+                ✅ <strong>Total a Registrar:</strong>
+
+                <span id="nf-total">1.00</span>
+
+                <span id="nf-sigla">un</span>
+
             </div>
+
             <div class="exemplo">
-                📌 <strong>Exemplo prático:</strong> 10 unidades de detergente de 2 litros → sistema registra <strong>20L</strong> de entrada no estoque
+
+                📌 <strong>Exemplo prático:</strong>
+
+                10 unidades de detergente de 2 litros
+                → sistema registra <strong>20L</strong> de entrada no estoque.
+
             </div>
-            <div class="grupo-form"><label>Responsável pela Entrada:</label><input type="text" id="nf-responsavel" placeholder="Nome de quem recebeu"></div>
+
+            <div class="grupo-form">
+
+                <label>Responsável pela Entrada:</label>
+
+                <input
+                    type="text"
+                    id="nf-responsavel"
+                    placeholder="Nome de quem recebeu"
+                >
+
+            </div>
+
             <div class="grupo-botoes">
-                <button class="sucesso" onclick="adicionarItemNF()">➕ Adicionar Item à NF</button>
-                <button class="aviso" onclick="registrarEntradaNF()">✅ Registrar Entrada da NF</button>
-                <button class="secundario" onclick="limparFormNF()">🗑️ Limpar Formulário</button>
+
+                <button
+                    class="sucesso"
+                    onclick="adicionarItemNF()"
+                >
+                    ➕ Adicionar Item à NF
+                </button>
+
+                <button
+                    class="aviso"
+                    onclick="registrarEntradaNF()"
+                >
+                    ✅ Registrar Entrada da NF
+                </button>
+
+                <button
+                    class="secundario"
+                    onclick="limparFormNF()"
+                >
+                    🗑️ Limpar Formulário
+                </button>
+
             </div>
 
-            <h3 style="margin-top:20px; color:var(--cor-nf);">📋 Itens da Nota Fiscal</h3>
-            <table><thead><tr><th>Código</th><th>Produto</th><th>Qtd</th><th>Fator</th><th>Total Calculado</th><th>Un</th><th>Preço Unit.</th><th>Ação</th></tr></thead><tbody id="tabela-itens-nf"></tbody></table>
+            <h3 style="margin-top:20px; color:var(--cor-nf);">
+                📋 Itens da Nota Fiscal
+            </h3>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Código</th>
+                        <th>Produto</th>
+                        <th>Qtd</th>
+                        <th>Fator</th>
+                        <th>Total Calculado</th>
+                        <th>Un</th>
+                        <th>Preço Unit.</th>
+                        <th>Ação</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="tabela-itens-nf"></tbody>
+
+            </table>
+
         </div>
+
     </div>
 
+
+    <!-- CADASTRO DE PRODUTO -->
+
     <div class="secao">
+
         <h2>➕ Cadastrar Novo Produto</h2>
-        <div class="grupo-form"><label>Código:</label><input type="text" id="codigoNovo" placeholder="Ex: 001"></div>
-        <div class="grupo-form"><label>Nome do Produto:</label><input type="text" id="nomeNovo" placeholder="Nome completo"></div>
-        <div class="grupo-form"><label>Categoria:</label><input type="text" id="categoriaNova" placeholder="Ex: Limpeza"></div>
-        <div class="grupo-form"><label>Preço Unitário R$:</label><input type="text" id="precoNovo" value="0.00"></div>
-        <button class="sucesso" onclick="cadastrarProduto()">➕ Cadastrar Produto</button>
-    </div>
 
-    <div class="secao">
-        <h2>📦 Produtos em Estoque <button class="secundario" onclick="mostrarOcultarProdutos()">Ocultar</button></h2>
-        <table id="tabela-produtos"><thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div class="secao">
-        <h2>📊 Controle Geral de Estoque <button class="secundario" onclick="mostrarOcultarEstoque()">Ocultar</button></h2>
-        <table id="tabela-estoque"><thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Quantidade</th><th>Valor Total</th><th>Última Atualização</th><th>Ação</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div class="secao">
-        <h2>🛠️ Ferramentas</h2>
-        <div class="grupo-botoes">
-            <button onclick="filtrarPorCategoria()">🔍 Filtrar por Categoria</button>
-            <button onclick="exportarParaExcel()">📁 Exportar para Excel</button>
-            <label class="arquivo">📂 Importar do Excel<input type="file" accept=".csv,.txt" onchange="importarDoExcel(event)"></label>
+        <div class="grupo-form">
+            <label>Código:</label>
+            <input
+                type="text"
+                id="codigoNovo"
+                placeholder="Ex: 001"
+            >
         </div>
+
+        <div class="grupo-form">
+            <label>Nome do Produto:</label>
+            <input
+                type="text"
+                id="nomeNovo"
+                placeholder="Nome completo"
+            >
+        </div>
+
+        <div class="grupo-form">
+            <label>Categoria:</label>
+            <input
+                type="text"
+                id="categoriaNova"
+                placeholder="Ex: Limpeza"
+            >
+        </div>
+
+        <div class="grupo-form">
+
+            <label>Preço Unitário R$:</label>
+
+            <input
+                type="text"
+                id="precoNovo"
+                value="0.00"
+            >
+
+        </div>
+
+        <div class="grupo-form">
+
+            <label>Unidade de Medida:</label>
+
+            <select id="unidadeNova">
+
+                <option value="UN">UN - Unidade</option>
+                <option value="KG">KG - Quilograma</option>
+                <option value="G">G - Grama</option>
+                <option value="L">L - Litro</option>
+                <option value="ML">ML - Mililitro</option>
+                <option value="M">M - Metro</option>
+                <option value="CM">CM - Centímetro</option>
+                <option value="CX">CX - Caixa</option>
+                <option value="PC">PC - Peça</option>
+                <option value="DZ">DZ - Dúzia</option>
+                <option value="SC">SC - Saco</option>
+                <option value="FD">FD - Fardo</option>
+
+            </select>
+
+        </div>
+
+        <button
+            class="sucesso"
+            onclick="cadastrarProduto()"
+        >
+            ➕ Cadastrar Produto
+        </button>
+
     </div>
+
+
+    <!-- PRODUTOS EM ESTOQUE -->
+
+    <div class="secao">
+
+        <h2>
+            📦 Produtos em Estoque
+
+            <button
+                class="secundario"
+                onclick="mostrarOcultarProdutos()"
+            >
+                Ocultar
+            </button>
+        </h2>
+
+        <table id="tabela-produtos">
+
+            <thead>
+
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    <th>Valor Total</th>
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- ESTOQUE GERAL -->
+
+    <div class="secao">
+
+        <h2>
+            📊 Controle Geral de Estoque
+
+            <button
+                class="secundario"
+                onclick="mostrarOcultarEstoque()"
+            >
+                Ocultar
+            </button>
+        </h2>
+
+        <table id="tabela-estoque">
+
+            <thead>
+
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Unidade</th>
+                    <th>Quantidade</th>
+                    <th>Valor Total</th>
+                    <th>Última Movimentação</th>
+                    <th>Ação</th>
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- FERRAMENTAS -->
+
+    <div class="secao">
+
+        <h2>🛠️ Ferramentas</h2>
+
+        <div class="grupo-botoes">
+
+            <button onclick="filtrarPorCategoria()">
+                🔍 Filtrar por Categoria
+            </button>
+
+            <button onclick="exportarParaExcel()">
+                📁 Exportar para Excel
+            </button>
+
+            <label class="arquivo">
+
+                📂 Importar do Excel
+
+                <input
+                    type="file"
+                    accept=".csv,.txt"
+                    onchange="importarDoExcel(event)"
+                >
+
+            </label>
+
+        </div>
+
+    </div>
+
 </section>
+
+
+<!-- ======================================================
+     ABA 1 - FORNECEDORES
+====================================================== -->
 
 <section class="conteudo-aba" id="aba1">
+
     <div class="secao">
-        <h2>🏢 Fornecedores <button class="secundario" onclick="alternarFornecedores()">Ocultar</button></h2>
-        <div id="form-fornecedor">
-            <div class="grupo-form"><label>CNPJ:</label><input type="text" id="cnpjForn" placeholder="00.000.000/0000-00"></div>
-            <div class="grupo-form"><label>Razão Social:</label><input type="text" id="razaoForn"></div>
-            <div class="grupo-form"><label>Nome Fantasia:</label><input type="text" id="fantasiaForn"></div>
-            <div class="grupo-form"><label>Endereço:</label><input type="text" id="enderecoForn"></div>
-            <div class="grupo-form"><label>Telefone:</label><input type="text" id="telefoneForn"></div>
-            <div class="grupo-form"><label>Cidade:</label><input type="text" id="cidadeForn"></div>
+
+        <h2>
+
+            🏢 Cadastro de Fornecedores
+
+            <button
+                class="secundario"
+                onclick="alternarFornecedores()"
+            >
+                Ocultar
+            </button>
+
+        </h2>
+
+
+        <!-- FORMULÁRIO COMPLETO DO FORNECEDOR -->
+
+        <div
+            id="form-fornecedor"
+            class="form-fornecedor-completo"
+        >
+
+            <h3>
+                📝 Dados cadastrais do fornecedor
+            </h3>
+
+            <div class="linha-fornecedor">
+
+                <!-- CNPJ -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="cnpjForn">
+                        CNPJ *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cnpjForn"
+                        placeholder="00.000.000/0000-00"
+                        maxlength="18"
+                        oninput="formatarCNPJ(this)"
+                    >
+
+                </div>
+
+
+                <!-- INSCRIÇÃO ESTADUAL -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="ieForn">
+                        Inscrição Estadual
+                    </label>
+
+                    <input
+                        type="text"
+                        id="ieForn"
+                        placeholder="Digite a Inscrição Estadual"
+                    >
+
+                </div>
+
+
+                <!-- RAZÃO SOCIAL -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="razaoForn">
+                        Razão Social *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="razaoForn"
+                        placeholder="Razão social da empresa"
+                    >
+
+                </div>
+
+
+                <!-- NOME FANTASIA -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="fantasiaForn">
+                        Nome Fantasia
+                    </label>
+
+                    <input
+                        type="text"
+                        id="fantasiaForn"
+                        placeholder="Nome comercial"
+                    >
+
+                </div>
+
+
+                <!-- RESPONSÁVEL -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="responsavelForn">
+                        Responsável / Contato
+                    </label>
+
+                    <input
+                        type="text"
+                        id="responsavelForn"
+                        placeholder="Nome do responsável"
+                    >
+
+                </div>
+
+
+                <!-- TELEFONE -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="telefoneForn">
+                        Telefone
+                    </label>
+
+                    <input
+                        type="text"
+                        id="telefoneForn"
+                        placeholder="(00) 0000-0000"
+                    >
+
+                </div>
+
+
+                <!-- WHATSAPP -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="whatsappForn">
+                        WhatsApp
+                    </label>
+
+                    <input
+                        type="text"
+                        id="whatsappForn"
+                        placeholder="(00) 00000-0000"
+                    >
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="emailForn">
+                        E-mail
+                    </label>
+
+                    <input
+                        type="email"
+                        id="emailForn"
+                        placeholder="fornecedor@email.com"
+                    >
+
+                </div>
+
+
+                <!-- CEP -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="cepForn">
+                        CEP
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cepForn"
+                        placeholder="00000-000"
+                        maxlength="9"
+                        oninput="formatarCEP(this)"
+                    >
+
+                </div>
+
+
+                <!-- ENDEREÇO -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="enderecoForn">
+                        Endereço
+                    </label>
+
+                    <input
+                        type="text"
+                        id="enderecoForn"
+                        placeholder="Rua, Avenida, etc."
+                    >
+
+                </div>
+
+
+                <!-- NÚMERO -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="numeroForn">
+                        Número
+                    </label>
+
+                    <input
+                        type="text"
+                        id="numeroForn"
+                        placeholder="Número"
+                    >
+
+                </div>
+
+
+                <!-- COMPLEMENTO -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="complementoForn">
+                        Complemento
+                    </label>
+
+                    <input
+                        type="text"
+                        id="complementoForn"
+                        placeholder="Sala, loja, galpão..."
+                    >
+
+                </div>
+
+
+                <!-- BAIRRO -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="bairroForn">
+                        Bairro
+                    </label>
+
+                    <input
+                        type="text"
+                        id="bairroForn"
+                        placeholder="Bairro"
+                    >
+
+                </div>
+
+
+                <!-- CIDADE -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="cidadeForn">
+                        Cidade
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cidadeForn"
+                        placeholder="Cidade"
+                    >
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="campo-fornecedor">
+
+                    <label for="ufForn">
+                        Estado / UF
+                    </label>
+
+                    <select id="ufForn">
+
+                        <option value="">Selecione</option>
+                        <option value="AC">AC - Acre</option>
+                        <option value="AL">AL - Alagoas</option>
+                        <option value="AP">AP - Amapá</option>
+                        <option value="AM">AM - Amazonas</option>
+                        <option value="BA">BA - Bahia</option>
+                        <option value="CE">CE - Ceará</option>
+                        <option value="DF">DF - Distrito Federal</option>
+                        <option value="ES">ES - Espírito Santo</option>
+                        <option value="GO">GO - Goiás</option>
+                        <option value="MA">MA - Maranhão</option>
+                        <option value="MT">MT - Mato Grosso</option>
+                        <option value="MS">MS - Mato Grosso do Sul</option>
+                        <option value="MG">MG - Minas Gerais</option>
+                        <option value="PA">PA - Pará</option>
+                        <option value="PB">PB - Paraíba</option>
+                        <option value="PR">PR - Paraná</option>
+                        <option value="PE">PE - Pernambuco</option>
+                        <option value="PI">PI - Piauí</option>
+                        <option value="RJ">RJ - Rio de Janeiro</option>
+                        <option value="RN">RN - Rio Grande do Norte</option>
+                        <option value="RS">RS - Rio Grande do Sul</option>
+                        <option value="RO">RO - Rondônia</option>
+                        <option value="RR">RR - Roraima</option>
+                        <option value="SC">SC - Santa Catarina</option>
+                        <option value="SP">SP - São Paulo</option>
+                        <option value="SE">SE - Sergipe</option>
+                        <option value="TO">TO - Tocantins</option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- OBSERVAÇÕES -->
+
+                <div class="campo-fornecedor campo-largo">
+
+                    <label for="observacaoForn">
+                        Observações
+                    </label>
+
+                    <textarea
+                        id="observacaoForn"
+                        placeholder="Informações adicionais sobre o fornecedor..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
         </div>
-        <button class="sucesso" onclick="cadastrarFornecedor()">✅ Cadastrar Fornecedor</button>
-        <table id="tabela-fornecedores"><thead><tr><th>CNPJ</th><th>Razão Social</th><th>Fantasia</th><th>Endereço</th><th>Telefone</th><th>Cidade</th><th>Ação</th></tr></thead><tbody></tbody></table>
+
+
+        <div class="grupo-botoes">
+
+            <button
+                class="sucesso"
+                onclick="cadastrarFornecedor()"
+            >
+                ✅ Cadastrar Fornecedor
+            </button>
+
+            <button
+                class="secundario"
+                onclick="limparFormularioFornecedor()"
+            >
+                🗑️ Limpar Campos
+            </button>
+
+        </div>
+
+
+        <!-- TABELA DE FORNECEDORES -->
+
+        <div class="tabela-fornecedores-container">
+
+            <table id="tabela-fornecedores">
+
+                <thead>
+
+                    <tr>
+
+                        <th>CNPJ</th>
+                        <th>Razão Social</th>
+                        <th>Fantasia</th>
+                        <th>Contato</th>
+                        <th>Telefone</th>
+                        <th>WhatsApp</th>
+                        <th>E-mail</th>
+                        <th>Cidade/UF</th>
+                        <th>Ação</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody></tbody>
+
+            </table>
+
+        </div>
+
     </div>
+
 </section>
+
+
+<!-- ======================================================
+     ABA 2 - ENTRADA RÁPIDA
+====================================================== -->
 
 <section class="conteudo-aba" id="aba2">
+
     <div class="secao">
-        <h2>📥 Entrada Rápida por Fornecedor</h2>
-        <div class="grupo-form"><label>Fornecedor:</label><select id="selectFornecedorEntrada" onchange="carregarProdutosFornecedor()"><option value="">-- Selecione --</option></select></div>
-        <div class="grupo-form"><label>Responsável:</label><input type="text" id="responsavelEntradaForn" placeholder="Quem recebeu"></div>
-        <div id="area-entrada-frn" style="display:none; margin-top:15px;"><table><thead><tr><th>Código</th><th>Produto</th><th>Quantidade</th></tr></thead><tbody id="corpo-entrada"></tbody></table><br><button class="sucesso" onclick="registrarEntradaForn()">✅ Registrar Entrada</button></div>
-        <div id="msg-entrada" class="mensagem" style="display:none;"></div>
+
+        <h2>
+            📥 Entrada Rápida por Fornecedor
+        </h2>
+
+        <div class="grupo-form">
+
+            <label>Fornecedor:</label>
+
+            <select
+                id="selectFornecedorEntrada"
+                onchange="carregarProdutosFornecedor()"
+            >
+
+                <option value="">
+                    -- Selecione --
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="grupo-form">
+
+            <label>Responsável:</label>
+
+            <input
+                type="text"
+                id="responsavelEntradaForn"
+                placeholder="Quem recebeu"
+            >
+
+        </div>
+
+        <div
+            id="area-entrada-frn"
+            style="display:none; margin-top:15px;"
+        >
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Código</th>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="corpo-entrada"></tbody>
+
+            </table>
+
+            <br>
+
+            <button
+                class="sucesso"
+                onclick="registrarEntradaForn()"
+            >
+                ✅ Registrar Entrada
+            </button>
+
+        </div>
+
+        <div
+            id="msg-entrada"
+            class="mensagem"
+            style="display:none;"
+        ></div>
+
     </div>
+
 </section>
+
+
+<!-- ======================================================
+     ABA 3 - XML
+====================================================== -->
 
 <section class="conteudo-aba" id="aba3">
+
     <div class="secao">
+
         <h2>📄 Importar Nota Fiscal (XML)</h2>
-        <p style="margin-bottom:10px;">Selecione o arquivo XML da NF para dar entrada no estoque automaticamente.</p>
-        <div class="grupo-form"><label>Arquivo XML:</label><input type="file" id="arquivoXml" accept=".xml"></div>
-        <button class="sucesso" onclick="importarEntradaXML()">📥 Importar Entrada do XML</button>
-        <div id="mensagemImportacao" class="mensagem" style="display:none;"></div>
+
+        <p style="margin-bottom:10px;">
+            Selecione o arquivo XML da NF para dar entrada no estoque automaticamente.
+        </p>
+
+        <div class="grupo-form">
+
+            <label>Arquivo XML:</label>
+
+            <input
+                type="file"
+                id="arquivoXml"
+                accept=".xml"
+            >
+
+        </div>
+
+        <button
+            class="sucesso"
+            onclick="importarEntradaXML()"
+        >
+            📥 Importar Entrada do XML
+        </button>
+
+        <div
+            id="mensagemImportacao"
+            class="mensagem"
+            style="display:none;"
+        ></div>
+
     </div>
+
 </section>
+
+
+<!-- ======================================================
+     ABA 4 - RELATÓRIOS
+====================================================== -->
 
 <section class="conteudo-aba" id="aba4">
+
     <div class="secao">
+
         <h2>📋 Relatórios</h2>
-        <div class="grupo-form"><label>Data Inicial:</label><input type="date" id="dataInicio"></div>
-        <div class="grupo-form"><label>Data Final:</label><input type="date" id="dataFim"></div>
-        <div class="grupo-botoes">
-            <button onclick="gerarRelatorio()">📊 Gerar Período</button>
-            <button class="aviso" onclick="relatorioCompleto()">📋 Relatório Completo</button>
-            <button class="sucesso" onclick="window.print()">🖨️ Imprimir</button>
+
+        <div class="grupo-form">
+
+            <label>Data Inicial:</label>
+
+            <input
+                type="date"
+                id="dataInicio"
+            >
+
         </div>
-        <div id="conteudo-relatorio" class="mensagem" style="background:#f8fafc;">Clique em um botão acima para visualizar...</div>
+
+        <div class="grupo-form">
+
+            <label>Data Final:</label>
+
+            <input
+                type="date"
+                id="dataFim"
+            >
+
+        </div>
+
+        <div class="grupo-botoes">
+
+            <button onclick="gerarRelatorio()">
+                📊 Gerar Período
+            </button>
+
+            <button
+                class="aviso"
+                onclick="relatorioCompleto()"
+            >
+                📋 Relatório Completo
+            </button>
+
+            <button
+                class="sucesso"
+                onclick="window.print()"
+            >
+                🖨️ Imprimir
+            </button>
+
+        </div>
+
+        <div
+            id="conteudo-relatorio"
+            class="mensagem"
+            style="background:#f8fafc;"
+        >
+            Clique em um botão acima para visualizar...
+        </div>
+
     </div>
+
 </section>
+
 </main>
+
 </div>
 
+
 <script>
+
+/* ==========================================================
+   VARIÁVEIS DO SISTEMA
+========================================================== */
+
 const SENHA_SISTEMA = "1234";
+
 let itensNF = [];
 let produtos = [];
 let movimentacoes = [];
 let fornecedores = [];
 
+
+/* ==========================================================
+   SALVAR DADOS
+========================================================== */
+
 function salvar() {
-    localStorage.setItem("produtos", JSON.stringify(produtos));
-    localStorage.setItem("movimentacoes", JSON.stringify(movimentacoes));
-    localStorage.setItem("fornecedores", JSON.stringify(fornecedores));
+
+    localStorage.setItem(
+        "produtos",
+        JSON.stringify(produtos)
+    );
+
+    localStorage.setItem(
+        "movimentacoes",
+        JSON.stringify(movimentacoes)
+    );
+
+    localStorage.setItem(
+        "fornecedores",
+        JSON.stringify(fornecedores)
+    );
 }
 
+
+/* ==========================================================
+   CARREGAR DADOS
+========================================================== */
+
 function carregarDados() {
-    produtos = JSON.parse(localStorage.getItem("produtos") || "[]");
-    movimentacoes = JSON.parse(localStorage.getItem("movimentacoes") || "[]");
-    fornecedores = JSON.parse(localStorage.getItem("fornecedores") || "[]");
+
+    produtos = JSON.parse(
+        localStorage.getItem("produtos") || "[]"
+    );
+
+    movimentacoes = JSON.parse(
+        localStorage.getItem("movimentacoes") || "[]"
+    );
+
+    fornecedores = JSON.parse(
+        localStorage.getItem("fornecedores") || "[]"
+    );
+
     listarProdutos();
     atualizarEstoque();
     listarFornecedores();
     atualizarSelectFornecedores();
 }
 
+
+/* ==========================================================
+   LOGIN
+========================================================== */
+
 function entrarSistema() {
-    const senha = document.getElementById('campo-senha').value;
+
+    const senha =
+        document.getElementById("campo-senha").value;
+
     if (senha === SENHA_SISTEMA) {
-        document.getElementById('tela-login').style.display = 'none';
-        document.getElementById('sistema').style.display = 'block';
+
+        document.getElementById("tela-login").style.display = "none";
+
+        document.getElementById("sistema").style.display = "block";
+
         carregarDados();
+
     } else {
-        document.getElementById('aviso-erro').style.display = 'block';
-        document.getElementById('campo-senha').value = '';
+
+        document.getElementById("aviso-erro").style.display = "block";
+
+        document.getElementById("campo-senha").value = "";
+
     }
 }
+
 
 function sairSistema() {
+
     if (confirm("Deseja realmente sair do sistema?")) {
-        document.getElementById('sistema').style.display = 'none';
-        document.getElementById('tela-login').style.display = 'flex';
-        document.getElementById('campo-senha').value = '';
-        document.getElementById('aviso-erro').style.display = 'none';
+
+        document.getElementById("sistema").style.display = "none";
+
+        document.getElementById("tela-login").style.display = "flex";
+
+        document.getElementById("campo-senha").value = "";
+
+        document.getElementById("aviso-erro").style.display = "none";
     }
 }
 
+
+/* ==========================================================
+   TROCAR ABA
+========================================================== */
+
 function trocarAba(n) {
-    document.querySelectorAll('.conteudo-aba').forEach((el, i) => el.classList.toggle('visivel', i === n));
-    document.querySelectorAll('.aba').forEach((el, i) => el.classList.toggle('ativa', i === n));
+
+    document
+        .querySelectorAll(".conteudo-aba")
+        .forEach((el, i) => {
+
+            el.classList.toggle(
+                "visivel",
+                i === n
+            );
+
+        });
+
+    document
+        .querySelectorAll(".aba")
+        .forEach((el, i) => {
+
+            el.classList.toggle(
+                "ativa",
+                i === n
+            );
+
+        });
 }
 
+
+/* ==========================================================
+   ENTRADA POR NF
+========================================================== */
+
 function abrirFormularioNF() {
-    const form = document.getElementById('form-entrada-nf');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+
+    const form =
+        document.getElementById("form-entrada-nf");
+
+    form.style.display =
+        form.style.display === "block"
+            ? "none"
+            : "block";
+
     itensNF = [];
-    document.getElementById('tabela-itens-nf').innerHTML = '';
+
+    document.getElementById(
+        "tabela-itens-nf"
+    ).innerHTML = "";
+
     limparFormNF();
 }
 
+
 function buscarFornecedorNF() {
-    const cnpj = document.getElementById('nf-cnpj').value.trim().replace(/\D/g, '');
-    const f = fornecedores.find(x => x.cnpj.replace(/\D/g, '') === cnpj);
-    document.getElementById('nf-razao').value = f ? f.razao : '(Fornecedor não cadastrado)';
+
+    const cnpj =
+        document
+            .getElementById("nf-cnpj")
+            .value
+            .trim()
+            .replace(/\D/g, "");
+
+    const f =
+        fornecedores.find(
+            x =>
+                String(x.cnpj || "")
+                    .replace(/\D/g, "") === cnpj
+        );
+
+    document.getElementById("nf-razao").value =
+        f
+            ? f.razao
+            : "(Fornecedor não cadastrado)";
 }
+
 
 function buscarProdutoNF() {
-    const cod = document.getElementById('nf-codigo').value.trim();
-    const p = produtos.find(x => String(x.codigo) === String(cod));
+
+    const cod =
+        document
+            .getElementById("nf-codigo")
+            .value
+            .trim();
+
+    const p =
+        produtos.find(
+            x =>
+                String(x.codigo) === String(cod)
+        );
+
     if (p) {
-        document.getElementById('nf-nome').value = p.nome;
-        document.getElementById('nf-preco').value = p.preco.toFixed(2);
+
+        document.getElementById("nf-nome").value =
+            p.nome;
+
+        document.getElementById("nf-preco").value =
+            Number(p.preco).toFixed(2);
+
     } else {
-        document.getElementById('nf-nome').value = '(Produto não cadastrado — cadastre primeiro)';
+
+        document.getElementById("nf-nome").value =
+            "(Produto não cadastrado — cadastre primeiro)";
     }
+
     calcularTotalNF();
 }
+
 
 function calcularTotalNF() {
-    const qtd = parseFloat(document.getElementById('nf-quantidade').value) || 0;
-    const fator = parseFloat(document.getElementById('nf-fator').value) || 1;
+
+    const qtd =
+        parseFloat(
+            document.getElementById("nf-quantidade").value
+        ) || 0;
+
+    const fator =
+        parseFloat(
+            document.getElementById("nf-fator").value
+        ) || 1;
+
     const total = qtd * fator;
-    const un = document.getElementById('nf-unidade').value;
-    const nomeUn = document.querySelector('#nf-unidade option:checked').textContent;
-    document.getElementById('nf-formula').textContent = `${qtd} × ${fator} = ${total.toFixed(2)}`;
-    document.getElementById('nf-total').textContent = total.toFixed(2);
-    document.getElementById('nf-sigla').textContent = nomeUn;
+
+    const un =
+        document.getElementById("nf-unidade").value;
+
+    const nomeUn =
+        document
+            .querySelector("#nf-unidade option:checked")
+            .textContent;
+
+    document.getElementById("nf-formula").textContent =
+        `${qtd} × ${fator} = ${total.toFixed(2)}`;
+
+    document.getElementById("nf-total").textContent =
+        total.toFixed(2);
+
+    document.getElementById("nf-sigla").textContent =
+        nomeUn;
 }
 
+
 function adicionarItemNF() {
-    const cod = document.getElementById('nf-codigo').value.trim();
-    const nome = document.getElementById('nf-nome').value.trim();
-    const qtd = parseFloat(document.getElementById('nf-quantidade').value);
-    const preco = parseFloat(document.getElementById('nf-preco').value.replace(',', '.'));
-    const fator = parseFloat(document.getElementById('nf-fator').value);
-    const un = document.getElementById('nf-unidade').value;
-    const nomeUn = document.querySelector('#nf-unidade option:checked').textContent.split(' — ')[0];
+
+    const cod =
+        document
+            .getElementById("nf-codigo")
+            .value
+            .trim();
+
+    const nome =
+        document
+            .getElementById("nf-nome")
+            .value
+            .trim();
+
+    const qtd =
+        parseFloat(
+            document.getElementById("nf-quantidade").value
+        );
+
+    const preco =
+        parseFloat(
+            document
+                .getElementById("nf-preco")
+                .value
+                .replace(",", ".")
+        );
+
+    const fator =
+        parseFloat(
+            document.getElementById("nf-fator").value
+        );
+
+    const un =
+        document.getElementById("nf-unidade").value;
+
+    const nomeUn =
+        document
+            .querySelector("#nf-unidade option:checked")
+            .textContent
+            .split(" — ")[0];
+
     const total = qtd * fator;
-    if (!cod || !nome || nome.startsWith('(') || isNaN(qtd) || qtd <= 0) {
-        return alert("⚠️ Preencha o código de um produto JÁ CADASTRADO no sistema!");
+
+    if (
+        !cod ||
+        !nome ||
+        nome.startsWith("(") ||
+        isNaN(qtd) ||
+        qtd <= 0
+    ) {
+
+        return alert(
+            "⚠️ Preencha o código de um produto JÁ CADASTRADO no sistema!"
+        );
     }
-    itensNF.push({ codigo: cod, nome: nome, quantidade: qtd, fator: fator, total: total, unidade: nomeUn, preco: preco });
+
+    itensNF.push({
+        codigo: cod,
+        nome: nome,
+        quantidade: qtd,
+        fator: fator,
+        total: total,
+        unidade: nomeUn,
+        preco: isNaN(preco) ? 0 : preco
+    });
+
     atualizarTabelaNF();
-    document.getElementById('nf-codigo').value = '';
-    document.getElementById('nf-nome').value = '';
-    document.getElementById('nf-quantidade').value = '1';
-    document.getElementById('nf-fator').value = '1';
+
+    document.getElementById("nf-codigo").value = "";
+    document.getElementById("nf-nome").value = "";
+    document.getElementById("nf-quantidade").value = "1";
+    document.getElementById("nf-fator").value = "1";
+
     calcularTotalNF();
 }
 
+
 function atualizarTabelaNF() {
-    const tb = document.getElementById('tabela-itens-nf');
-    tb.innerHTML = '';
+
+    const tb =
+        document.getElementById("tabela-itens-nf");
+
+    tb.innerHTML = "";
+
     itensNF.forEach((item, idx) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${item.codigo}</td><td>${item.nome}</td><td>${item.quantidade}</td><td>${item.fator}</td><td><strong>${item.total.toFixed(2)}</strong></td><td>${item.unidade}</td><td>R$ ${item.preco.toFixed(2)}</td><td><button class="perigo" onclick="removerItemNF(${idx})">Excluir</button></td>`;
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${item.codigo}</td>
+            <td>${item.nome}</td>
+            <td>${item.quantidade}</td>
+            <td>${item.fator}</td>
+            <td><strong>${item.total.toFixed(2)}</strong></td>
+            <td>${item.unidade}</td>
+            <td>R$ ${item.preco.toFixed(2)}</td>
+            <td>
+                <button
+                    class="perigo"
+                    onclick="removerItemNF(${idx})"
+                >
+                    Excluir
+                </button>
+            </td>
+        `;
+
         tb.appendChild(tr);
     });
 }
 
+
 function removerItemNF(idx) {
+
     itensNF.splice(idx, 1);
+
     atualizarTabelaNF();
 }
 
+
+/* ==========================================================
+   REGISTRAR ENTRADA NF
+========================================================== */
+
 function registrarEntradaNF() {
-    const resp = document.getElementById('nf-responsavel').value.trim();
-    if (!resp) return alert("⚠️ Informe o responsável pela entrada!");
-    if (itensNF.length === 0) return alert("⚠️ Adicione pelo menos um item na NF!");
+
+    const resp =
+        document
+            .getElementById("nf-responsavel")
+            .value
+            .trim();
+
+    const cnpjFornecedor =
+        document
+            .getElementById("nf-cnpj")
+            .value
+            .trim();
+
+    const fornecedor =
+        fornecedores.find(
+            f =>
+                String(f.cnpj || "")
+                    .replace(/\D/g, "") ===
+                cnpjFornecedor.replace(/\D/g, "")
+        );
+
+    if (!fornecedor) {
+
+        return alert(
+            "⚠️ Informe um fornecedor cadastrado!"
+        );
+    }
+
+    if (!resp) {
+
+        return alert(
+            "⚠️ Informe o responsável pela entrada!"
+        );
+    }
+
+    if (itensNF.length === 0) {
+
+        return alert(
+            "⚠️ Adicione pelo menos um item na NF!"
+        );
+    }
+
     let adicionados = 0;
+
     itensNF.forEach(item => {
-        const p = produtos.find(x => String(x.codigo) === String(item.codigo));
+
+        const p =
+            produtos.find(
+                x =>
+                    String(x.codigo) ===
+                    String(item.codigo)
+            );
+
         if (p) {
+
             p.quantidade += item.total;
-            p.ultima = new Date().toLocaleString('pt-BR');
+
+            p.ultima =
+                new Date().toLocaleString("pt-BR");
+
             movimentacoes.push({
-                codigo: item.codigo, produto: item.nome, quantidade: item.total,
-                tipo: 'entrada (NF)', responsavel: resp, data: p.ultima,
-                unidade: item.unidade, fatorUsado: item.fator
+
+                codigo: item.codigo,
+
+                produto: item.nome,
+
+                quantidade: item.total,
+
+                tipo: "entrada (NF)",
+
+                responsavel: resp,
+
+                fornecedor: fornecedor.razao,
+
+                cnpjFornecedor: fornecedor.cnpj,
+
+                data: p.ultima,
+
+                unidade: item.unidade,
+
+                fatorUsado: item.fator
+
             });
+
             adicionados++;
         }
     });
-    salvar(); listarProdutos(); atualizarEstoque();
-    alert(`✅ ENTRADA REGISTRADA! ${adicionados} produto(s) atualizado(s).`);
-    limparFormNF(); itensNF = [];
-    document.getElementById('tabela-itens-nf').innerHTML = '';
-    document.getElementById('form-entrada-nf').style.display = 'none';
+
+    salvar();
+
+    listarProdutos();
+    atualizarEstoque();
+
+    alert(
+        `✅ ENTRADA REGISTRADA!\n\n${adicionados} produto(s) atualizado(s).\nFornecedor: ${fornecedor.razao}`
+    );
+
+    limparFormNF();
+
+    itensNF = [];
+
+    document.getElementById(
+        "tabela-itens-nf"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "form-entrada-nf"
+    ).style.display = "none";
 }
 
+
 function limparFormNF() {
-    document.getElementById('nf-cnpj').value = '';
-    document.getElementById('nf-razao').value = '';
-    document.getElementById('nf-codigo').value = '';
-    document.getElementById('nf-nome').value = '';
-    document.getElementById('nf-quantidade').value = '1';
-    document.getElementById('nf-preco').value = '0.00';
-    document.getElementById('nf-fator').value = '1';
-    document.getElementById('nf-unidade').value = 'un';
-    document.getElementById('nf-responsavel').value = '';
+
+    document.getElementById("nf-cnpj").value = "";
+    document.getElementById("nf-razao").value = "";
+    document.getElementById("nf-codigo").value = "";
+    document.getElementById("nf-nome").value = "";
+    document.getElementById("nf-quantidade").value = "1";
+    document.getElementById("nf-preco").value = "0.00";
+    document.getElementById("nf-fator").value = "1";
+    document.getElementById("nf-unidade").value = "un";
+    document.getElementById("nf-responsavel").value = "";
+
     calcularTotalNF();
 }
 
+
+/* ==========================================================
+   PRODUTOS
+========================================================== */
+
 function buscarProduto() {
-    const cod = document.getElementById('codigoProd').value.trim();
-    if (!cod) { limparCampos(); return; }
-    const p = produtos.find(x => String(x.codigo) === String(cod));
+
+    const cod =
+        document
+            .getElementById("codigoProd")
+            .value
+            .trim();
+
+    if (!cod) {
+
+        limparCampos();
+
+        return;
+    }
+
+    const p =
+        produtos.find(
+            x =>
+                String(x.codigo) ===
+                String(cod)
+        );
+
     if (p) {
-        document.getElementById('nomeProd').value = p.nome;
-        document.getElementById('categoriaProd').value = p.categoria;
-        document.getElementById('precoProd').value = p.preco.toFixed(2);
-    } else limparCampos();
+
+        document.getElementById("nomeProd").value =
+            p.nome;
+
+        document.getElementById("categoriaProd").value =
+            p.categoria;
+
+        document.getElementById("precoProd").value =
+            Number(p.preco).toFixed(2);
+
+    } else {
+
+        limparCampos();
+    }
 }
+
 
 function limparCampos() {
-    document.getElementById('nomeProd').value = '';
-    document.getElementById('categoriaProd').value = '';
-    document.getElementById('precoProd').value = '';
+
+    document.getElementById("nomeProd").value = "";
+    document.getElementById("categoriaProd").value = "";
+    document.getElementById("precoProd").value = "";
 }
+
 
 function cadastrarProduto() {
-    const codigo = document.getElementById('codigoNovo').value.trim();
-    const nome = document.getElementById('nomeNovo').value.trim();
-    const cat = document.getElementById('categoriaNova').value.trim();
-    const preco = parseFloat(document.getElementById('precoNovo').value.replace(',', '.'));
-    if (!codigo || !nome || !cat || isNaN(preco) || preco <= 0) return alert("Preencha todos os campos corretamente!");
-    if (produtos.some(x => String(x.codigo) === String(codigo))) return alert("Já existe produto com este código!");
-    produtos.push({ codigo, nome, categoria: cat, preco, quantidade: 0, ultima: new Date().toLocaleString('pt-BR') });
-    salvar(); listarProdutos(); atualizarEstoque();
-    alert("✅ Produto cadastrado com sucesso!");
-    document.getElementById('codigoNovo').value = '';
-    document.getElementById('nomeNovo').value = '';
-    document.getElementById('categoriaNova').value = '';
-    document.getElementById('precoNovo').value = '';
+
+    const codigo =
+        document.getElementById("codigoNovo").value.trim();
+
+    const nome =
+        document.getElementById("nomeNovo").value.trim();
+
+    const cat =
+        document.getElementById("categoriaNova").value.trim();
+
+    const preco =
+        parseFloat(
+            document
+                .getElementById("precoNovo")
+                .value
+                .replace(",", ".")
+        );
+
+    const unidade =
+        document.getElementById("unidadeNova").value;
+
+    if (
+        !codigo ||
+        !nome ||
+        !cat ||
+        isNaN(preco) ||
+        preco <= 0
+    ) {
+
+        return alert(
+            "Preencha todos os campos corretamente!"
+        );
+    }
+
+    if (
+        produtos.some(
+            x =>
+                String(x.codigo) ===
+                String(codigo)
+        )
+    ) {
+
+        return alert(
+            "Já existe produto com este código!"
+        );
+    }
+
+    produtos.push({
+
+        codigo,
+        nome,
+        categoria: cat,
+        preco,
+        unidade,
+        quantidade: 0,
+        ultima: new Date().toLocaleString("pt-BR")
+
+    });
+
+    salvar();
+
+    listarProdutos();
+    atualizarEstoque();
+
+    alert(
+        "✅ Produto cadastrado com sucesso!"
+    );
+
+    document.getElementById("codigoNovo").value = "";
+    document.getElementById("nomeNovo").value = "";
+    document.getElementById("categoriaNova").value = "";
+    document.getElementById("precoNovo").value = "";
 }
+
 
 function listarProdutos() {
-    const tb = document.querySelector('#tabela-produtos tbody');
-    tb.innerHTML = '';
+
+    const tb =
+        document.querySelector(
+            "#tabela-produtos tbody"
+        );
+
+    tb.innerHTML = "";
+
     produtos.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td>`;
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${p.codigo}</td>
+            <td>${p.nome}</td>
+            <td>${p.categoria}</td>
+            <td>R$ ${Number(p.preco).toFixed(2)}</td>
+            <td>${p.quantidade}</td>
+            <td>R$ ${(Number(p.preco) * Number(p.quantidade)).toFixed(2)}</td>
+        `;
+
         tb.appendChild(tr);
     });
 }
+
 
 function registrarMovimentacao() {
-    const cod = document.getElementById('codigoProd').value.trim();
-    const qtd = parseFloat(document.getElementById('qtdProd').value);
-    const resp = document.getElementById('responsavel').value.trim();
-    const tipo = document.getElementById('tipoMov').value;
-    if (!cod || isNaN(qtd) || qtd <= 0 || !resp) return alert("Preencha todos os campos corretamente!");
-    const p = produtos.find(x => String(x.codigo) === String(cod));
-    if (!p) return alert("Produto não encontrado! Cadastre-o primeiro.");
-    if (tipo === 'entrada') p.quantidade += qtd;
-    else { if (p.quantidade < qtd) return alert("Estoque insuficiente! Disponível: " + p.quantidade); p.quantidade -= qtd; }
-    p.ultima = new Date().toLocaleString('pt-BR');
-    movimentacoes.push({ codigo: cod, produto: p.nome, categoria: p.categoria, quantidade: qtd, tipo, responsavel: resp, data: p.ultima });
-    salvar(); listarProdutos(); atualizarEstoque(); limparCampos();
-    document.getElementById('qtdProd').value = '1';
-    document.getElementById('responsavel').value = '';
-    document.getElementById('codigoProd').value = '';
-    alert("✅ Movimentação registrada com sucesso!");
+
+    const cod =
+        document
+            .getElementById("codigoProd")
+            .value
+            .trim();
+
+    const qtd =
+        parseFloat(
+            document.getElementById("qtdProd").value
+        );
+
+    const resp =
+        document
+            .getElementById("responsavel")
+            .value
+            .trim();
+
+    const tipo =
+        document.getElementById("tipoMov").value;
+
+    if (
+        !cod ||
+        isNaN(qtd) ||
+        qtd <= 0 ||
+        !resp
+    ) {
+
+        return alert(
+            "Preencha todos os campos corretamente!"
+        );
+    }
+
+    const p =
+        produtos.find(
+            x =>
+                String(x.codigo) ===
+                String(cod)
+        );
+
+    if (!p) {
+
+        return alert(
+            "Produto não encontrado! Cadastre-o primeiro."
+        );
+    }
+
+    if (tipo === "entrada") {
+
+        p.quantidade += qtd;
+
+    } else {
+
+        if (p.quantidade < qtd) {
+
+            return alert(
+                "Estoque insuficiente! Disponível: " +
+                p.quantidade
+            );
+        }
+
+        p.quantidade -= qtd;
+    }
+
+    p.ultima =
+        new Date().toLocaleString("pt-BR");
+
+    movimentacoes.push({
+
+        codigo: cod,
+
+        produto: p.nome,
+
+        categoria: p.categoria,
+
+        quantidade: qtd,
+
+        tipo,
+
+        responsavel: resp,
+
+        data: p.ultima
+    });
+
+    salvar();
+
+    listarProdutos();
+    atualizarEstoque();
+
+    limparCampos();
+
+    document.getElementById("qtdProd").value = "1";
+    document.getElementById("responsavel").value = "";
+    document.getElementById("codigoProd").value = "";
+
+    alert(
+        "✅ Movimentação registrada com sucesso!"
+    );
 }
+
+
+/* ==========================================================
+   ESTOQUE
+========================================================== */
 
 function atualizarEstoque() {
-    const tb = document.querySelector('#tabela-estoque tbody');
-    tb.innerHTML = '';
+
+    const tb =
+        document.querySelector(
+            "#tabela-estoque tbody"
+        );
+
+    tb.innerHTML = "";
+
     produtos.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td><td>${p.ultima || '-'}</td><td><button class="perigo" onclick="excluirProduto('${p.codigo}')">Excluir</button></td>`;
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${p.codigo}</td>
+            <td>${p.nome}</td>
+            <td>${p.categoria}</td>
+            <td>R$ ${Number(p.preco).toFixed(2)}</td>
+            <td>${p.unidade || "UN"}</td>
+            <td>${p.quantidade}</td>
+            <td>R$ ${(Number(p.preco) * Number(p.quantidade)).toFixed(2)}</td>
+            <td>${p.ultima || "-"}</td>
+            <td>
+                <button
+                    class="perigo"
+                    onclick="excluirProduto('${p.codigo}')"
+                >
+                    Excluir
+                </button>
+            </td>
+        `;
+
         tb.appendChild(tr);
     });
 }
+
 
 function excluirProduto(cod) {
-    if (!confirm("Deseja excluir este produto?")) return;
-    produtos = produtos.filter(x => String(x.codigo) !== String(cod));
-    salvar(); listarProdutos(); atualizarEstoque();
+
+    if (!confirm("Deseja excluir este produto?")) {
+        return;
+    }
+
+    produtos =
+        produtos.filter(
+            x =>
+                String(x.codigo) !==
+                String(cod)
+        );
+
+    salvar();
+
+    listarProdutos();
+    atualizarEstoque();
 }
+
 
 let visivelProd = true;
+
 function mostrarOcultarProdutos() {
+
     visivelProd = !visivelProd;
-    document.getElementById('tabela-produtos').style.display = visivelProd ? '' : 'none';
-    event.target.textContent = visivelProd ? 'Ocultar' : 'Mostrar';
+
+    document.getElementById(
+        "tabela-produtos"
+    ).style.display =
+        visivelProd ? "" : "none";
 }
+
 
 let visivelEstoque = true;
+
 function mostrarOcultarEstoque() {
+
     visivelEstoque = !visivelEstoque;
-    document.getElementById('tabela-estoque').style.display = visivelEstoque ? '' : 'none';
-    event.target.textContent = visivelEstoque ? 'Ocultar' : 'Mostrar';
+
+    document.getElementById(
+        "tabela-estoque"
+    ).style.display =
+        visivelEstoque ? "" : "none";
 }
 
+
+/* ==========================================================
+   FILTRO
+========================================================== */
+
 function filtrarPorCategoria() {
-    const cat = prompt("Digite a categoria para filtrar (deixe vazio para todas):", "");
-    const filtrados = (!cat) ? produtos : produtos.filter(p => p.categoria.toLowerCase().includes(cat.toLowerCase()));
-    const tb = document.querySelector('#tabela-produtos tbody'); tb.innerHTML = '';
+
+    const cat =
+        prompt(
+            "Digite a categoria para filtrar (deixe vazio para todas):",
+            ""
+        );
+
+    const filtrados =
+        !cat
+            ? produtos
+            : produtos.filter(
+                p =>
+                    p.categoria
+                        .toLowerCase()
+                        .includes(
+                            cat.toLowerCase()
+                        )
+            );
+
+    const tb =
+        document.querySelector(
+            "#tabela-produtos tbody"
+        );
+
+    tb.innerHTML = "";
+
     filtrados.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td>`;
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${p.codigo}</td>
+            <td>${p.nome}</td>
+            <td>${p.categoria}</td>
+            <td>R$ ${Number(p.preco).toFixed(2)}</td>
+            <td>${p.quantidade}</td>
+            <td>R$ ${(Number(p.preco) * Number(p.quantidade)).toFixed(2)}</td>
+        `;
+
         tb.appendChild(tr);
     });
 }
 
+
+/* ==========================================================
+   EXPORTAÇÃO
+========================================================== */
+
 function exportarParaExcel() {
-    if (!produtos.length) return alert("Não há produtos para exportar!");
-    let csv = "Código;Nome;Categoria;Preço;Quantidade;Valor Total\n";
-    produtos.forEach(p => csv += `${p.codigo};${p.nome};${p.categoria};${p.preco.toFixed(2)};${p.quantidade};${(p.preco * p.quantidade).toFixed(2)}\n`);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `estoque_${new Date().toLocaleDateString('pt-BR').replaceAll('/','-')}.csv`;
+
+    if (!produtos.length) {
+
+        return alert(
+            "Não há produtos para exportar!"
+        );
+    }
+
+    let csv =
+        "Código;Nome;Categoria;Preço;Quantidade;Valor Total\n";
+
+    produtos.forEach(p => {
+
+        csv +=
+            `${p.codigo};${p.nome};${p.categoria};${Number(p.preco).toFixed(2)};${p.quantidade};${(Number(p.preco) * Number(p.quantidade)).toFixed(2)}\n`;
+    });
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type: "text/csv;charset=utf-8"
+            }
+        );
+
+    const a =
+        document.createElement("a");
+
+    a.href =
+        URL.createObjectURL(blob);
+
+    a.download =
+        `estoque_${new Date().toLocaleDateString("pt-BR").replaceAll("/", "-")}.csv`;
+
     a.click();
 }
 
+
 function importarDoExcel(e) {
-    const arq = e.target.files[0]; if (!arq) return;
-    const leitor = new FileReader();
+
+    const arq =
+        e.target.files[0];
+
+    if (!arq) return;
+
+    const leitor =
+        new FileReader();
+
     leitor.onload = evt => {
-        const linhas = evt.target.result.split('\n');
+
+        const linhas =
+            evt.target.result.split("\n");
+
         let cont = 0;
-        for (let i = 1; i < linhas.length; i++) {
-            const linha = linhas[i].trim();
+
+        for (
+            let i = 1;
+            i < linhas.length;
+            i++
+        ) {
+
+            const linha =
+                linhas[i].trim();
+
             if (!linha) continue;
-            const [cod, nome, cat, preco, qtd] = linha.split(';');
+
+            const [
+                cod,
+                nome,
+                cat,
+                preco,
+                qtd
+            ] = linha.split(";");
+
             if (!cod) continue;
-            const ex = produtos.find(p => String(p.codigo.trim()) === String(cod.trim()));
-            if (ex) { ex.nome = nome.trim(); ex.categoria = cat.trim(); ex.preco = +preco.replace(',', '.'); }
-            else {
+
+            const ex =
+                produtos.find(
+                    p =>
+                        String(p.codigo).trim() ===
+                        String(cod).trim()
+                );
+
+            if (ex) {
+
+                ex.nome = nome.trim();
+                ex.categoria = cat.trim();
+                ex.preco =
+                    +preco.replace(",", ".");
+
+            } else {
+
                 produtos.push({
-                    codigo: cod.trim(), nome: nome.trim(), categoria: cat.trim(),
-                    preco: +preco.replace(',', '.'), quantidade: parseInt(qtd) || 0,
-                    ultima: new Date().toLocaleString('pt-BR')
+
+                    codigo: cod.trim(),
+
+                    nome: nome.trim(),
+
+                    categoria: cat.trim(),
+
+                    preco:
+                        +preco.replace(",", "."),
+
+                    quantidade:
+                        parseInt(qtd) || 0,
+
+                    unidade: "UN",
+
+                    ultima:
+                        new Date().toLocaleString("pt-BR")
                 });
+
                 cont++;
             }
         }
-        salvar(); listarProdutos(); atualizarEstoque(); alert(`✅ Importado! ${cont} novo(s) produto(s).`);
+
+        salvar();
+
+        listarProdutos();
+        atualizarEstoque();
+
+        alert(
+            `✅ Importado! ${cont} novo(s) produto(s).`
+        );
     };
+
     leitor.readAsText(arq);
 }
 
-let visivelForn = true;
-function alternarFornecedores() {
-    visivelForn = !visivelForn;
-    document.getElementById('form-fornecedor').style.display = visivelForn ? 'block' : 'none';
-    document.getElementById('tabela-fornecedores').style.display = visivelForn ? 'table' : 'none';
-    event.target.textContent = visivelForn ? 'Ocultar' : 'Mostrar';
+
+/* ==========================================================
+   FORNECEDORES
+   NOVA PARTE COMPLETA
+========================================================== */
+
+
+/*
+   Formata o CNPJ automaticamente
+*/
+
+function formatarCNPJ(campo) {
+
+    let valor =
+        campo.value.replace(/\D/g, "");
+
+    valor =
+        valor.substring(0, 14);
+
+    if (valor.length > 12) {
+
+        valor =
+            valor.replace(
+                /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/,
+                "$1.$2.$3/$4-$5"
+            );
+
+    } else if (valor.length > 8) {
+
+        valor =
+            valor.replace(
+                /^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/,
+                "$1.$2.$3/$4"
+            );
+
+    } else if (valor.length > 5) {
+
+        valor =
+            valor.replace(
+                /^(\d{2})(\d{3})(\d{0,3}).*/,
+                "$1.$2.$3"
+            );
+
+    } else if (valor.length > 2) {
+
+        valor =
+            valor.replace(
+                /^(\d{2})(\d{0,3}).*/,
+                "$1.$2"
+            );
+    }
+
+    campo.value = valor;
 }
+
+
+/*
+   Formata CEP
+*/
+
+function formatarCEP(campo) {
+
+    let valor =
+        campo.value.replace(/\D/g, "");
+
+    valor =
+        valor.substring(0, 8);
+
+    if (valor.length > 5) {
+
+        valor =
+            valor.replace(
+                /^(\d{5})(\d{0,3}).*/,
+                "$1-$2"
+            );
+    }
+
+    campo.value = valor;
+}
+
+
+/*
+   Limpa todos os campos do fornecedor
+*/
+
+function limparFormularioFornecedor() {
+
+    document.getElementById("cnpjForn").value = "";
+    document.getElementById("ieForn").value = "";
+    document.getElementById("razaoForn").value = "";
+    document.getElementById("fantasiaForn").value = "";
+    document.getElementById("responsavelForn").value = "";
+    document.getElementById("telefoneForn").value = "";
+    document.getElementById("whatsappForn").value = "";
+    document.getElementById("emailForn").value = "";
+    document.getElementById("cepForn").value = "";
+    document.getElementById("enderecoForn").value = "";
+    document.getElementById("numeroForn").value = "";
+    document.getElementById("complementoForn").value = "";
+    document.getElementById("bairroForn").value = "";
+    document.getElementById("cidadeForn").value = "";
+    document.getElementById("ufForn").value = "";
+    document.getElementById("observacaoForn").value = "";
+}
+
+
+/*
+   Alternar exibição dos fornecedores
+*/
+
+let visivelForn = true;
+
+function alternarFornecedores() {
+
+    visivelForn = !visivelForn;
+
+    document.getElementById(
+        "form-fornecedor"
+    ).style.display =
+        visivelForn ? "block" : "none";
+
+    document.getElementById(
+        "tabela-fornecedores"
+    ).style.display =
+        visivelForn ? "table" : "none";
+}
+
+
+/*
+   CADASTRAR FORNECEDOR
+*/
 
 function cadastrarFornecedor() {
+
     const f = {
-        cnpj: document.getElementById('cnpjForn').value.trim(),
-        razao: document.getElementById('razaoForn').value.trim(),
-        fantasia: document.getElementById('fantasiaForn').value.trim(),
-        endereco: document.getElementById('enderecoForn').value.trim(),
-        telefone: document.getElementById('telefoneForn').value.trim(),
-        cidade: document.getElementById('cidadeForn').value.trim()
+
+        cnpj:
+            document
+                .getElementById("cnpjForn")
+                .value
+                .trim(),
+
+        ie:
+            document
+                .getElementById("ieForn")
+                .value
+                .trim(),
+
+        razao:
+            document
+                .getElementById("razaoForn")
+                .value
+                .trim(),
+
+        fantasia:
+            document
+                .getElementById("fantasiaForn")
+                .value
+                .trim(),
+
+        responsavel:
+            document
+                .getElementById("responsavelForn")
+                .value
+                .trim(),
+
+        telefone:
+            document
+                .getElementById("telefoneForn")
+                .value
+                .trim(),
+
+        whatsapp:
+            document
+                .getElementById("whatsappForn")
+                .value
+                .trim(),
+
+        email:
+            document
+                .getElementById("emailForn")
+                .value
+                .trim(),
+
+        cep:
+            document
+                .getElementById("cepForn")
+                .value
+                .trim(),
+
+        endereco:
+            document
+                .getElementById("enderecoForn")
+                .value
+                .trim(),
+
+        numero:
+            document
+                .getElementById("numeroForn")
+                .value
+                .trim(),
+
+        complemento:
+            document
+                .getElementById("complementoForn")
+                .value
+                .trim(),
+
+        bairro:
+            document
+                .getElementById("bairroForn")
+                .value
+                .trim(),
+
+        cidade:
+            document
+                .getElementById("cidadeForn")
+                .value
+                .trim(),
+
+        uf:
+            document
+                .getElementById("ufForn")
+                .value,
+
+        observacao:
+            document
+                .getElementById("observacaoForn")
+                .value
+                .trim()
     };
-    if (!f.cnpj || !f.razao) return alert("CNPJ e Razão Social são obrigatórios!");
-    fornecedores.push(f); salvar(); listarFornecedores(); atualizarSelectFornecedores();
-    alert("✅ Fornecedor cadastrado com sucesso!");
-    document.getElementById('cnpjForn').value = '';
-    document.getElementById('razaoForn').value = '';
-    document.getElementById('fantasiaForn').value = '';
-    document.getElementById('enderecoForn').value = '';
-    document.getElementById('telefoneForn').value = '';
-    document.getElementById('cidadeForn').value = '';
+
+
+    /* CAMPOS OBRIGATÓRIOS */
+
+    if (!f.cnpj) {
+
+        return alert(
+            "⚠️ Informe o CNPJ do fornecedor!"
+        );
+    }
+
+    if (!f.razao) {
+
+        return alert(
+            "⚠️ Informe a Razão Social!"
+        );
+    }
+
+
+    /* VERIFICA CNPJ DUPLICADO */
+
+    const cnpjNumeros =
+        f.cnpj.replace(/\D/g, "");
+
+    const existe =
+        fornecedores.some(
+            fornecedor =>
+                String(fornecedor.cnpj || "")
+                    .replace(/\D/g, "") ===
+                cnpjNumeros
+        );
+
+    if (existe) {
+
+        return alert(
+            "⚠️ Este CNPJ já está cadastrado!"
+        );
+    }
+
+
+    /* ADICIONA FORNECEDOR */
+
+    fornecedores.push(f);
+
+
+    /* SALVA */
+
+    salvar();
+
+
+    /* ATUALIZA SISTEMA */
+
+    listarFornecedores();
+
+    atualizarSelectFornecedores();
+
+
+    /* LIMPA FORMULÁRIO */
+
+    limparFormularioFornecedor();
+
+
+    alert(
+        "✅ Fornecedor cadastrado com sucesso!\n\n" +
+        "Razão Social: " +
+        f.razao
+    );
 }
 
+
+/*
+   LISTAR FORNECEDORES
+*/
+
 function listarFornecedores() {
-    const tb = document.querySelector('#tabela-fornecedores tbody');
-    tb.innerHTML = '';
+
+    const tb =
+        document.querySelector(
+            "#tabela-fornecedores tbody"
+        );
+
+    if (!tb) return;
+
+    tb.innerHTML = "";
+
+
     fornecedores.forEach((f, idx) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${f.cnpj}</td><td>${f.razao}</td><td>${f.fantasia || '-'}</td><td>${f.endereco || '-'}</td><td>${f.telefone || '-'}</td><td>${f.cidade || '-'}</td><td><button class="perigo" onclick="excluirFornecedor(${idx})">Excluir</button></td>`;
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+
+            <td>${f.cnpj || "-"}</td>
+
+            <td>${f.razao || "-"}</td>
+
+            <td>${f.fantasia || "-"}</td>
+
+            <td>${f.responsavel || "-"}</td>
+
+            <td>${f.telefone || "-"}</td>
+
+            <td>${f.whatsapp || "-"}</td>
+
+            <td>${f.email || "-"}</td>
+
+            <td>
+                ${f.cidade || "-"}
+                ${f.uf ? "/" + f.uf : ""}
+            </td>
+
+            <td>
+
+                <button
+                    class="perigo"
+                    onclick="visualizarFornecedor(${idx})"
+                >
+                    👁️ Ver
+                </button>
+
+                <button
+                    class="perigo"
+                    onclick="excluirFornecedor(${idx})"
+                >
+                    🗑️ Excluir
+                </button>
+
+            </td>
+
+        `;
+
         tb.appendChild(tr);
     });
 }
 
-function excluirFornecedor(idx) {
-    if (!confirm("Excluir fornecedor?")) return;
-    fornecedores.splice(idx, 1); salvar(); listarFornecedores(); atualizarSelectFornecedores();
+
+/*
+   VISUALIZAR DADOS COMPLETOS DO FORNECEDOR
+*/
+
+function visualizarFornecedor(idx) {
+
+    const f =
+        fornecedores[idx];
+
+    if (!f) return;
+
+    const enderecoCompleto = [
+
+        f.endereco,
+
+        f.numero,
+
+        f.complemento,
+
+        f.bairro,
+
+        f.cidade,
+
+        f.uf,
+
+        f.cep
+
+    ].filter(Boolean).join(", ");
+
+
+    alert(
+
+        "🏢 DADOS DO FORNECEDOR\n\n" +
+
+        "CNPJ: " + (f.cnpj || "-") + "\n" +
+
+        "Inscrição Estadual: " +
+        (f.ie || "-") + "\n\n" +
+
+        "Razão Social: " +
+        (f.razao || "-") + "\n" +
+
+        "Nome Fantasia: " +
+        (f.fantasia || "-") + "\n\n" +
+
+        "Responsável: " +
+        (f.responsavel || "-") + "\n" +
+
+        "Telefone: " +
+        (f.telefone || "-") + "\n" +
+
+        "WhatsApp: " +
+        (f.whatsapp || "-") + "\n" +
+
+        "E-mail: " +
+        (f.email || "-") + "\n\n" +
+
+        "Endereço: " +
+        (enderecoCompleto || "-") + "\n\n" +
+
+        "Observações: " +
+        (f.observacao || "-")
+    );
 }
 
+
+/*
+   EXCLUIR FORNECEDOR
+*/
+
+function excluirFornecedor(idx) {
+
+    const f =
+        fornecedores[idx];
+
+    if (!f) return;
+
+
+    /*
+       Confirmação antes da exclusão
+    */
+
+    const confirmar =
+        confirm(
+            "⚠️ Deseja realmente excluir este fornecedor?\n\n" +
+            "Fornecedor: " +
+            f.razao +
+            "\n" +
+            "CNPJ: " +
+            f.cnpj
+        );
+
+    if (!confirmar) return;
+
+
+    fornecedores.splice(idx, 1);
+
+    salvar();
+
+    listarFornecedores();
+
+    atualizarSelectFornecedores();
+
+    alert(
+        "✅ Fornecedor excluído com sucesso!"
+    );
+}
+
+
+/*
+   ATUALIZAR SELECT DE FORNECEDORES
+*/
+
 function atualizarSelectFornecedores() {
-    const sel = document.getElementById('selectFornecedorEntrada');
-    sel.innerHTML = '<option value="">-- Selecione --</option>';
+
+    const sel =
+        document.getElementById(
+            "selectFornecedorEntrada"
+        );
+
+    if (!sel) return;
+
+    sel.innerHTML =
+        '<option value="">-- Selecione --</option>';
+
+
     fornecedores.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f.cnpj;
-        opt.textContent = f.razao;
+
+        const opt =
+            document.createElement("option");
+
+        opt.value =
+            f.cnpj;
+
+        opt.textContent =
+            f.fantasia
+                ? `${f.razao} - ${f.fantasia}`
+                : f.razao;
+
         sel.appendChild(opt);
     });
 }
 
+
+/*
+   CARREGAR PRODUTOS DO FORNECEDOR
+*/
+
 function carregarProdutosFornecedor() {
-    const sel = document.getElementById('selectFornecedorEntrada').value;
-    if (!sel) { document.getElementById('area-entrada-frn').style.display = 'none'; return; }
-    document.getElementById('area-entrada-frn').style.display = 'block';
-    document.getElementById('corpo-entrada').innerHTML = '<tr><td colspan="3">Use a aba Produtos ou Entrada por NF para registrar quantidades</td></tr>';
+
+    const cnpj =
+        document
+            .getElementById(
+                "selectFornecedorEntrada"
+            )
+            .value;
+
+    const area =
+        document.getElementById(
+            "area-entrada-frn"
+        );
+
+    const corpo =
+        document.getElementById(
+            "corpo-entrada"
+        );
+
+    if (!cnpj) {
+
+        area.style.display = "none";
+
+        return;
+    }
+
+
+    const fornecedor =
+        fornecedores.find(
+            f =>
+                f.cnpj === cnpj
+        );
+
+    if (!fornecedor) {
+
+        area.style.display = "none";
+
+        return;
+    }
+
+
+    area.style.display = "block";
+
+    corpo.innerHTML = `
+
+        <tr>
+
+            <td colspan="3">
+
+                <strong>
+                    🏢 Fornecedor selecionado:
+                </strong>
+
+                ${fornecedor.razao}
+
+                <br>
+
+                <small>
+                    CNPJ: ${fornecedor.cnpj}
+                </small>
+
+                <br><br>
+
+                Use a aba
+                <strong>
+                    "Produtos"
+                </strong>
+                ou
+                <strong>
+                    "Entrada por NF"
+                </strong>
+                para registrar as quantidades.
+
+            </td>
+
+        </tr>
+
+    `;
 }
+
+
+/*
+   REGISTRAR ENTRADA RÁPIDA
+*/
 
 function registrarEntradaForn() {
-    alert("✅ Use a aba Produtos ou Entrada por NF para informar quantidades com conversão de unidades!");
+
+    const cnpj =
+        document
+            .getElementById(
+                "selectFornecedorEntrada"
+            )
+            .value;
+
+    const responsavel =
+        document
+            .getElementById(
+                "responsavelEntradaForn"
+            )
+            .value
+            .trim();
+
+    if (!cnpj) {
+
+        return alert(
+            "⚠️ Selecione um fornecedor!"
+        );
+    }
+
+    if (!responsavel) {
+
+        return alert(
+            "⚠️ Informe o responsável pela entrada!"
+        );
+    }
+
+    const fornecedor =
+        fornecedores.find(
+            f =>
+                f.cnpj === cnpj
+        );
+
+    if (!fornecedor) {
+
+        return alert(
+            "❌ Fornecedor não encontrado!"
+        );
+    }
+
+    alert(
+
+        "✅ Fornecedor selecionado!\n\n" +
+
+        "Fornecedor: " +
+        fornecedor.razao +
+        "\n" +
+
+        "CNPJ: " +
+        fornecedor.cnpj +
+        "\n\n" +
+
+        "Para informar os produtos e quantidades, " +
+        "utilize a aba Produtos ou Entrada por NF."
+    );
+
+    /*
+       Registra a ação no histórico
+    */
+
+    movimentacoes.push({
+
+        tipo: "entrada por fornecedor",
+
+        fornecedor:
+            fornecedor.razao,
+
+        cnpjFornecedor:
+            fornecedor.cnpj,
+
+        responsavel:
+            responsavel,
+
+        data:
+            new Date().toLocaleString("pt-BR")
+    });
+
+    salvar();
 }
 
+
+/* ==========================================================
+   IMPORTAR XML
+========================================================== */
+
 function importarEntradaXML() {
-    const input = document.getElementById('arquivoXml');
-    const arq = input.files[0];
-    if (!arq) return alert("Selecione um arquivo XML!");
-    const leitor = new FileReader();
+
+    const input =
+        document.getElementById(
+            "arquivoXml"
+        );
+
+    const arq =
+        input.files[0];
+
+    if (!arq) {
+
+        return alert(
+            "Selecione um arquivo XML!"
+        );
+    }
+
+    const leitor =
+        new FileReader();
+
     leitor.onload = function(e) {
+
         try {
-            const texto = e.target.result;
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(texto, "text/xml");
-            const resp = xml.querySelector("responsavel")?.textContent || "";
-            const itens = xml.querySelectorAll("item");
-            if (!resp) return alert("Tag <responsavel> não encontrada no XML!");
-            if (itens.length === 0) return alert("Nenhum <item> encontrado no XML!");
-            let adicionados = 0;
-            for (const item of itens) {
-                const cod = item.querySelector("codigo")?.textContent || "";
-                const qtd = parseFloat(item.querySelector("quantidade")?.textContent || "0");
-                const fator = parseFloat(item.querySelector("fator")?.textContent || "1");
-                if (!cod || qtd <= 0) continue;
-                const p = produtos.find(x => String(x.codigo) === String(cod));
-                if (p) { p.quantidade += qtd * fator; p.ultima = new Date().toLocaleString('pt-BR'); adicionados++; }
+
+            const texto =
+                e.target.result;
+
+            const parser =
+                new DOMParser();
+
+            const xml =
+                parser.parseFromString(
+                    texto,
+                    "text/xml"
+                );
+
+            const resp =
+                xml.querySelector(
+                    "responsavel"
+                )?.textContent || "";
+
+            const itens =
+                xml.querySelectorAll(
+                    "item"
+                );
+
+            if (!resp) {
+
+                return alert(
+                    "Tag <responsavel> não encontrada no XML!"
+                );
             }
-            salvar(); listarProdutos(); atualizarEstoque();
-            alert(`✅ XML importado! ${adicionados} produto(s) atualizado(s).`);
-        } catch (erro) { alert("❌ Erro ao ler XML: " + erro.message); }
+
+            if (itens.length === 0) {
+
+                return alert(
+                    "Nenhum <item> encontrado no XML!"
+                );
+            }
+
+            let adicionados = 0;
+
+            for (const item of itens) {
+
+                const cod =
+                    item.querySelector(
+                        "codigo"
+                    )?.textContent || "";
+
+                const qtd =
+                    parseFloat(
+                        item.querySelector(
+                            "quantidade"
+                        )?.textContent || "0"
+                    );
+
+                const fator =
+                    parseFloat(
+                        item.querySelector(
+                            "fator"
+                        )?.textContent || "1"
+                    );
+
+                if (!cod || qtd <= 0) continue;
+
+                const p =
+                    produtos.find(
+                        x =>
+                            String(x.codigo) ===
+                            String(cod)
+                    );
+
+                if (p) {
+
+                    p.quantidade +=
+                        qtd * fator;
+
+                    p.ultima =
+                        new Date()
+                            .toLocaleString(
+                                "pt-BR"
+                            );
+
+                    adicionados++;
+                }
+            }
+
+            salvar();
+
+            listarProdutos();
+            atualizarEstoque();
+
+            alert(
+                `✅ XML importado! ${adicionados} produto(s) atualizado(s).`
+            );
+
+        } catch (erro) {
+
+            alert(
+                "❌ Erro ao ler XML: " +
+                erro.message
+            );
+        }
     };
+
     leitor.readAsText(arq);
 }
 
+
+/* ==========================================================
+   RELATÓRIOS
+========================================================== */
+
 function gerarRelatorio() {
-    const inicio = document.getElementById('dataInicio').value;
-    const fim = document.getElementById('dataFim').value;
-    const rel = document.getElementById('conteudo-relatorio');
-    if (!inicio || !fim) { rel.innerHTML = "<strong>⚠️ Informe as datas inicial e final!</strong>"; return; }
+
+    const inicio =
+        document.getElementById(
+            "dataInicio"
+        ).value;
+
+    const fim =
+        document.getElementById(
+            "dataFim"
+        ).value;
+
+    const rel =
+        document.getElementById(
+            "conteudo-relatorio"
+        );
+
+    if (!inicio || !fim) {
+
+        rel.innerHTML =
+            "<strong>⚠️ Informe as datas inicial e final!</strong>";
+
+        return;
+    }
+
     rel.innerHTML = `
-        <h3>📊 Relatório de Estoque</h3>
-        <p><strong>Período:</strong> ${inicio} até ${fim}</p>
-        <p><strong>Total de Produtos:</strong> ${produtos.length}</p>
-        <p><strong>Total de Movimentações:</strong> ${movimentacoes.length}</p>
+
+        <h3>
+            📊 Relatório de Estoque
+        </h3>
+
+        <p>
+            <strong>Período:</strong>
+            ${inicio} até ${fim}
+        </p>
+
+        <p>
+            <strong>Total de Produtos:</strong>
+            ${produtos.length}
+        </p>
+
+        <p>
+            <strong>Total de Movimentações:</strong>
+            ${movimentacoes.length}
+        </p>
+
         <table style="margin-top:15px;">
-            <thead><tr><th>Código</th><th>Produto</th><th>Quantidade Atual</th><th>Valor Total</th></tr></thead>
-            <tbody>${produtos.map(p => `<tr><td>${p.codigo}</td><td>${p.nome}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td></tr>`).join('')}</tbody>
+
+            <thead>
+
+                <tr>
+                    <th>Código</th>
+                    <th>Produto</th>
+                    <th>Quantidade Atual</th>
+                    <th>Valor Total</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                ${produtos.map(p => `
+
+                    <tr>
+
+                        <td>${p.codigo}</td>
+
+                        <td>${p.nome}</td>
+
+                        <td>${p.quantidade}</td>
+
+                        <td>
+                            R$ ${(Number(p.preco) * Number(p.quantidade)).toFixed(2)}
+                        </td>
+
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+
         </table>
     `;
 }
 
+
 function relatorioCompleto() {
-    document.getElementById('dataInicio').value = '2000-01-01';
-    document.getElementById('dataFim').value = new Date().toISOString().split('T')[0];
+
+    document.getElementById(
+        "dataInicio"
+    ).value = "2000-01-01";
+
+    document.getElementById(
+        "dataFim"
+    ).value =
+        new Date()
+            .toISOString()
+            .split("T")[0];
+
     gerarRelatorio();
 }
+
+
+/* ==========================================================
+   INICIALIZAÇÃO
+========================================================== */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        /*
+           O sistema continua iniciando
+           pela tela de login.
+        */
+
+        document.getElementById(
+            "campo-senha"
+        ).focus();
+
+    }
+);
+
 </script>
+
 </body>
 </html>
-

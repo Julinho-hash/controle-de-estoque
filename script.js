@@ -215,6 +215,7 @@ function cadastrarProduto() {
     const nome = document.getElementById('nomeNovo').value.trim();
     const cat = document.getElementById('categoriaNova').value.trim();
     const preco = parseFloat(document.getElementById('precoNovo').value.replace(',', '.'));
+    const unidade = document.getElementById('unidadeNova').value;
     if (!codigo || !nome || !cat || isNaN(preco) || preco <= 0) return alert("Preencha todos os campos corretamente!");
     if (produtos.some(x => String(x.codigo) === String(codigo))) return alert("Já existe produto com este código!");
     produtos.push({ codigo, nome, categoria: cat, preco, quantidade: 0, ultima: new Date().toLocaleString('pt-BR') });
@@ -228,14 +229,16 @@ function cadastrarProduto() {
 
 function listarProdutos() {
     const tb = document.querySelector('#tabela-produtos tbody');
-    tb.innerHTML = '';
-    produtos.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td>`;
-        tb.appendChild(tr);
-    });
+    tr.innerHTML = `
+    <td>${p.codigo}</td>
+    <td>${p.nome}</td>
+    <td>${p.categoria}</td>
+    <td>R$ ${p.preco.toFixed(2)}</td>
+    <td>${p.unidade || 'UN'}</td>
+    <td>${p.quantidade}</td>
+    <td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td>
+`;
 }
-
 function registrarMovimentacao() {
     const cod = document.getElementById('codigoProd').value.trim();
     const qtd = parseFloat(document.getElementById('qtdProd').value);
@@ -257,12 +260,32 @@ function registrarMovimentacao() {
 
 function atualizarEstoque() {
     const tb = document.querySelector('#tabela-estoque tbody');
-    tb.innerHTML = '';
-    produtos.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nome}</td><td>${p.categoria}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.quantidade}</td><td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td><td>${p.ultima}</td><td><button class="perigo" onclick="excluirProduto('${p.codigo}')">Excluir</button></td>`;
-        tb.appendChild(tr);
-    });
+    tr.innerHTML = `
+    <td>${p.codigo}</td>
+
+    <td>${p.nome}</td>
+
+    <td>${p.categoria}</td>
+
+    <td>R$ ${p.preco.toFixed(2)}</td>
+
+    <td>${p.unidade || 'UN'}</td>
+
+    <td>${p.quantidade}</td>
+
+    <td>R$ ${(p.preco * p.quantidade).toFixed(2)}</td>
+
+    <td>${p.ultima || '-'}</td>
+
+    <td>
+        <button
+            class="perigo"
+            onclick="excluirProduto('${p.codigo}')"
+        >
+            Excluir
+        </button>
+    </td>
+`;
 }
 
 function excluirProduto(cod) {
