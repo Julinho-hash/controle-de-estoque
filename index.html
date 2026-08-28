@@ -1,660 +1,4487 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        :root {
-            --cor-primaria: #2563eb; --cor-primaria-escura: #1d4ed8;
-            --cor-sucesso: #16a34a; --cor-aviso: #d97706; --cor-perigo: #dc2626;
-            --cor-nf: #7c3aed; --cor-nf-escura: #6d28d9;
-            --cor-fundo: #f1f5f9; --cor-texto: #1e293b; --cor-borda: #e2e8f0;
-        }
-        body { background-color: var(--cor-fundo); color: var(--cor-texto); line-height: 1.6; padding: 20px; }
-        header {
-            background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-escura));
-            color: white; padding: 25px 30px; border-radius: 12px; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        header h1 { font-size: 26px; margin-bottom: 4px; }
-        .botao-sair { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; color: white; border: none; cursor: pointer; }
-        .botao-sair:hover { background: rgba(255,255,255,0.3); }
-        .navegacao-abas { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--cor-borda); flex-wrap: wrap; }
-        .aba { padding: 12px 18px; background-color: #e2e8f0; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; font-weight: 500; color: #1e293b; }
-        .aba.ativa { background-color: white; border-bottom: 3px solid var(--cor-primaria); color: var(--cor-primaria); font-weight: 600; }
-        .conteudo-aba { display: none; }
-        .conteudo-aba.visivel { display: block; }
-        .secao { background-color: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; }
-        .secao h2 { font-size: 18px; color: var(--cor-primaria); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--cor-borda); }
-        .grupo-form { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-        .grupo-form label { min-width: 180px; font-weight: 500; }
-        input, select { padding: 10px 12px; border: 1px solid var(--cor-borda); border-radius: 6px; font-size: 14px; min-width: 200px; }
-        input[readonly] { background-color: #f8fafc; color: #475569; }
-        button { padding: 10px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; color: white; background-color: var(--cor-primaria); }
-        button:hover { background-color: var(--cor-primaria-escura); }
-        button.sucesso { background-color: var(--cor-sucesso); }
-        button.sucesso:hover { background-color: #15803d; }
-        button.secundario { background-color: #64748b; padding: 8px 14px; font-size: 13px; }
-        button.secundario:hover { background-color: #475569; }
-        button.nf { background-color: var(--cor-nf); }
-        button.nf:hover { background-color: var(--cor-nf-escura); }
-        .grupo-botoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--cor-borda); font-size: 14px; }
-        th { background-color: #f8fafc; color: var(--cor-primaria); font-weight: 600; }
-        tr:hover { background-color: #f8fafc; }
-        #form-entrada-nf, #form-saida-nf {
-            background: linear-gradient(135deg, #f0f7ff, #eef2ff);
-            padding: 25px; border-radius: 12px; border-left: 5px solid var(--cor-nf);
-            margin-top: 20px; display: none;
-        }
-        #form-entrada-nf h3, #form-saida-nf h3 {
-            color: var(--cor-nf); margin-bottom: 20px; font-size: 17px;
-            padding-bottom: 10px; border-bottom: 1px solid #ddd6fe;
-        }
-        .destaque-nf {
-            background: #ede9fe; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #5b21b6;
-        }
-        .card-calculo { background: #dcfce7; padding: 16px 20px; border-radius: 10px; margin: 16px 0; border-left: 4px solid var(--cor-sucesso); font-size: 15px; }
-        .card-calculo.saida { background: #fee2e2; border-left-color: var(--cor-perigo); }
-        #tela-login {
-            position: fixed; inset: 0;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            display: flex; align-items: center; justify-content: center; z-index: 999;
-        }
-        .caixa-login {
-            background: white; padding: 40px 30px; border-radius: 14px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            max-width: 400px; width: 100%; text-align: center;
-        }
-        .caixa-login h2 { color: var(--cor-primaria); margin-bottom: 20px; }
-        .caixa-login input {
-            width: 100%; padding: 14px; margin: 10px 0 20px;
-            border: 1px solid var(--cor-borda); border-radius: 8px;
-            font-size: 16px; text-align: center;
-        }
-        .erro-senha { color: var(--cor-perigo); margin-top: 12px; display: none; }
-        .mensagem { margin-top: 12px; padding: 12px; border-radius: 6px; }
-        .sucesso-msg { background: #dcfce7; color: #166534; }
-        @media (max-width: 800px) {
-            header { flex-direction: column; gap: 15px; text-align: center; }
-            .grupo-form { align-items: stretch; }
-            .grupo-form label { min-width: 100%; }
-            input, select { width: 100%; min-width: 0; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Controle de Estoque</title>
+
+<style>
+
+/* =========================================================
+   ESTILO GERAL
+========================================================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#eef3f8;
+    color:#1f2937;
+    padding:20px;
+}
+
+button,
+input,
+select{
+    font-size:15px;
+}
+
+button{
+    cursor:pointer;
+    border:0;
+    border-radius:6px;
+    padding:10px 15px;
+    background:#1683e8;
+    color:white;
+    font-weight:bold;
+}
+
+button:hover{
+    opacity:.88;
+}
+
+.sucesso{
+    background:#16a34a;
+}
+
+.botao-sair{
+    background:#dc2626;
+}
+
+.botao-excluir{
+    background:#dc6262;
+    padding:8px 12px;
+}
+
+.botao-editar{
+    background:#f59e0b;
+    padding:8px 12px;
+    margin-right:5px;
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+#tela-login{
+    min-height:95vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.caixa-login{
+    width:380px;
+    max-width:95%;
+    background:white;
+    padding:35px;
+    border-radius:12px;
+    box-shadow:0 5px 25px rgba(0,0,0,.15);
+    text-align:center;
+}
+
+.caixa-login h1{
+    color:#123b70;
+    margin-bottom:25px;
+}
+
+.caixa-login input{
+    width:100%;
+    padding:13px;
+    border:1px solid #bbb;
+    border-radius:6px;
+    margin-bottom:15px;
+}
+
+.caixa-login button{
+    width:100%;
+}
+
+.aviso-erro{
+    color:#dc2626;
+    display:none;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+
+/* =========================================================
+   SISTEMA
+========================================================= */
+
+#sistema{
+    display:none;
+    max-width:1250px;
+    margin:auto;
+}
+
+.cabecalho{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:white;
+    padding:20px;
+    border-bottom:2px solid #d5e1ed;
+    margin-bottom:12px;
+}
+
+.cabecalho h1{
+    color:#123b70;
+}
+
+
+/* =========================================================
+   ABAS
+========================================================= */
+
+.navegacao-abas{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+}
+
+.aba{
+    background:#9fc0e7;
+}
+
+.aba.ativa{
+    background:#087fe5;
+}
+
+.conteudo-aba{
+    display:none;
+    background:white;
+    padding:25px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.conteudo-aba.visivel{
+    display:block;
+}
+
+h2{
+    color:#123b70;
+    margin-bottom:20px;
+}
+
+h3{
+    color:#244d79;
+    margin-bottom:15px;
+}
+
+
+/* =========================================================
+   FORMULÁRIOS
+========================================================= */
+
+.linha-botoes{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.form-secao{
+    border:1px solid #d8e1eb;
+    padding:20px;
+    border-radius:8px;
+    margin-bottom:20px;
+    background:#f9fbfd;
+}
+
+.tres-colunas{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.dois-colunas{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.grupo-form{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.grupo-form label{
+    font-weight:bold;
+    color:#334155;
+}
+
+.grupo-form input,
+.grupo-form select{
+    width:100%;
+    padding:11px;
+    border:1px solid #b8c5d3;
+    border-radius:6px;
+    background:white;
+}
+
+.grupo-form input:focus,
+.grupo-form select:focus{
+    outline:2px solid #93c5fd;
+}
+
+
+/* =========================================================
+   TABELAS
+========================================================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+th{
+    background:#e8f1fb;
+    color:#173f6b;
+    padding:12px 8px;
+    text-align:left;
+}
+
+td{
+    padding:11px 8px;
+    border-bottom:1px solid #e1e7ee;
+}
+
+tr:hover{
+    background:#f7fafc;
+}
+
+#area-tabela-estoque{
+    overflow-x:auto;
+}
+
+
+/* =========================================================
+   RESUMO
+========================================================= */
+
+.resumo{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card-resumo{
+    background:#edf6ff;
+    padding:18px;
+    border-radius:8px;
+    text-align:center;
+}
+
+.card-resumo strong{
+    display:block;
+    font-size:24px;
+    color:#087fe5;
+    margin-top:5px;
+}
+
+
+/* =========================================================
+   LISTA NF
+========================================================= */
+
+.lista-itens{
+    margin-top:15px;
+    overflow-x:auto;
+}
+
+.item-nf{
+    display:grid;
+    grid-template-columns:1fr 2fr 1fr 1fr auto;
+    gap:8px;
+    align-items:end;
+    padding:10px;
+    background:white;
+    border:1px solid #ddd;
+    margin-bottom:8px;
+    border-radius:6px;
+}
+
+.item-nf input,
+.item-nf select{
+    padding:9px;
+    border:1px solid #bbb;
+    border-radius:5px;
+}
+
+hr{
+    border:0;
+    border-top:1px solid #ddd;
+    margin:20px 0;
+}
+
+.mensagem{
+    margin-top:12px;
+    font-weight:bold;
+}
+
+.mensagem.ok{
+    color:#15803d;
+}
+
+.mensagem.erro{
+    color:#dc2626;
+}
+
+
+/* =========================================================
+   RELATÓRIO PROFISSIONAL
+========================================================= */
+
+#modal-relatorio{
+    display:none;
+    position:fixed;
+    z-index:9999;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.65);
+    overflow:auto;
+    padding:25px;
+}
+
+.caixa-relatorio{
+    background:white;
+    max-width:1200px;
+    margin:auto;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 5px 30px rgba(0,0,0,.25);
+}
+
+.filtros-relatorio{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    background:#f5f8fb;
+    padding:20px;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+.filtros-relatorio .grupo-form{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.filtros-relatorio label{
+    font-weight:bold;
+    color:#334155;
+}
+
+.filtros-relatorio input,
+.filtros-relatorio select{
+    padding:10px;
+    border:1px solid #b8c5d3;
+    border-radius:6px;
+}
+
+.resumo-relatorio{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card-relatorio{
+    background:#edf6ff;
+    padding:15px;
+    border-radius:8px;
+    text-align:center;
+}
+
+.card-relatorio strong{
+    display:block;
+    font-size:20px;
+    color:#087fe5;
+    margin-top:5px;
+}
+
+.acoes-relatorio{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.tabela-relatorio{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.tabela-relatorio th{
+    background:#e8f1fb;
+    color:#173f6b;
+    padding:10px 7px;
+}
+
+.tabela-relatorio td{
+    padding:9px 7px;
+    border-bottom:1px solid #ddd;
+}
+
+.relatorio-cabecalho{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.relatorio-cabecalho h1{
+    color:#123b70;
+    margin-bottom:8px;
+}
+
+.relatorio-cabecalho p{
+    color:#555;
+}
+
+.relatorio-vazio{
+    text-align:center;
+    padding:30px;
+    color:#777;
+    font-weight:bold;
+}
+
+.area-tabela-relatorio{
+    overflow-x:auto;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
+@media(max-width:900px){
+
+    .tres-colunas,
+    .dois-colunas,
+    .resumo{
+        grid-template-columns:1fr;
+    }
+
+    .filtros-relatorio{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .resumo-relatorio{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .item-nf{
+        grid-template-columns:1fr;
+    }
+
+    .cabecalho{
+        gap:10px;
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    table{
+        min-width:950px;
+    }
+
+}
+
+@media(max-width:600px){
+
+    body{
+        padding:8px;
+    }
+
+    .conteudo-aba{
+        padding:15px;
+    }
+
+    .navegacao-abas{
+        flex-direction:column;
+    }
+
+    .aba{
+        width:100%;
+    }
+
+    .linha-botoes{
+        flex-direction:column;
+    }
+
+    .linha-botoes button{
+        width:100%;
+    }
+
+    #modal-relatorio{
+        padding:8px;
+    }
+
+    .caixa-relatorio{
+        padding:15px;
+    }
+
+    .filtros-relatorio,
+    .resumo-relatorio{
+        grid-template-columns:1fr;
+    }
+
+    .tabela-relatorio{
+        min-width:1000px;
+    }
+
+}
+
+
+/* =========================================================
+   IMPRESSÃO
+========================================================= */
+
+@media print{
+
+    body > *{
+        display:none!important;
+    }
+
+    #modal-relatorio{
+        display:block!important;
+        position:static!important;
+        background:white!important;
+        padding:0!important;
+        width:100%!important;
+        height:auto!important;
+        overflow:visible!important;
+    }
+
+    .caixa-relatorio{
+        box-shadow:none!important;
+        max-width:none!important;
+        padding:0!important;
+    }
+
+    .filtros-relatorio,
+    .acoes-relatorio{
+        display:none!important;
+    }
+
+    .resumo-relatorio{
+        display:grid!important;
+    }
+
+    .area-tabela-relatorio{
+        overflow:visible!important;
+    }
+
+    .tabela-relatorio{
+        min-width:0!important;
+    }
+
+    .relatorio-cabecalho{
+        margin-bottom:20px;
+    }
+
+}
+
+</style>
 </head>
+
 <body>
 
-<!-- LOGIN -->
-<div id="tela-login">
+
+<!-- =========================================================
+     MODAL DE RELATÓRIO
+========================================================= -->
+
+<div id="modal-relatorio">
+
+    <div class="caixa-relatorio">
+
+        <div class="relatorio-cabecalho">
+
+            <h1>📋 RELATÓRIO DE MOVIMENTAÇÃO DE ESTOQUE</h1>
+
+            <p id="periodo-relatorio">
+                Período: Todos os registros
+            </p>
+
+        </div>
+
+
+        <!-- FILTROS -->
+
+        <div class="filtros-relatorio">
+
+            <div class="grupo-form">
+                <label>Data Inicial</label>
+                <input type="date" id="relatorio-data-inicial">
+            </div>
+
+            <div class="grupo-form">
+                <label>Data Final</label>
+                <input type="date" id="relatorio-data-final">
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Produto</label>
+
+                <select id="relatorio-produto">
+                    <option value="">Todos os produtos</option>
+                </select>
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Tipo</label>
+
+                <select id="relatorio-tipo">
+
+                    <option value="">
+                        Todas as movimentações
+                    </option>
+
+                    <option value="entrada">
+                        📥 Entradas
+                    </option>
+
+                    <option value="saida">
+                        📤 Saídas
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Código</label>
+
+                <input
+                    type="text"
+                    id="relatorio-codigo"
+                    placeholder="Código do produto">
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Número da NF</label>
+
+                <input
+                    type="text"
+                    id="relatorio-nf"
+                    placeholder="Número da NF">
+
+            </div>
+
+            <div class="grupo-form">
+
+                <label>Responsável</label>
+
+                <input
+                    type="text"
+                    id="relatorio-responsavel"
+                    placeholder="Responsável">
+
+            </div>
+
+        </div>
+
+
+        <!-- AÇÕES -->
+
+        <div class="acoes-relatorio">
+
+            <button
+                class="sucesso"
+                type="button"
+                onclick="aplicarFiltrosRelatorio()">
+
+                🔍 Gerar Relatório
+
+            </button>
+
+            <button
+                type="button"
+                onclick="imprimirRelatorio()">
+
+                🖨️ Imprimir Relatório
+
+            </button>
+
+            <button
+                class="botao-sair"
+                type="button"
+                onclick="fecharRelatorio()">
+
+                ❌ Fechar
+
+            </button>
+
+        </div>
+
+
+        <!-- RESUMO -->
+
+        <div class="resumo-relatorio">
+
+            <div class="card-relatorio">
+
+                Total de Movimentações
+
+                <strong id="rel-total-mov">
+                    0
+                </strong>
+
+            </div>
+
+            <div class="card-relatorio">
+
+                Total de Entradas
+
+                <strong id="rel-total-entrada">
+                    0
+                </strong>
+
+            </div>
+
+            <div class="card-relatorio">
+
+                Total de Saídas
+
+                <strong id="rel-total-saida">
+                    0
+                </strong>
+
+            </div>
+
+            <div class="card-relatorio">
+
+                Saldo do Período
+
+                <strong id="rel-saldo">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- TABELA -->
+
+        <div class="area-tabela-relatorio">
+
+            <table class="tabela-relatorio">
+
+                <thead>
+
+                    <tr>
+                        <th>Data</th>
+                        <th>Código</th>
+                        <th>Produto</th>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>NF</th>
+                        <th>Responsável</th>
+                        <th>Preço Unit.</th>
+                        <th>Valor Total</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="tabela-relatorio-body"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     LOGIN
+========================================================= -->
+
+<section id="tela-login">
+
     <div class="caixa-login">
-        <h2>🔐 Controle de Estoque</h2>
-        <p>Digite a senha para acessar o sistema</p>
-        <input type="password" id="campo-senha" placeholder="Digite a senha..."
-            onkeypress="if(event.key === 'Enter') entrarSistema()">
-        <button class="sucesso" onclick="entrarSistema()">✅ Entrar</button>
-        <div class="erro-senha" id="aviso-erro">❌ Senha incorreta!</div>
+
+        <h1>🔐 Acesso ao Sistema</h1>
+
+        <input
+            type="password"
+            id="campo-senha"
+            placeholder="Digite a senha"
+            autocomplete="current-password">
+
+        <button
+            type="button"
+            onclick="entrarSistema()">
+
+            Entrar
+
+        </button>
+
+        <p id="aviso-erro" class="aviso-erro">
+            Senha incorreta! Tente novamente.
+        </p>
+
     </div>
-</div>
 
-<!-- SISTEMA -->
-<div id="sistema" style="display:none;">
-<header>
-    <div>
-        <h1>Controle de Estoque</h1>
-        <p>Sistema de gestão de produtos, fornecedores e movimentações</p>
-    </div>
-    <button class="botao-sair" onclick="sairSistema()">🚪 Sair</button>
-</header>
-
-<div class="navegacao-abas">
-    <button class="aba ativa" onclick="trocarAba(0)">📦 Produtos</button>
-    <button class="aba" onclick="trocarAba(1)">🏢 Fornecedores</button>
-    <button class="aba" onclick="trocarAba(2)">📥 Entrada Rápida</button>
-    <button class="aba" onclick="trocarAba(3)">📄 Importar XML</button>
-    <button class="aba" onclick="trocarAba(4)">📊 Relatórios</button>
-</div>
-
-<main>
-<!-- =====================================================
- ABA 0 — MOVIMENTAÇÃO / ENTRADA E SAÍDA POR NF
-===================================================== -->
-<section class="conteudo-aba visivel" id="aba0">
-<div class="secao">
-<h2>🔍 Buscar Produto e Registrar Movimentação</h2>
-
-<div class="grupo-form">
-    <label>Código do Produto:</label>
-    <input type="text" id="codigoProd" placeholder="Digite o código"
-        onblur="buscarProduto()" onkeypress="if(event.key==='Enter') buscarProduto()">
-</div>
-<div class="grupo-form">
-    <label>Nome:</label>
-    <input type="text" id="nomeProd" readonly placeholder="Preenchido automaticamente">
-</div>
-<div class="grupo-form">
-    <label>Quantidade:</label>
-    <input type="number" id="qtdProd" min="0.001" step="0.001" value="1">
-</div>
-<div class="grupo-form">
-    <label>Tipo de Movimento:</label>
-    <select id="tipoMov">
-        <option value="entrada">📥 Entrada</option>
-        <option value="saida">📤 Saída</option>
-    </select>
-</div>
-
-<!-- CAMPOS NF MOVIMENTAÇÃO -->
-<div class="grupo-form">
-    <label>Número da NF:</label>
-    <input type="text" id="mov-numero-nf" placeholder="Digite o número da NF">
-</div>
-<div class="grupo-form">
-    <label>Data de Emissão da NF:</label>
-    <input type="date" id="mov-emissao-nf">
-</div>
-<div class="grupo-form">
-    <label>Data da Movimentação:</label>
-    <input type="date" id="mov-data">
-</div>
-
-<div class="grupo-form">
-    <label>Responsável:</label>
-    <input type="text" id="responsavel" placeholder="Nome de quem registrou">
-</div>
-
-<div class="grupo-botoes">
-    <button class="sucesso" onclick="registrarMovimentacao()">✅ Registrar Movimentação</button>
-    <button class="nf" onclick="abrirFormularioNF()">📥 Entrada por NF com Conversão</button>
-    <button class="nf" onclick="abrirFormularioSaidaNF()">📤 Saída por Conversão</button>
-</div>
-
-<!-- =====================================================
- ENTRADA POR NF — ⭐ CAMPOS ADICIONADOS NO TOPO ⭐
-===================================================== -->
-<div id="form-entrada-nf">
-<h3>📥 Entrada por NF — Conversão Automática</h3>
-<div class="destaque-nf">
-💡 Informe os dados da NF e o sistema calcula automaticamente.
-</div>
-
-<!-- ⭐ CAMPOS NF — LOGO NO TOPO, ACIMA DE TUDO ⭐ -->
-<div class="grupo-form">
-    <label>Número da NF:</label>
-    <input type="text" id="nf-numero" placeholder="Digite o número da NF">
-</div>
-<div class="grupo-form">
-    <label>Data de Emissão da NF:</label>
-    <input type="date" id="nf-emissao">
-</div>
-<div class="grupo-form">
-    <label>Data da Entrada:</label>
-    <input type="date" id="nf-data-entrada">
-</div>
-
-<div class="grupo-form">
-    <label>CNPJ do Fornecedor:</label>
-    <input type="text" id="nf-cnpj" placeholder="Digite o CNPJ">
-</div>
-<div class="grupo-form">
-    <label>Razão Social:</label>
-    <input type="text" id="nf-razao" readonly placeholder="Preenchido automaticamente">
-</div>
-<div class="grupo-form">
-    <label>Código do Produto:</label>
-    <input type="text" id="nf-codigo" placeholder="Digite o código" onblur="buscarProdutoNF()">
-</div>
-<div class="grupo-form">
-    <label>Nome do Produto:</label>
-    <input type="text" id="nf-nome" readonly placeholder="Preenchido automaticamente">
-</div>
-<div class="grupo-form">
-    <label>Quantidade de Unidades:</label>
-    <input type="number" id="nf-quantidade" min="1" value="1" oninput="calcularTotalNF()">
-</div>
-<div class="grupo-form">
-    <label>Preço Unitário da NF R$:</label>
-    <input type="number" id="nf-preco" step="0.01" value="0.00">
-</div>
-<div class="grupo-form">
-    <label>Volume/Peso por Unidade:</label>
-    <input type="number" id="nf-fator" step="0.001" min="0.001" value="1" oninput="calcularTotalNF()">
-</div>
-<div class="grupo-form">
-    <label>Unidade de Medida:</label>
-    <select id="nf-unidade" onchange="calcularTotalNF()">
-        <option value="L">L — Litros</option>
-        <option value="kg">kg — Quilogramas</option>
-        <option value="un" selected>un — Unidades</option>
-    </select>
-</div>
-
-
-
-
-<div class="card-calculo">
-    🧮 Cálculo: <span id="nf-calculo">1 × 1 = 1.00</span><br>
-    ✅ Total a Registrar: <span id="nf-total">1.00</span> <span id="nf-sigla">un</span>
-</div>
-<div class="grupo-botoes">
-    <button class="sucesso" onclick="registrarEntradaNF()">✅ Registrar Entrada</button>
-    <button class="secundario" onclick="limparFormNF()">🗑️ Limpar</button>
-</div>
-</div>
-
-<!-- =====================================================
- SAÍDA POR CONVERSÃO — ⭐ CAMPOS ADICIONADOS NO TOPO ⭐
-===================================================== -->
-<div id="form-saida-nf">
-<h3>📤 Saída por Conversão de Unidades</h3>
-
-<!-- ⭐ CAMPOS NF — LOGO NO TOPO, ACIMA DE TUDO ⭐ -->
-<div class="grupo-form">
-    <label>Número da NF:</label>
-    <input type="text" id="saida-numero-nf" placeholder="Digite o número da NF">
-</div>
-<div class="grupo-form">
-    <label>Data de Emissão da NF:</label>
-    <input type="date" id="saida-emissao-nf">
-</div>
-<div class="grupo-form">
-    <label>Data da Saída:</label>
-    <input type="date" id="saida-data">
-</div>
-
-<div class="grupo-form">
-    <label>CNPJ do Fornecedor:</label>
-    <input type="text" id="saida-cnpj" placeholder="Digite o CNPJ">
-</div>
-<div class="grupo-form">
-    <label>Razão Social:</label>
-    <input type="text" id="saida-razao" readonly placeholder="Preenchido automaticamente">
-</div>
-<div class="grupo-form">
-    <label>Código do Produto:</label>
-    <input type="text" id="saida-codigo" placeholder="Digite o código" onblur="buscarProdutoSaida()">
-</div>
-<div class="grupo-form">
-    <label>Nome do Produto:</label>
-    <input type="text" id="saida-nome" readonly placeholder="Preenchido automaticamente">
-</div>
-<div class="grupo-form">
-    <label>Quantidade de Unidades:</label>
-    <input type="number" id="saida-quantidade" min="1" value="1" oninput="calcularTotalSaida()">
-</div>
-<div class="grupo-form">
-    <label>Volume/Peso por Unidade:</label>
-    <input type="number" id="saida-fator" step="0.001" min="0.001" value="1" oninput="calcularTotalSaida()">
-</div>
-<div class="card-calculo saida">
-    ⚠️ Total a Descontar: <span id="saida-total">1.00</span> <span id="saida-sigla">un</span>
-</div>
-<div class="grupo-botoes">
-    <button class="sucesso" onclick="registrarSaidaConversao()">✅ Registrar Saída</button>
-    <button class="secundario" onclick="limparFormSaida()">🗑️ Limpar</button>
-</div>
-</div>
-
-</div>
-
-<!-- CADASTRO DE PRODUTO -->
-<div class="secao">
-<h2>➕ Cadastrar Novo Produto</h2>
-<div class="grupo-form"><label>Código:</label><input type="text" id="codigoNovo"></div>
-<div class="grupo-form"><label>Nome:</label><input type="text" id="nomeNovo"></div>
-<div class="grupo-form"><label>Quantidade Inicial:</label><input type="number" id="qtdNovo" step="0.001" value="0"></div>
-<button class="sucesso" onclick="cadastrarProduto()">➕ Cadastrar</button>
-</div>
-
-<!-- TABELA ESTOQUE -->
-<div class="secao">
-<h2>📦 Estoque</h2>
-<table id="tabela-estoque" style="width:100%;border-collapse:collapse;margin-top:15px;">
-<thead><tr><th>Código</th><th>Nome</th><th>Quantidade</th><th>Última Movimentação</th></tr></thead>
-<tbody></tbody>
-</table>
-</div>
 </section>
 
-<!-- =====================================================
- ABA 1 — FORNECEDORES
-===================================================== -->
-<section class="conteudo-aba" id="aba1">
-<div class="secao">
-<h2>🏢 Fornecedores</h2>
-<div class="grupo-form"><label>CNPJ:</label><input type="text" id="cnpjForn"></div>
-<div class="grupo-form"><label>Razão Social:</label><input type="text" id="razaoForn"></div>
-<button class="sucesso" onclick="cadastrarFornecedor()">✅ Cadastrar</button>
-</div>
-</section>
 
-<!-- =====================================================
- ABA 2 — ENTRADA RÁPIDA
-===================================================== -->
-<section class="conteudo-aba" id="aba2">
-<div class="secao">
-<h2>📥 Entrada Rápida</h2>
-<div class="grupo-form">
-    <label>Número da NF:</label>
-    <input type="text" id="entrada-rapida-nf" placeholder="Digite o número da NF">
-</div>
-<div class="grupo-form">
-    <label>Data de Emissão da NF:</label>
-    <input type="date" id="entrada-rapida-emissao">
-</div>
-<div class="grupo-form">
-    <label>Data da Entrada:</label>
-    <input type="date" id="entrada-rapida-data">
-</div>
-<div class="grupo-form">
-    <label>Código do Produto:</label>
-    <input type="text" id="entrada-codigo">
-</div>
-<div class="grupo-form">
-    <label>Quantidade:</label>
-    <input type="number" id="entrada-qtd" step="0.001">
-</div>
-<button class="sucesso" onclick="registrarEntradaRapida()">✅ Registrar Entrada</button>
-<div id="msg-entrada" class="mensagem" style="display:none;"></div>
-</div>
-</section>
+<!-- =========================================================
+     SISTEMA
+========================================================= -->
 
-<!-- =====================================================
- ABA 3 — XML
-===================================================== -->
-<section class="conteudo-aba" id="aba3">
-<div class="secao">
-<h2>📄 Importar XML</h2>
-<div class="grupo-form"><label>Arquivo XML:</label><input type="file" id="arquivoXml" accept=".xml"></div>
-<button class="sucesso" onclick="importarXML()">📥 Importar</button>
-</div>
-</section>
+<main id="sistema">
 
-<!-- =====================================================
- ABA 4 — RELATÓRIOS
-===================================================== -->
-<section class="conteudo-aba" id="aba4">
-<div class="secao">
-<h2>📊 Relatórios</h2>
-<button class="sucesso" onclick="gerarRelatorio()">📋 Gerar Relatório</button>
-<div id="relatorio-dados" style="margin-top:15px;"></div>
-</div>
-</section>
+    <header class="cabecalho">
+
+        <h1>📦 Controle de Estoque</h1>
+
+        <button
+            type="button"
+            class="botao-sair"
+            onclick="sairSistema()">
+
+            Sair
+
+        </button>
+
+    </header>
+
+
+    <!-- =====================================================
+         ABAS
+    ====================================================== -->
+
+    <nav class="navegacao-abas">
+
+        <button
+            type="button"
+            class="aba ativa"
+            onclick="trocarAba(0)">
+
+            📊 Estoque
+
+        </button>
+
+        <button
+            type="button"
+            class="aba"
+            onclick="trocarAba(1)">
+
+            📝 Cadastro
+
+        </button>
+
+        <button
+            type="button"
+            class="aba"
+            onclick="trocarAba(2)">
+
+            📥 Movimentação
+
+        </button>
+
+        <button
+            type="button"
+            class="aba"
+            onclick="trocarAba(3)">
+
+            📄 NF Entrada
+
+        </button>
+
+        <button
+            type="button"
+            class="aba"
+            onclick="trocarAba(4)">
+
+            📄 NF Saída
+
+        </button>
+
+        <button
+            type="button"
+            class="aba"
+            onclick="trocarAba(5)">
+
+            🏢 Fornecedores
+
+        </button>
+
+    </nav>
+
+
+    <!-- =====================================================
+         ABA 0 - ESTOQUE
+    ====================================================== -->
+
+    <section class="conteudo-aba visivel">
+
+        <h2>📊 Controle de Estoque</h2>
+
+        <div class="linha-botoes">
+
+            <button
+                type="button"
+                id="botao-ocultar-estoque"
+                onclick="mostrarOcultarEstoque()">
+
+                👁️ Ocultar Estoque
+
+            </button>
+
+            <button
+                type="button"
+                onclick="filtrarPorCategoria()">
+
+                🔍 Filtrar Categoria
+
+            </button>
+
+            <button
+                type="button"
+                onclick="exportarParaExcel()">
+
+                📊 Exportar Excel
+
+            </button>
+
+            <button
+                type="button"
+                onclick="importarDoExcel()">
+
+                📂 Importar Excel
+
+            </button>
+
+            <button
+                type="button"
+                onclick="importarXML()">
+
+                📥 Importar XML NF-e
+
+            </button>
+
+            <button
+                type="button"
+                onclick="gerarRelatorio()">
+
+                📋 Gerar Relatório
+
+            </button>
+
+        </div>
+
+
+        <div class="resumo">
+
+            <div class="card-resumo">
+
+                Produtos cadastrados
+
+                <strong id="total-produtos">0</strong>
+
+            </div>
+
+            <div class="card-resumo">
+
+                Quantidade em estoque
+
+                <strong id="total-quantidade">0</strong>
+
+            </div>
+
+            <div class="card-resumo">
+
+                Valor do estoque
+
+                <strong id="valor-estoque">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div id="area-tabela-estoque">
+
+            <table id="tabela-estoque">
+
+                <thead>
+
+                    <tr>
+                        <th>Código</th>
+                        <th>Nome do Produto</th>
+                        <th>Categoria</th>
+                        <th>Preço Unitário</th>
+                        <th>Unidade</th>
+                        <th>Quantidade</th>
+                        <th>Valor Total</th>
+                        <th>Última Movimentação</th>
+                        <th>Ação</th>
+                    </tr>
+
+                </thead>
+
+                <tbody></tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ABA 1 - CADASTRO
+    ====================================================== -->
+
+    <section class="conteudo-aba">
+
+        <h2>📝 Cadastro de Produtos</h2>
+
+        <div class="form-secao">
+
+            <h3>➕ Cadastrar Novo Produto</h3>
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Código</label>
+
+                    <input
+                        type="text"
+                        id="codigoNovo"
+                        placeholder="Ex.: 001">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Nome do Produto</label>
+
+                    <input
+                        type="text"
+                        id="nomeNovo"
+                        placeholder="Nome completo">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Categoria</label>
+
+                    <input
+                        type="text"
+                        id="categoriaNova"
+                        placeholder="Ex.: Alimentos">
+
+                </div>
+
+            </div>
+
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Preço Unitário R$</label>
+
+                    <input
+                        type="text"
+                        id="precoNovo"
+                        placeholder="0,00">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Quantidade Inicial</label>
+
+                    <input
+                        type="number"
+                        id="qtdNovo"
+                        value="0"
+                        min="0"
+                        step="0.01">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Unidade de Medida</label>
+
+                    <select id="unidadeNova">
+
+                        <option value="UN">
+                            UN — Unidade
+                        </option>
+
+                        <option value="KG">
+                            KG — Quilograma
+                        </option>
+
+                        <option value="L">
+                            L — Litro
+                        </option>
+
+                        <option value="CX">
+                            CX — Caixa
+                        </option>
+
+                        <option value="PC">
+                            PC — Pacote
+                        </option>
+
+                        <option value="M">
+                            M — Metro
+                        </option>
+
+                        <option value="MT">
+                            MT — Metro Quadrado
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="sucesso"
+                onclick="cadastrarProduto()">
+
+                ✅ Cadastrar Produto
+
+            </button>
+
+            <div
+                id="msg-cadastro"
+                class="mensagem">
+            </div>
+
+        </div>
+
+
+        <div class="form-secao">
+
+            <h3>🔍 Buscar Produto</h3>
+
+            <div class="dois-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Código do Produto</label>
+
+                    <input
+                        type="text"
+                        id="codigoBusca"
+                        placeholder="Digite o código"
+                        onblur="buscarProdutoCadastro()">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Nome</label>
+
+                    <input
+                        type="text"
+                        id="nomeProd"
+                        readonly>
+
+                </div>
+
+            </div>
+
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Categoria</label>
+
+                    <input
+                        type="text"
+                        id="categoriaProd"
+                        readonly>
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Preço Unitário R$</label>
+
+                    <input
+                        type="text"
+                        id="precoProd"
+                        readonly>
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Unidade</label>
+
+                    <input
+                        type="text"
+                        id="unidadeProd"
+                        readonly>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="limparCampos()">
+
+                🔄 Limpar
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ABA 2 - MOVIMENTAÇÃO
+    ====================================================== -->
+
+    <section class="conteudo-aba">
+
+        <h2>📥 Movimentação de Estoque</h2>
+
+        <div class="form-secao">
+
+            <h3>Registrar Entrada / Saída</h3>
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Código do Produto</label>
+
+                    <input
+                        type="text"
+                        id="codigoMov"
+                        placeholder="Código"
+                        onblur="buscarProdutoMovimentacao()">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Tipo</label>
+
+                    <select id="tipoMov">
+
+                        <option value="entrada">
+                            📥 Entrada
+                        </option>
+
+                        <option value="saida">
+                            📤 Saída
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Quantidade</label>
+
+                    <input
+                        type="number"
+                        id="qtdProd"
+                        value="1"
+                        min="0.01"
+                        step="0.01">
+
+                </div>
+
+            </div>
+
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Número da NF</label>
+
+                    <input
+                        type="text"
+                        id="mov-numero-nf"
+                        placeholder="Número">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Data Emissão NF</label>
+
+                    <input
+                        type="date"
+                        id="mov-emissao-nf">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Data Movimentação</label>
+
+                    <input
+                        type="date"
+                        id="mov-data">
+
+                </div>
+
+            </div>
+
+
+            <div class="dois-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Responsável</label>
+
+                    <input
+                        type="text"
+                        id="responsavel"
+                        placeholder="Nome completo">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="sucesso"
+                onclick="registrarMovimentacao()">
+
+                ✅ Registrar Movimentação
+
+            </button>
+
+            <div
+                id="msg-movimentacao"
+                class="mensagem">
+            </div>
+
+        </div>
+
+
+        <div class="form-secao">
+
+            <h3>⚡ Entrada Rápida por NF</h3>
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Código Produto</label>
+
+                    <input
+                        type="text"
+                        id="entrada-codigo"
+                        placeholder="Código">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Nº NF</label>
+
+                    <input
+                        type="text"
+                        id="entrada-rapida-nf"
+                        placeholder="Número NF">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Quantidade</label>
+
+                    <input
+                        type="number"
+                        id="entrada-qtd"
+                        value="1"
+                        min="0.01"
+                        step="0.01">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="sucesso"
+                onclick="registrarEntradaRapida()">
+
+                ✅ Registrar Entrada
+
+            </button>
+
+            <div
+                id="msg-entrada"
+                class="mensagem">
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ABA 3 - NF ENTRADA
+    ====================================================== -->
+
+    <section class="conteudo-aba">
+
+        <h2>📄 Entrada por Nota Fiscal</h2>
+
+        <button
+            type="button"
+            class="sucesso"
+            onclick="abrirFormularioNF()">
+
+            ➕ Nova Entrada NF
+
+        </button>
+
+
+        <div
+            id="form-entrada-nf"
+            class="form-secao"
+            style="display:none;margin-top:15px;">
+
+            <h3>Dados da Nota Fiscal</h3>
+
+            <div class="dois-colunas">
+
+                <div class="grupo-form">
+
+                    <label>CNPJ Fornecedor</label>
+
+                    <input
+                        type="text"
+                        id="nf-cnpj"
+                        placeholder="00.000.000/0000-00"
+                        onblur="buscarFornecedorNF()">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Razão Social</label>
+
+                    <input
+                        type="text"
+                        id="nf-razao"
+                        readonly>
+
+                </div>
+
+            </div>
+
+
+            <div class="dois-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Número da NF</label>
+
+                    <input
+                        type="text"
+                        id="nf-numero"
+                        placeholder="Número da NF">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Data Emissão</label>
+
+                    <input
+                        type="date"
+                        id="nf-data">
+
+                </div>
+
+            </div>
+
+
+            <div class="grupo-form">
+
+                <label>Responsável pela Entrada</label>
+
+                <input
+                    type="text"
+                    id="nf-responsavel"
+                    placeholder="Nome de quem recebeu">
+
+            </div>
+
+            <hr>
+
+            <h3>Itens da Nota Fiscal</h3>
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Código Produto</label>
+
+                    <input
+                        type="text"
+                        id="nf-codigo"
+                        placeholder="Código"
+                        onblur="buscarProdutoNF()">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Quantidade</label>
+
+                    <input
+                        type="number"
+                        id="nf-qtd"
+                        value="1"
+                        min="0.01"
+                        step="0.01">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Preço Unitário</label>
+
+                    <input
+                        type="text"
+                        id="nf-preco"
+                        placeholder="0,00">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="adicionarItemNF()">
+
+                ➕ Adicionar Item
+
+            </button>
+
+
+            <div
+                id="lista-itens-nf"
+                class="lista-itens">
+            </div>
+
+            <br>
+
+
+            <button
+                type="button"
+                class="sucesso"
+                onclick="finalizarNFEntrada()">
+
+                ✅ Finalizar Entrada NF
+
+            </button>
+
+            <button
+                type="button"
+                onclick="cancelarNF()">
+
+                ❌ Cancelar
+
+            </button>
+
+
+            <div
+                id="msg-nf-entrada"
+                class="mensagem">
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ABA 4 - NF SAÍDA
+    ====================================================== -->
+
+    <section class="conteudo-aba">
+
+        <h2>📄 Saída por Nota Fiscal</h2>
+
+        <div class="form-secao">
+
+            <h3>Dados da NF de Saída</h3>
+
+            <div class="dois-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Número da NF</label>
+
+                    <input
+                        type="text"
+                        id="saida-nf-numero"
+                        placeholder="Número">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Data</label>
+
+                    <input
+                        type="date"
+                        id="saida-nf-data">
+
+                </div>
+
+            </div>
+
+
+            <div class="grupo-form">
+
+                <label>Responsável</label>
+
+                <input
+                    type="text"
+                    id="saida-responsavel"
+                    placeholder="Nome completo">
+
+            </div>
+
+            <hr>
+
+            <h3>Produto</h3>
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Código Produto</label>
+
+                    <input
+                        type="text"
+                        id="saida-codigo"
+                        placeholder="Código"
+                        onblur="buscarProdutoSaida()">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Produto</label>
+
+                    <input
+                        type="text"
+                        id="saida-produto"
+                        readonly>
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Quantidade</label>
+
+                    <input
+                        type="number"
+                        id="saida-qtd"
+                        value="1"
+                        min="0.01"
+                        step="0.01">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="sucesso"
+                onclick="registrarSaidaNF()">
+
+                📤 Registrar Saída NF
+
+            </button>
+
+
+            <div
+                id="msg-nf-saida"
+                class="mensagem">
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ABA 5 - FORNECEDORES
+    ====================================================== -->
+
+    <section class="conteudo-aba">
+
+        <h2>🏢 Cadastro de Fornecedores</h2>
+
+        <div class="form-secao">
+
+            <h3>➕ Novo Fornecedor</h3>
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>CNPJ</label>
+
+                    <input
+                        type="text"
+                        id="fornecedor-cnpj"
+                        placeholder="00.000.000/0000-00">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Razão Social</label>
+
+                    <input
+                        type="text"
+                        id="fornecedor-razao"
+                        placeholder="Razão Social">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Nome Fantasia</label>
+
+                    <input
+                        type="text"
+                        id="fornecedor-fantasia"
+                        placeholder="Nome Fantasia">
+
+                </div>
+
+            </div>
+
+
+            <div class="tres-colunas">
+
+                <div class="grupo-form">
+
+                    <label>Telefone</label>
+
+                    <input
+                        type="text"
+                        id="fornecedor-telefone"
+                        placeholder="Telefone">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>E-mail</label>
+
+                    <input
+                        type="email"
+                        id="fornecedor-email"
+                        placeholder="E-mail">
+
+                </div>
+
+                <div class="grupo-form">
+
+                    <label>Cidade</label>
+
+                    <input
+                        type="text"
+                        id="fornecedor-cidade"
+                        placeholder="Cidade">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="sucesso"
+                onclick="cadastrarFornecedor()">
+
+                ✅ Cadastrar Fornecedor
+
+            </button>
+
+
+            <div
+                id="msg-fornecedor"
+                class="mensagem">
+            </div>
+
+        </div>
+
+
+        <div class="form-secao">
+
+            <h3>📋 Fornecedores Cadastrados</h3>
+
+            <div style="overflow-x:auto;">
+
+                <table id="tabela-fornecedores">
+
+                    <thead>
+
+                        <tr>
+                            <th>CNPJ</th>
+                            <th>Razão Social</th>
+                            <th>Nome Fantasia</th>
+                            <th>Telefone</th>
+                            <th>E-mail</th>
+                            <th>Cidade</th>
+                            <th>Ação</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
 
 </main>
-</div>
 
-<!-- =====================================================
- JAVASCRIPT
-===================================================== -->
+
+<!-- =========================================================
+     JAVASCRIPT
+     TUDO DENTRO DESTE HTML
+========================================================= -->
+
 <script>
+
+/* =========================================================
+   CONFIGURAÇÕES
+========================================================= */
+
 const SENHA_SISTEMA = "1234";
-let produtos = [];
-let movimentacoes = [];
-let fornecedores = [];
 
-function dataHojeISO() {
+let produtos = JSON.parse(
+    localStorage.getItem("produtos_estoque") || "[]"
+);
+
+let movimentacoes = JSON.parse(
+    localStorage.getItem("movimentacoes_estoque") || "[]"
+);
+
+let fornecedores = JSON.parse(
+    localStorage.getItem("fornecedores_estoque") || "[]"
+);
+
+let itensNF = [];
+
+let estoqueVisivel = true;
+
+
+/* =========================================================
+   SALVAR DADOS
+========================================================= */
+
+function salvarDados(){
+
+    localStorage.setItem(
+        "produtos_estoque",
+        JSON.stringify(produtos)
+    );
+
+    localStorage.setItem(
+        "movimentacoes_estoque",
+        JSON.stringify(movimentacoes)
+    );
+
+    localStorage.setItem(
+        "fornecedores_estoque",
+        JSON.stringify(fornecedores)
+    );
+
+}
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+function dataHojeISO(){
+
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    return d.getFullYear() + "-" +
+        String(d.getMonth()+1).padStart(2,"0") + "-" +
+        String(d.getDate()).padStart(2,"0");
+
 }
 
-function salvar() {
-    localStorage.setItem("produtos", JSON.stringify(produtos));
-    localStorage.setItem("movimentacoes", JSON.stringify(movimentacoes));
-    localStorage.setItem("fornecedores", JSON.stringify(fornecedores));
+
+function dataHora(){
+
+    return new Date().toLocaleString("pt-BR");
+
 }
 
-function carregarDados() {
-    produtos = JSON.parse(localStorage.getItem("produtos") || "[]");
-    movimentacoes = JSON.parse(localStorage.getItem("movimentacoes") || "[]");
-    fornecedores = JSON.parse(localStorage.getItem("fornecedores") || "[]");
+
+/* =========================================================
+   FORMATAÇÃO
+========================================================= */
+
+function moeda(valor){
+
+    return Number(valor || 0).toLocaleString(
+        "pt-BR",
+        {
+            style:"currency",
+            currency:"BRL"
+        }
+    );
+
 }
 
-function entrarSistema() {
-    const senha = document.getElementById("campo-senha").value;
-    if (senha === SENHA_SISTEMA) {
-        document.getElementById("tela-login").style.display = "none";
-        document.getElementById("sistema").style.display = "block";
-        carregarDados();
-        atualizarTabelaEstoque();
-        // PREENCHE TODAS AS DATAS AUTOMATICAMENTE
-        const hoje = dataHojeISO();
-        document.getElementById("mov-data").value = hoje;
-        document.getElementById("nf-data-entrada").value = hoje;
-        document.getElementById("saida-data").value = hoje;
-        document.getElementById("entrada-rapida-data").value = hoje;
-    } else {
-        document.getElementById("aviso-erro").style.display = "block";
+
+function numero(valor){
+
+    return Number(valor || 0).toLocaleString(
+        "pt-BR",
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function entrarSistema(){
+
+    const campoSenha =
+        document.getElementById("campo-senha");
+
+    const telaLogin =
+        document.getElementById("tela-login");
+
+    const sistema =
+        document.getElementById("sistema");
+
+    const aviso =
+        document.getElementById("aviso-erro");
+
+    if(!campoSenha || !telaLogin || !sistema){
+        return;
     }
+
+    const senha = campoSenha.value;
+
+    if(senha === SENHA_SISTEMA){
+
+        telaLogin.style.display = "none";
+
+        sistema.style.display = "block";
+
+        if(aviso){
+            aviso.style.display = "none";
+        }
+
+        localStorage.setItem(
+            "sistema_logado",
+            "sim"
+        );
+
+        atualizarTudo();
+
+    }else{
+
+        if(aviso){
+            aviso.style.display = "block";
+        }
+
+    }
+
 }
 
-function sairSistema() {
-    document.getElementById("sistema").style.display = "none";
-    document.getElementById("tela-login").style.display = "flex";
-    document.getElementById("campo-senha").value = "";
-    document.getElementById("aviso-erro").style.display = "none";
+
+function sairSistema(){
+
+    localStorage.removeItem(
+        "sistema_logado"
+    );
+
+    document.getElementById(
+        "sistema"
+    ).style.display = "none";
+
+    document.getElementById(
+        "tela-login"
+    ).style.display = "flex";
+
+    document.getElementById(
+        "campo-senha"
+    ).value = "";
+
 }
 
-function trocarAba(indice) {
-    document.querySelectorAll(".aba").forEach((b,i)=>{ b.classList.toggle("ativa", i===indice); });
-    document.querySelectorAll(".conteudo-aba").forEach((c,i)=>{ c.classList.toggle("visivel", i===indice); });
+
+/* =========================================================
+   ABAS
+========================================================= */
+
+function trocarAba(numeroAba){
+
+    const abas =
+        document.querySelectorAll(".aba");
+
+    const conteudos =
+        document.querySelectorAll(".conteudo-aba");
+
+    abas.forEach(function(aba,index){
+
+        aba.classList.toggle(
+            "ativa",
+            index === numeroAba
+        );
+
+    });
+
+    conteudos.forEach(function(conteudo,index){
+
+        conteudo.classList.toggle(
+            "visivel",
+            index === numeroAba
+        );
+
+    });
+
 }
 
-function cadastrarProduto() {
-    const codigo = document.getElementById("codigoNovo").value.trim();
-    const nome = document.getElementById("nomeNovo").value.trim();
-    const qtd = parseFloat(document.getElementById("qtdNovo").value) || 0;
-    if (!codigo || !nome) { alert("Preencha Código e Nome!"); return; }
-    if (produtos.find(p=>p.codigo===codigo)) { alert("Produto já cadastrado!"); return; }
-    produtos.push({ codigo, nome, quantidade: qtd });
-    salvar(); atualizarTabelaEstoque();
-    alert("✅ Produto cadastrado!");
+
+/* =========================================================
+   PRODUTOS
+========================================================= */
+
+function encontrarProduto(codigo){
+
+    return produtos.find(function(produto){
+
+        return String(produto.codigo).trim() ===
+               String(codigo).trim();
+
+    });
+
 }
 
-function buscarProduto() {
-    const cod = document.getElementById("codigoProd").value.trim();
-    const p = produtos.find(x=>x.codigo===cod);
-    document.getElementById("nomeProd").value = p ? p.nome : "";
+
+function cadastrarProduto(){
+
+    const codigo =
+        document.getElementById(
+            "codigoNovo"
+        ).value.trim();
+
+    const nome =
+        document.getElementById(
+            "nomeNovo"
+        ).value.trim();
+
+    const categoria =
+        document.getElementById(
+            "categoriaNova"
+        ).value.trim();
+
+    const precoTexto =
+        document.getElementById(
+            "precoNovo"
+        ).value;
+
+    const preco =
+        parseFloat(
+            precoTexto.replace(",",".")
+        ) || 0;
+
+    const quantidade =
+        parseFloat(
+            document.getElementById(
+                "qtdNovo"
+            ).value
+        ) || 0;
+
+    const unidade =
+        document.getElementById(
+            "unidadeNova"
+        ).value;
+
+    if(!codigo || !nome){
+
+        mostrarMensagem(
+            "msg-cadastro",
+            "Informe o código e o nome do produto.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(produtos.some(function(p){
+
+        return String(p.codigo) === codigo;
+
+    })){
+
+        mostrarMensagem(
+            "msg-cadastro",
+            "Este código já está cadastrado.",
+            "erro"
+        );
+
+        return;
+    }
+
+    produtos.push({
+
+        codigo:codigo,
+
+        nome:nome,
+
+        categoria:categoria,
+
+        preco:preco,
+
+        unidade:unidade,
+
+        quantidade:quantidade,
+
+        ultimaMovimentacao:
+            quantidade > 0
+            ? dataHora()
+            : "-"
+
+    });
+
+    salvarDados();
+
+    limparCadastro();
+
+    atualizarTudo();
+
+    mostrarMensagem(
+        "msg-cadastro",
+        "Produto cadastrado com sucesso!",
+        "ok"
+    );
+
 }
 
-function registrarMovimentacao() {
-    const codigo = document.getElementById("codigoProd").value.trim();
-    const tipo = document.getElementById("tipoMov").value;
-    const qtd = parseFloat(document.getElementById("qtdProd").value) || 0;
-    const numNF = document.getElementById("mov-numero-nf").value.trim();
-    const dtEmissao = document.getElementById("mov-emissao-nf").value;
-    const dtMov = document.getElementById("mov-data").value;
-    const resp = document.getElementById("responsavel").value.trim();
 
-    const p = produtos.find(x=>x.codigo===codigo);
-    if (!p) { alert("Produto não encontrado!"); return; }
-    if (tipo==="saida" && p.quantidade < qtd) { alert("Estoque insuficiente!"); return; }
+function limparCadastro(){
 
-    p.quantidade = tipo==="entrada" ? p.quantidade + qtd : p.quantidade - qtd;
+    document.getElementById(
+        "codigoNovo"
+    ).value = "";
+
+    document.getElementById(
+        "nomeNovo"
+    ).value = "";
+
+    document.getElementById(
+        "categoriaNova"
+    ).value = "";
+
+    document.getElementById(
+        "precoNovo"
+    ).value = "";
+
+    document.getElementById(
+        "qtdNovo"
+    ).value = "0";
+
+    document.getElementById(
+        "unidadeNova"
+    ).value = "UN";
+
+}
+
+
+function limparCampos(){
+
+    document.getElementById(
+        "codigoBusca"
+    ).value = "";
+
+    document.getElementById(
+        "nomeProd"
+    ).value = "";
+
+    document.getElementById(
+        "categoriaProd"
+    ).value = "";
+
+    document.getElementById(
+        "precoProd"
+    ).value = "";
+
+    document.getElementById(
+        "unidadeProd"
+    ).value = "";
+
+}
+
+
+function buscarProdutoCadastro(){
+
+    const codigo =
+        document.getElementById(
+            "codigoBusca"
+        ).value;
+
+    const produto =
+        encontrarProduto(codigo);
+
+    if(!produto){
+
+        limparCampos();
+
+        return;
+    }
+
+    document.getElementById(
+        "nomeProd"
+    ).value = produto.nome;
+
+    document.getElementById(
+        "categoriaProd"
+    ).value = produto.categoria || "";
+
+    document.getElementById(
+        "precoProd"
+    ).value = moeda(produto.preco);
+
+    document.getElementById(
+        "unidadeProd"
+    ).value = produto.unidade || "UN";
+
+}
+
+
+function buscarProdutoMovimentacao(){
+
+    const codigo =
+        document.getElementById(
+            "codigoMov"
+        ).value;
+
+    if(
+        codigo &&
+        !encontrarProduto(codigo)
+    ){
+
+        alert(
+            "Produto não encontrado."
+        );
+
+    }
+
+}
+
+
+function buscarProdutoNF(){
+
+    const codigo =
+        document.getElementById(
+            "nf-codigo"
+        ).value;
+
+    const produto =
+        encontrarProduto(codigo);
+
+    if(produto){
+
+        document.getElementById(
+            "nf-preco"
+        ).value =
+            Number(produto.preco || 0)
+            .toFixed(2)
+            .replace(".",",");
+
+    }
+
+}
+
+
+function buscarProdutoSaida(){
+
+    const codigo =
+        document.getElementById(
+            "saida-codigo"
+        ).value;
+
+    const produto =
+        encontrarProduto(codigo);
+
+    document.getElementById(
+        "saida-produto"
+    ).value =
+        produto
+        ? produto.nome
+        : "";
+
+}
+
+
+/* =========================================================
+   TABELA DE ESTOQUE
+========================================================= */
+
+function atualizarTabelaEstoque(){
+
+    const tbody =
+        document.querySelector(
+            "#tabela-estoque tbody"
+        );
+
+    if(!tbody){
+        return;
+    }
+
+    tbody.innerHTML = "";
+
+    if(!estoqueVisivel){
+        return;
+    }
+
+    produtos.forEach(function(produto){
+
+        const tr =
+            document.createElement("tr");
+
+        const valorTotal =
+            Number(produto.preco || 0) *
+            Number(produto.quantidade || 0);
+
+        tr.innerHTML =
+
+            "<td>" +
+                escaparHTML(produto.codigo) +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(produto.nome) +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(
+                    produto.categoria || "-"
+                ) +
+            "</td>" +
+
+            "<td>" +
+                moeda(produto.preco) +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(
+                    produto.unidade || "UN"
+                ) +
+            "</td>" +
+
+            "<td>" +
+                numero(produto.quantidade) +
+            "</td>" +
+
+            "<td>" +
+                moeda(valorTotal) +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(
+                    produto.ultimaMovimentacao || "-"
+                ) +
+            "</td>" +
+
+            "<td>" +
+
+                "<button " +
+                    "type='button' " +
+                    "class='botao-excluir' " +
+                    "onclick='excluirProduto(" +
+                    JSON.stringify(String(produto.codigo)) +
+                    ")'>" +
+
+                    "🗑️ Excluir" +
+
+                "</button>" +
+
+            "</td>";
+
+        tbody.appendChild(tr);
+
+    });
+
+}
+
+
+function excluirProduto(codigo){
+
+    const produto =
+        encontrarProduto(codigo);
+
+    if(!produto){
+        return;
+    }
+
+    if(!confirm(
+        "Deseja realmente excluir o produto " +
+        produto.nome +
+        "?"
+    )){
+        return;
+    }
+
+    produtos =
+        produtos.filter(function(p){
+
+            return String(p.codigo) !==
+                   String(codigo);
+
+        });
+
+    salvarDados();
+
+    atualizarTudo();
+
+}
+
+
+/* =========================================================
+   OCULTAR ESTOQUE
+========================================================= */
+
+function mostrarOcultarEstoque(){
+
+    estoqueVisivel =
+        !estoqueVisivel;
+
+    const area =
+        document.getElementById(
+            "area-tabela-estoque"
+        );
+
+    const botao =
+        document.getElementById(
+            "botao-ocultar-estoque"
+        );
+
+    if(estoqueVisivel){
+
+        area.style.display = "block";
+
+        botao.innerHTML =
+            "👁️ Ocultar Estoque";
+
+    }else{
+
+        area.style.display = "none";
+
+        botao.innerHTML =
+            "👁️ Mostrar Estoque";
+
+    }
+
+}
+
+
+/* =========================================================
+   FILTRO CATEGORIA
+========================================================= */
+
+function filtrarPorCategoria(){
+
+    if(produtos.length === 0){
+
+        alert(
+            "Não existem produtos cadastrados."
+        );
+
+        return;
+    }
+
+    const categorias =
+        [...new Set(
+            produtos.map(function(p){
+
+                return p.categoria ||
+                       "Sem categoria";
+
+            })
+        )];
+
+    const escolha =
+        prompt(
+            "Digite a categoria:\n\n" +
+            categorias.join("\n")
+        );
+
+    if(escolha === null){
+        return;
+    }
+
+    const categoria =
+        escolha.trim().toLowerCase();
+
+    const tbody =
+        document.querySelector(
+            "#tabela-estoque tbody"
+        );
+
+    tbody.innerHTML = "";
+
+    produtos
+        .filter(function(p){
+
+            return (
+                p.categoria ||
+                "Sem categoria"
+            )
+            .toLowerCase()
+            .includes(categoria);
+
+        })
+        .forEach(function(produto){
+
+            const tr =
+                document.createElement("tr");
+
+            tr.innerHTML =
+
+                "<td>" +
+                    escaparHTML(produto.codigo) +
+                "</td>" +
+
+                "<td>" +
+                    escaparHTML(produto.nome) +
+                "</td>" +
+
+                "<td>" +
+                    escaparHTML(
+                        produto.categoria || "-"
+                    ) +
+                "</td>" +
+
+                "<td>" +
+                    moeda(produto.preco) +
+                "</td>" +
+
+                "<td>" +
+                    escaparHTML(
+                        produto.unidade || "UN"
+                    ) +
+                "</td>" +
+
+                "<td>" +
+                    numero(produto.quantidade) +
+                "</td>" +
+
+                "<td>" +
+                    moeda(
+                        produto.preco *
+                        produto.quantidade
+                    ) +
+                "</td>" +
+
+                "<td>" +
+                    escaparHTML(
+                        produto.ultimaMovimentacao || "-"
+                    ) +
+                "</td>" +
+
+                "<td>" +
+
+                    "<button " +
+                        "type='button' " +
+                        "class='botao-excluir' " +
+                        "onclick='excluirProduto(" +
+                        JSON.stringify(
+                            String(produto.codigo)
+                        ) +
+                        ")'>" +
+
+                        "🗑️ Excluir" +
+
+                    "</button>" +
+
+                "</td>";
+
+            tbody.appendChild(tr);
+
+        });
+
+}
+
+
+/* =========================================================
+   MOVIMENTAÇÃO
+========================================================= */
+
+function registrarMovimentacao(){
+
+    const codigo =
+        document.getElementById(
+            "codigoMov"
+        ).value.trim();
+
+    const tipo =
+        document.getElementById(
+            "tipoMov"
+        ).value;
+
+    const quantidade =
+        parseFloat(
+            document.getElementById(
+                "qtdProd"
+            ).value
+        );
+
+    const produto =
+        encontrarProduto(codigo);
+
+    if(!produto){
+
+        mostrarMensagem(
+            "msg-movimentacao",
+            "Produto não encontrado.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(
+        !quantidade ||
+        quantidade <= 0
+    ){
+
+        mostrarMensagem(
+            "msg-movimentacao",
+            "Informe uma quantidade válida.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(
+        tipo === "saida" &&
+        quantidade > Number(produto.quantidade)
+    ){
+
+        mostrarMensagem(
+            "msg-movimentacao",
+            "Estoque insuficiente.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(tipo === "entrada"){
+
+        produto.quantidade =
+            Number(produto.quantidade || 0) +
+            quantidade;
+
+    }else{
+
+        produto.quantidade =
+            Number(produto.quantidade || 0) -
+            quantidade;
+
+    }
+
+    produto.ultimaMovimentacao =
+        dataHora();
 
     movimentacoes.push({
-        codigo, nome: p.nome, tipo, quantidade: qtd,
-        numeroNF: numNF, dataEmissao: dtEmissao, dataMov: dtMov, responsavel: resp,
-        dataHora: new Date().toLocaleString("pt-BR")
+
+        codigo:codigo,
+
+        produto:produto.nome,
+
+        tipo:tipo,
+
+        quantidade:quantidade,
+
+        nf:
+            document.getElementById(
+                "mov-numero-nf"
+            ).value,
+
+        data:
+            document.getElementById(
+                "mov-data"
+            ).value ||
+            dataHojeISO(),
+
+        responsavel:
+            document.getElementById(
+                "responsavel"
+            ).value
+
     });
-    salvar(); atualizarTabelaEstoque();
-    alert(`✅ Movimentação registrada! NF: ${numNF || 'não informada'}`);
+
+    salvarDados();
+
+    atualizarTudo();
+
+    mostrarMensagem(
+        "msg-movimentacao",
+        "Movimentação registrada com sucesso!",
+        "ok"
+    );
+
 }
 
-function abrirFormularioNF() {
-    document.getElementById("form-entrada-nf").style.display = "block";
-    document.getElementById("form-saida-nf").style.display = "none";
-}
-function abrirFormularioSaidaNF() {
-    document.getElementById("form-saida-nf").style.display = "block";
-    document.getElementById("form-entrada-nf").style.display = "none";
-}
 
-function buscarProdutoNF() {
-    const cod = document.getElementById("nf-codigo").value.trim();
-    const p = produtos.find(x=>x.codigo===cod);
-    document.getElementById("nf-nome").value = p ? p.nome : "";
-}
+/* =========================================================
+   ENTRADA RÁPIDA
+========================================================= */
 
-function calcularTotalNF() {
-    const qtd = parseFloat(document.getElementById("nf-quantidade").value) || 0;
-    const fator = parseFloat(document.getElementById("nf-fator").value) || 0;
-    const un = document.getElementById("nf-unidade").value;
-    const total = qtd * fator;
-    document.getElementById("nf-calculo").textContent = `${qtd} × ${fator} = ${total.toFixed(2)}`;
-    document.getElementById("nf-total").textContent = total.toFixed(2);
-    document.getElementById("nf-sigla").textContent = un;
-}
+function registrarEntradaRapida(){
 
-function registrarEntradaNF() {
-    const codigo = document.getElementById("nf-codigo").value.trim();
-    const numNF = document.getElementById("nf-numero").value.trim();
-    const dtEmissao = document.getElementById("nf-emissao").value;
-    const dtEntrada = document.getElementById("nf-data-entrada").value;
-    const qtd = parseFloat(document.getElementById("nf-quantidade").value) || 0;
-    const fator = parseFloat(document.getElementById("nf-fator").value) || 1;
-    const total = qtd * fator;
+    const codigo =
+        document.getElementById(
+            "entrada-codigo"
+        ).value.trim();
 
-    if (!codigo || !numNF) { alert("Informe Código e Número da NF!"); return; }
+    const nf =
+        document.getElementById(
+            "entrada-rapida-nf"
+        ).value;
 
-    let p = produtos.find(x=>x.codigo===codigo);
-    if (!p) { alert("Produto não cadastrado!"); return; }
+    const quantidade =
+        parseFloat(
+            document.getElementById(
+                "entrada-qtd"
+            ).value
+        );
 
-    p.quantidade += total;
+    const produto =
+        encontrarProduto(codigo);
+
+    if(!produto){
+
+        mostrarMensagem(
+            "msg-entrada",
+            "Produto não encontrado.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(
+        !quantidade ||
+        quantidade <= 0
+    ){
+
+        mostrarMensagem(
+            "msg-entrada",
+            "Quantidade inválida.",
+            "erro"
+        );
+
+        return;
+    }
+
+    produto.quantidade =
+        Number(produto.quantidade || 0) +
+        quantidade;
+
+    produto.ultimaMovimentacao =
+        dataHora();
+
     movimentacoes.push({
-        codigo, nome: p.nome, tipo: "entrada", quantidade: total,
-        numeroNF: numNF, dataEmissao: dtEmissao, dataEntrada: dtEntrada,
-        observacao: "Entrada por NF com conversão"
+
+        codigo:codigo,
+
+        produto:produto.nome,
+
+        tipo:"entrada",
+
+        quantidade:quantidade,
+
+        nf:nf,
+
+        data:dataHojeISO(),
+
+        responsavel:"Entrada rápida"
+
     });
-    salvar(); atualizarTabelaEstoque();
-    alert(`✅ Entrada da NF ${numNF} registrada! Total: ${total.toFixed(2)}`);
-    document.getElementById("form-entrada-nf").style.display = "none";
+
+    salvarDados();
+
+    atualizarTudo();
+
+    mostrarMensagem(
+        "msg-entrada",
+        "Entrada registrada com sucesso!",
+        "ok"
+    );
+
 }
 
-function limparFormNF() {
-    document.getElementById("nf-numero").value = "";
-    document.getElementById("nf-emissao").value = "";
-    document.getElementById("nf-data-entrada").value = dataHojeISO();
-    document.getElementById("nf-cnpj").value = "";
-    document.getElementById("nf-razao").value = "";
-    document.getElementById("nf-codigo").value = "";
-    document.getElementById("nf-nome").value = "";
-    document.getElementById("nf-quantidade").value = "1";
-    document.getElementById("nf-preco").value = "0.00";
-    document.getElementById("nf-fator").value = "1";
-    calcularTotalNF();
+
+/* =========================================================
+   NF ENTRADA
+========================================================= */
+
+function abrirFormularioNF(){
+
+    document.getElementById(
+        "form-entrada-nf"
+    ).style.display = "block";
+
+    document.getElementById(
+        "nf-data"
+    ).value = dataHojeISO();
+
 }
 
-function buscarProdutoSaida() {
-    const cod = document.getElementById("saida-codigo").value.trim();
-    const p = produtos.find(x=>x.codigo===cod);
-    document.getElementById("saida-nome").value = p ? p.nome : "";
+
+function adicionarItemNF(){
+
+    const codigo =
+        document.getElementById(
+            "nf-codigo"
+        ).value.trim();
+
+    const quantidade =
+        parseFloat(
+            document.getElementById(
+                "nf-qtd"
+            ).value
+        );
+
+    const preco =
+        parseFloat(
+            document.getElementById(
+                "nf-preco"
+            ).value.replace(",",".")
+        ) || 0;
+
+    const produto =
+        encontrarProduto(codigo);
+
+    if(!produto){
+
+        alert(
+            "Produto não encontrado."
+        );
+
+        return;
+    }
+
+    if(
+        !quantidade ||
+        quantidade <= 0
+    ){
+
+        alert(
+            "Quantidade inválida."
+        );
+
+        return;
+    }
+
+    itensNF.push({
+
+        codigo:codigo,
+
+        nome:produto.nome,
+
+        quantidade:quantidade,
+
+        preco:preco
+
+    });
+
+    atualizarListaNF();
+
+    document.getElementById(
+        "nf-codigo"
+    ).value = "";
+
+    document.getElementById(
+        "nf-qtd"
+    ).value = "1";
+
+    document.getElementById(
+        "nf-preco"
+    ).value = "";
+
 }
 
-function calcularTotalSaida() {
-    const qtd = parseFloat(document.getElementById("saida-quantidade").value) || 0;
-    const fator = parseFloat(document.getElementById("saida-fator").value) || 0;
-    const total = qtd * fator;
-    document.getElementById("saida-total").textContent = total.toFixed(2);
-    document.getElementById("saida-sigla").textContent = document.getElementById("nf-unidade")?.value || "un";
+
+function atualizarListaNF(){
+
+    const area =
+        document.getElementById(
+            "lista-itens-nf"
+        );
+
+    if(!area){
+        return;
+    }
+
+    area.innerHTML = "";
+
+    itensNF.forEach(function(item,index){
+
+        const div =
+            document.createElement("div");
+
+        div.className = "item-nf";
+
+        div.innerHTML =
+
+            "<div>" +
+                "<strong>Código</strong><br>" +
+                escaparHTML(item.codigo) +
+            "</div>" +
+
+            "<div>" +
+                "<strong>Produto</strong><br>" +
+                escaparHTML(item.nome) +
+            "</div>" +
+
+            "<div>" +
+                "<strong>Quantidade</strong><br>" +
+                numero(item.quantidade) +
+            "</div>" +
+
+            "<div>" +
+                "<strong>Preço</strong><br>" +
+                moeda(item.preco) +
+            "</div>" +
+
+            "<button " +
+                "type='button' " +
+                "class='botao-excluir' " +
+                "onclick='removerItemNF(" +
+                index +
+                ")'>" +
+
+                "🗑️" +
+
+            "</button>";
+
+        area.appendChild(div);
+
+    });
+
 }
 
-function registrarSaidaConversao() {
-    const codigo = document.getElementById("saida-codigo").value.trim();
-    const numNF = document.getElementById("saida-numero-nf").value.trim();
-    const dtEmissao = document.getElementById("saida-emissao-nf").value;
-    const dtSaida = document.getElementById("saida-data").value;
-    const qtd = parseFloat(document.getElementById("saida-quantidade").value) || 0;
-    const fator = parseFloat(document.getElementById("saida-fator").value) || 1;
-    const total = qtd * fator;
 
-    if (!codigo || !numNF) { alert("Informe Código e Número da NF!"); return; }
+function removerItemNF(index){
 
-    let p = produtos.find(x=>x.codigo===codigo);
-    if (!p) { alert("Produto não encontrado!"); return; }
-    if (p.quantidade < total) { alert(`Estoque insuficiente! Disponível: ${p.quantidade.toFixed(2)}`); return; }
+    itensNF.splice(index,1);
 
-    p.quantidade -= total;
+    atualizarListaNF();
+
+}
+
+
+function finalizarNFEntrada(){
+
+    if(itensNF.length === 0){
+
+        alert(
+            "Adicione pelo menos um produto."
+        );
+
+        return;
+    }
+
+    const nf =
+        document.getElementById(
+            "nf-numero"
+        ).value;
+
+    const responsavel =
+        document.getElementById(
+            "nf-responsavel"
+        ).value;
+
+    const data =
+        document.getElementById(
+            "nf-data"
+        ).value ||
+        dataHojeISO();
+
+    itensNF.forEach(function(item){
+
+        const produto =
+            encontrarProduto(item.codigo);
+
+        if(!produto){
+            return;
+        }
+
+        produto.quantidade =
+            Number(produto.quantidade || 0) +
+            Number(item.quantidade || 0);
+
+        if(item.preco > 0){
+
+            produto.preco =
+                Number(item.preco);
+
+        }
+
+        produto.ultimaMovimentacao =
+            dataHora();
+
+        movimentacoes.push({
+
+            codigo:item.codigo,
+
+            produto:item.nome,
+
+            tipo:"entrada",
+
+            quantidade:Number(
+                item.quantidade || 0
+            ),
+
+            nf:nf,
+
+            data:data,
+
+            responsavel:responsavel
+
+        });
+
+    });
+
+    salvarDados();
+
+    atualizarTudo();
+
+    itensNF = [];
+
+    atualizarListaNF();
+
+    mostrarMensagem(
+        "msg-nf-entrada",
+        "NF de entrada registrada com sucesso!",
+        "ok"
+    );
+
+}
+
+
+function cancelarNF(){
+
+    itensNF = [];
+
+    atualizarListaNF();
+
+    document.getElementById(
+        "form-entrada-nf"
+    ).style.display = "none";
+
+}
+
+
+/* =========================================================
+   FORNECEDOR NA NF
+========================================================= */
+
+function buscarFornecedorNF(){
+
+    const cnpj =
+        document.getElementById(
+            "nf-cnpj"
+        ).value.trim();
+
+    const fornecedor =
+        fornecedores.find(function(f){
+
+            return f.cnpj === cnpj;
+
+        });
+
+    document.getElementById(
+        "nf-razao"
+    ).value =
+        fornecedor
+        ? fornecedor.razao
+        : "";
+
+}
+
+
+/* =========================================================
+   NF SAÍDA
+========================================================= */
+
+function registrarSaidaNF(){
+
+    const codigo =
+        document.getElementById(
+            "saida-codigo"
+        ).value.trim();
+
+    const quantidade =
+        parseFloat(
+            document.getElementById(
+                "saida-qtd"
+            ).value
+        );
+
+    const produto =
+        encontrarProduto(codigo);
+
+    if(!produto){
+
+        mostrarMensagem(
+            "msg-nf-saida",
+            "Produto não encontrado.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(
+        !quantidade ||
+        quantidade <= 0
+    ){
+
+        mostrarMensagem(
+            "msg-nf-saida",
+            "Quantidade inválida.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(
+        quantidade >
+        Number(produto.quantidade || 0)
+    ){
+
+        mostrarMensagem(
+            "msg-nf-saida",
+            "Estoque insuficiente.",
+            "erro"
+        );
+
+        return;
+    }
+
+    produto.quantidade =
+        Number(produto.quantidade || 0) -
+        quantidade;
+
+    produto.ultimaMovimentacao =
+        dataHora();
+
     movimentacoes.push({
-        codigo, nome: p.nome, tipo: "saida", quantidade: total,
-        numeroNF: numNF, dataEmissao: dtEmissao, dataSaida: dtSaida,
-        observacao: "Saída por conversão"
+
+        codigo:codigo,
+
+        produto:produto.nome,
+
+        tipo:"saida",
+
+        quantidade:quantidade,
+
+        nf:
+            document.getElementById(
+                "saida-nf-numero"
+            ).value,
+
+        data:
+            document.getElementById(
+                "saida-nf-data"
+            ).value ||
+            dataHojeISO(),
+
+        responsavel:
+            document.getElementById(
+                "saida-responsavel"
+            ).value
+
     });
-    salvar(); atualizarTabelaEstoque();
-    alert(`✅ Saída da NF ${numNF} registrada! Descontado: ${total.toFixed(2)}`);
-    document.getElementById("form-saida-nf").style.display = "none";
+
+    salvarDados();
+
+    atualizarTudo();
+
+    mostrarMensagem(
+        "msg-nf-saida",
+        "Saída registrada com sucesso!",
+        "ok"
+    );
+
 }
 
-function limparFormSaida() {
-    document.getElementById("saida-numero-nf").value = "";
-    document.getElementById("saida-emissao-nf").value = "";
-    document.getElementById("saida-data").value = dataHojeISO();
-    document.getElementById("saida-cnpj").value = "";
-    document.getElementById("saida-razao").value = "";
-    document.getElementById("saida-codigo").value = "";
-    document.getElementById("saida-nome").value = "";
-    document.getElementById("saida-quantidade").value = "1";
-    document.getElementById("saida-fator").value = "1";
-    calcularTotalSaida();
-}
 
-function registrarEntradaRapida() {
-    const codigo = document.getElementById("entrada-codigo").value.trim();
-    const numNF = document.getElementById("entrada-rapida-nf").value.trim();
-    const dtEmissao = document.getElementById("entrada-rapida-emissao").value;
-    const dtEntrada = document.getElementById("entrada-rapida-data").value;
-    const qtd = parseFloat(document.getElementById("entrada-qtd").value) || 0;
+/* =========================================================
+   FORNECEDORES
+========================================================= */
 
-    if (!codigo || !numNF || qtd<=0) { alert("Preencha Código, NF e Quantidade!"); return; }
+function cadastrarFornecedor(){
 
-    let p = produtos.find(x=>x.codigo===codigo);
-    if (!p) { alert("Produto não encontrado!"); return; }
+    const cnpj =
+        document.getElementById(
+            "fornecedor-cnpj"
+        ).value.trim();
 
-    p.quantidade += qtd;
-    movimentacoes.push({
-        codigo, nome: p.nome, tipo: "entrada", quantidade: qtd,
-        numeroNF: numNF, dataEmissao: dtEmissao, dataEntrada: dtEntrada,
-        observacao: "Entrada Rápida"
+    const razao =
+        document.getElementById(
+            "fornecedor-razao"
+        ).value.trim();
+
+    const fantasia =
+        document.getElementById(
+            "fornecedor-fantasia"
+        ).value.trim();
+
+    const telefone =
+        document.getElementById(
+            "fornecedor-telefone"
+        ).value.trim();
+
+    const email =
+        document.getElementById(
+            "fornecedor-email"
+        ).value.trim();
+
+    const cidade =
+        document.getElementById(
+            "fornecedor-cidade"
+        ).value.trim();
+
+    if(!cnpj || !razao){
+
+        mostrarMensagem(
+            "msg-fornecedor",
+            "Informe CNPJ e Razão Social.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if(
+        fornecedores.some(function(f){
+
+            return f.cnpj === cnpj;
+
+        })
+    ){
+
+        mostrarMensagem(
+            "msg-fornecedor",
+            "Este CNPJ já está cadastrado.",
+            "erro"
+        );
+
+        return;
+    }
+
+    fornecedores.push({
+
+        cnpj:cnpj,
+
+        razao:razao,
+
+        fantasia:fantasia,
+
+        telefone:telefone,
+
+        email:email,
+
+        cidade:cidade
+
     });
-    salvar(); atualizarTabelaEstoque();
-    document.getElementById("msg-entrada").style.display = "block";
-    document.getElementById("msg-entrada").className = "mensagem sucesso-msg";
-    document.getElementById("msg-entrada").innerHTML = `✅ Entrada NF ${numNF} registrada!`;
-    setTimeout(()=>document.getElementById("msg-entrada").style.display="none", 4000);
+
+    salvarDados();
+
+    atualizarTabelaFornecedores();
+
+    document.getElementById(
+        "fornecedor-cnpj"
+    ).value = "";
+
+    document.getElementById(
+        "fornecedor-razao"
+    ).value = "";
+
+    document.getElementById(
+        "fornecedor-fantasia"
+    ).value = "";
+
+    document.getElementById(
+        "fornecedor-telefone"
+    ).value = "";
+
+    document.getElementById(
+        "fornecedor-email"
+    ).value = "";
+
+    document.getElementById(
+        "fornecedor-cidade"
+    ).value = "";
+
+    mostrarMensagem(
+        "msg-fornecedor",
+        "Fornecedor cadastrado com sucesso!",
+        "ok"
+    );
+
 }
 
-function cadastrarFornecedor() { alert("Função de cadastro de fornecedores — dados salvos!"); }
-function importarXML() { alert("Função de importação de XML — em desenvolvimento!"); }
 
-function gerarRelatorio() {
-    const rel = movimentacoes.map(m=>
-        `<div style="padding:8px 0;border-bottom:1px solid #ddd;">
-            <strong>${m.tipo==='entrada'?'📥 ENTRADA':'📤 SAÍDA'}</strong> — ${m.nome}
-            <br><b>NF:</b> ${m.numeroNF||'-'} | <b>Emissão:</b> ${m.dataEmissao||'-'} | <b>Data:</b> ${m.dataEntrada||m.dataSaida||m.dataMov||'-'}
-            <br>Quantidade: ${m.quantidade} | ${m.dataHora||''}
-        </div>`
-    ).join("") || "<p>Nenhuma movimentação registrada.</p>";
-    document.getElementById("relatorio-dados").innerHTML = rel;
-}
+function atualizarTabelaFornecedores(){
 
-function atualizarTabelaEstoque() {
-    const tb = document.querySelector("#tabela-estoque tbody");
-    tb.innerHTML = "";
-    produtos.forEach(p=>{
-        const tr = document.createElement("tr");
-        const ultimaMov = movimentacoes.filter(m=>m.codigo===p.codigo).pop() || {};
-        tr.innerHTML = `
-            <td>${p.codigo}</td>
-            <td>${p.nome}</td>
-            <td>${p.quantidade.toFixed(2)}</td>
-            <td>${ultimaMov.dataHora||'-'}</td>
-        `;
-        tb.appendChild(tr);
+    const tbody =
+        document.querySelector(
+            "#tabela-fornecedores tbody"
+        );
+
+    if(!tbody){
+        return;
+    }
+
+    tbody.innerHTML = "";
+
+    fornecedores.forEach(function(f,index){
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML =
+
+            "<td>" +
+                escaparHTML(f.cnpj) +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(f.razao) +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(f.fantasia || "-") +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(f.telefone || "-") +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(f.email || "-") +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(f.cidade || "-") +
+            "</td>" +
+
+            "<td>" +
+
+                "<button " +
+                    "type='button' " +
+                    "class='botao-excluir' " +
+                    "onclick='excluirFornecedor(" +
+                    index +
+                    ")'>" +
+
+                    "🗑️ Excluir" +
+
+                "</button>" +
+
+            "</td>";
+
+        tbody.appendChild(tr);
+
     });
+
 }
+
+
+function excluirFornecedor(index){
+
+    if(!confirm(
+        "Deseja excluir este fornecedor?"
+    )){
+        return;
+    }
+
+    fornecedores.splice(index,1);
+
+    salvarDados();
+
+    atualizarTabelaFornecedores();
+
+}
+
+
+/* =========================================================
+   EXPORTAR CSV
+========================================================= */
+
+function exportarParaExcel(){
+
+    if(produtos.length === 0){
+
+        alert(
+            "Não existem produtos para exportar."
+        );
+
+        return;
+    }
+
+    let csv =
+        "Código;Nome;Categoria;Preço;Unidade;Quantidade;Valor Total\n";
+
+    produtos.forEach(function(p){
+
+        csv +=
+            p.codigo + ";" +
+            p.nome + ";" +
+            (p.categoria || "") + ";" +
+            p.preco + ";" +
+            (p.unidade || "UN") + ";" +
+            p.quantidade + ";" +
+            (
+                Number(p.preco || 0) *
+                Number(p.quantidade || 0)
+            ) +
+            "\n";
+
+    });
+
+    const blob =
+        new Blob(
+            ["\ufeff" + csv],
+            {
+                type:"text/csv;charset=utf-8;"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "estoque.csv";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* =========================================================
+   IMPORTAR CSV
+========================================================= */
+
+function importarDoExcel(){
+
+    const input =
+        document.createElement("input");
+
+    input.type = "file";
+
+    input.accept =
+        ".csv,.xlsx,.xls";
+
+    input.onchange = function(){
+
+        const arquivo =
+            input.files[0];
+
+        if(!arquivo){
+            return;
+        }
+
+        if(
+            !arquivo.name
+                .toLowerCase()
+                .endsWith(".csv")
+        ){
+
+            alert(
+                "Para esta versão, importe o Excel salvo como CSV."
+            );
+
+            return;
+        }
+
+        const reader =
+            new FileReader();
+
+        reader.onload = function(e){
+
+            const linhas =
+                e.target.result
+                .replace(/^\uFEFF/,"")
+                .split(/\r?\n/);
+
+            linhas.shift();
+
+            linhas.forEach(function(linha){
+
+                if(!linha.trim()){
+                    return;
+                }
+
+                const dados =
+                    linha.split(";");
+
+                if(dados.length < 6){
+                    return;
+                }
+
+                const codigo =
+                    dados[0].trim();
+
+                if(encontrarProduto(codigo)){
+                    return;
+                }
+
+                produtos.push({
+
+                    codigo:codigo,
+
+                    nome:dados[1] || "",
+
+                    categoria:dados[2] || "",
+
+                    preco:
+                        parseFloat(
+                            String(dados[3])
+                            .replace(",",".")
+                        ) || 0,
+
+                    unidade:dados[4] || "UN",
+
+                    quantidade:
+                        parseFloat(
+                            String(dados[5])
+                            .replace(",",".")
+                        ) || 0,
+
+                    ultimaMovimentacao:
+                        dataHora()
+
+                });
+
+            });
+
+            salvarDados();
+
+            atualizarTudo();
+
+            alert(
+                "Importação concluída."
+            );
+
+        };
+
+        reader.readAsText(
+            arquivo,
+            "UTF-8"
+        );
+
+    };
+
+    input.click();
+
+}
+
+
+/* =========================================================
+   IMPORTAR XML
+========================================================= */
+
+function importarXML(){
+
+    const input =
+        document.createElement("input");
+
+    input.type = "file";
+
+    input.accept = ".xml";
+
+    input.onchange = function(){
+
+        const arquivo =
+            input.files[0];
+
+        if(!arquivo){
+            return;
+        }
+
+        const reader =
+            new FileReader();
+
+        reader.onload = function(e){
+
+            const xml =
+                new DOMParser()
+                .parseFromString(
+                    e.target.result,
+                    "text/xml"
+                );
+
+            const produtosXML =
+                xml.querySelectorAll("det");
+
+            let adicionados = 0;
+
+            produtosXML.forEach(function(det){
+
+                const prod =
+                    det.querySelector("prod");
+
+                if(!prod){
+                    return;
+                }
+
+                const codigo =
+                    prod.querySelector("cProd")
+                    ?.textContent
+                    ?.trim();
+
+                const nome =
+                    prod.querySelector("xProd")
+                    ?.textContent
+                    ?.trim();
+
+                const quantidade =
+                    parseFloat(
+                        prod.querySelector("qCom")
+                        ?.textContent || "0"
+                    );
+
+                const preco =
+                    parseFloat(
+                        prod.querySelector("vUnCom")
+                        ?.textContent || "0"
+                    );
+
+                if(!codigo || !nome){
+                    return;
+                }
+
+                const existente =
+                    encontrarProduto(codigo);
+
+                if(existente){
+
+                    existente.quantidade =
+                        Number(
+                            existente.quantidade || 0
+                        ) +
+                        quantidade;
+
+                    if(preco > 0){
+                        existente.preco = preco;
+                    }
+
+                    existente.ultimaMovimentacao =
+                        dataHora();
+
+                }else{
+
+                    produtos.push({
+
+                        codigo:codigo,
+
+                        nome:nome,
+
+                        categoria:"Importado XML",
+
+                        preco:preco,
+
+                        unidade:
+                            prod.querySelector("uCom")
+                            ?.textContent ||
+                            "UN",
+
+                        quantidade:quantidade,
+
+                        ultimaMovimentacao:
+                            dataHora()
+
+                    });
+
+                }
+
+                adicionados++;
+
+            });
+
+            salvarDados();
+
+            atualizarTudo();
+
+            alert(
+                "XML processado. Itens encontrados: " +
+                adicionados
+            );
+
+        };
+
+        reader.readAsText(
+            arquivo
+        );
+
+    };
+
+    input.click();
+
+}
+
+
+/* =========================================================
+   RELATÓRIO
+========================================================= */
+
+function gerarRelatorio(){
+
+    const modal =
+        document.getElementById(
+            "modal-relatorio"
+        );
+
+    if(!modal){
+
+        alert(
+            "Área de relatório não encontrada."
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        "relatorio-data-inicial"
+    ).value = "";
+
+    document.getElementById(
+        "relatorio-data-final"
+    ).value = "";
+
+    document.getElementById(
+        "relatorio-codigo"
+    ).value = "";
+
+    document.getElementById(
+        "relatorio-nf"
+    ).value = "";
+
+    document.getElementById(
+        "relatorio-responsavel"
+    ).value = "";
+
+    document.getElementById(
+        "relatorio-tipo"
+    ).value = "";
+
+    const selectProduto =
+        document.getElementById(
+            "relatorio-produto"
+        );
+
+    selectProduto.innerHTML =
+        '<option value="">Todos os produtos</option>';
+
+    produtos.forEach(function(produto){
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            produto.codigo;
+
+        option.textContent =
+            produto.codigo +
+            " - " +
+            produto.nome;
+
+        selectProduto.appendChild(option);
+
+    });
+
+    modal.style.display = "block";
+
+    aplicarFiltrosRelatorio();
+
+}
+
+
+/* =========================================================
+   APLICAR FILTROS DO RELATÓRIO
+========================================================= */
+
+function aplicarFiltrosRelatorio(){
+
+    const dataInicial =
+        document.getElementById(
+            "relatorio-data-inicial"
+        ).value;
+
+    const dataFinal =
+        document.getElementById(
+            "relatorio-data-final"
+        ).value;
+
+    const codigo =
+        document.getElementById(
+            "relatorio-codigo"
+        ).value
+        .trim()
+        .toLowerCase();
+
+    const produtoSelecionado =
+        document.getElementById(
+            "relatorio-produto"
+        ).value;
+
+    const tipo =
+        document.getElementById(
+            "relatorio-tipo"
+        ).value;
+
+    const nf =
+        document.getElementById(
+            "relatorio-nf"
+        ).value
+        .trim()
+        .toLowerCase();
+
+    const responsavel =
+        document.getElementById(
+            "relatorio-responsavel"
+        ).value
+        .trim()
+        .toLowerCase();
+
+
+    let resultados =
+        movimentacoes.filter(function(mov){
+
+            const dataMov =
+                mov.data || "";
+
+            if(
+                dataInicial &&
+                dataMov < dataInicial
+            ){
+                return false;
+            }
+
+            if(
+                dataFinal &&
+                dataMov > dataFinal
+            ){
+                return false;
+            }
+
+            if(
+                codigo &&
+                !String(mov.codigo || "")
+                    .toLowerCase()
+                    .includes(codigo)
+            ){
+                return false;
+            }
+
+            if(
+                produtoSelecionado &&
+                String(mov.codigo) !==
+                String(produtoSelecionado)
+            ){
+                return false;
+            }
+
+            if(
+                tipo &&
+                mov.tipo !== tipo
+            ){
+                return false;
+            }
+
+            if(
+                nf &&
+                !String(mov.nf || "")
+                    .toLowerCase()
+                    .includes(nf)
+            ){
+                return false;
+            }
+
+            if(
+                responsavel &&
+                !String(mov.responsavel || "")
+                    .toLowerCase()
+                    .includes(responsavel)
+            ){
+                return false;
+            }
+
+            return true;
+
+        });
+
+
+    resultados.sort(function(a,b){
+
+        return String(a.data || "")
+            .localeCompare(
+                String(b.data || "")
+            );
+
+    });
+
+
+    const tbody =
+        document.getElementById(
+            "tabela-relatorio-body"
+        );
+
+    tbody.innerHTML = "";
+
+
+    let totalEntrada = 0;
+
+    let totalSaida = 0;
+
+
+    resultados.forEach(function(mov){
+
+        const produto =
+            encontrarProduto(mov.codigo);
+
+        const preco =
+            produto
+            ? Number(produto.preco || 0)
+            : 0;
+
+        const quantidade =
+            Number(mov.quantidade || 0);
+
+        const valorTotal =
+            preco * quantidade;
+
+
+        if(mov.tipo === "entrada"){
+
+            totalEntrada += quantidade;
+
+        }
+
+        if(mov.tipo === "saida"){
+
+            totalSaida += quantidade;
+
+        }
+
+
+        const tr =
+            document.createElement("tr");
+
+
+        const dataFormatada =
+            mov.data
+            ? String(mov.data)
+                .split("-")
+                .reverse()
+                .join("/")
+            : "-";
+
+
+        tr.innerHTML =
+
+            "<td>" +
+                dataFormatada +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(mov.codigo || "-") +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(mov.produto || "-") +
+            "</td>" +
+
+            "<td>" +
+
+                (
+                    mov.tipo === "entrada"
+                    ? "📥 Entrada"
+                    : "📤 Saída"
+                ) +
+
+            "</td>" +
+
+            "<td>" +
+                numero(quantidade) +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(mov.nf || "-") +
+            "</td>" +
+
+            "<td>" +
+                escaparHTML(
+                    mov.responsavel || "-"
+                ) +
+            "</td>" +
+
+            "<td>" +
+                moeda(preco) +
+            "</td>" +
+
+            "<td>" +
+                moeda(valorTotal) +
+            "</td>";
+
+        tbody.appendChild(tr);
+
+    });
+
+
+    if(resultados.length === 0){
+
+        tbody.innerHTML =
+
+            "<tr>" +
+
+                "<td " +
+                    "colspan='9' " +
+                    "class='relatorio-vazio'>" +
+
+                    "Nenhuma movimentação " +
+                    "encontrada para os filtros informados." +
+
+                "</td>" +
+
+            "</tr>";
+
+    }
+
+
+    document.getElementById(
+        "rel-total-mov"
+    ).textContent =
+        resultados.length;
+
+
+    document.getElementById(
+        "rel-total-entrada"
+    ).textContent =
+        numero(totalEntrada);
+
+
+    document.getElementById(
+        "rel-total-saida"
+    ).textContent =
+        numero(totalSaida);
+
+
+    document.getElementById(
+        "rel-saldo"
+    ).textContent =
+        numero(
+            totalEntrada -
+            totalSaida
+        );
+
+
+    let textoPeriodo =
+        "Período: Todos os registros";
+
+
+    if(
+        dataInicial ||
+        dataFinal
+    ){
+
+        const inicio =
+            dataInicial
+            ? dataInicial
+                .split("-")
+                .reverse()
+                .join("/")
+            : "...";
+
+        const fim =
+            dataFinal
+            ? dataFinal
+                .split("-")
+                .reverse()
+                .join("/")
+            : "...";
+
+        textoPeriodo =
+            "Período: " +
+            inicio +
+            " até " +
+            fim;
+
+    }
+
+
+    document.getElementById(
+        "periodo-relatorio"
+    ).textContent =
+        textoPeriodo;
+
+}
+
+
+/* =========================================================
+   IMPRIMIR RELATÓRIO
+========================================================= */
+
+function imprimirRelatorio(){
+
+    window.print();
+
+}
+
+
+/* =========================================================
+   FECHAR RELATÓRIO
+========================================================= */
+
+function fecharRelatorio(){
+
+    const modal =
+        document.getElementById(
+            "modal-relatorio"
+        );
+
+    if(modal){
+
+        modal.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   RESUMO
+========================================================= */
+
+function atualizarResumo(){
+
+    const totalProdutos =
+        document.getElementById(
+            "total-produtos"
+        );
+
+    const totalQuantidade =
+        document.getElementById(
+            "total-quantidade"
+        );
+
+    const valorEstoque =
+        document.getElementById(
+            "valor-estoque"
+        );
+
+    if(totalProdutos){
+
+        totalProdutos.textContent =
+            produtos.length;
+
+    }
+
+
+    const quantidade =
+        produtos.reduce(
+            function(total,p){
+
+                return total +
+                    Number(
+                        p.quantidade || 0
+                    );
+
+            },
+            0
+        );
+
+
+    const valor =
+        produtos.reduce(
+            function(total,p){
+
+                return total +
+                    Number(p.preco || 0) *
+                    Number(p.quantidade || 0);
+
+            },
+            0
+        );
+
+
+    if(totalQuantidade){
+
+        totalQuantidade.textContent =
+            numero(quantidade);
+
+    }
+
+
+    if(valorEstoque){
+
+        valorEstoque.textContent =
+            moeda(valor);
+
+    }
+
+}
+
+
+/* =========================================================
+   MENSAGENS
+========================================================= */
+
+function mostrarMensagem(
+    id,
+    texto,
+    tipo
+){
+
+    const elemento =
+        document.getElementById(id);
+
+    if(!elemento){
+        return;
+    }
+
+    elemento.textContent =
+        texto;
+
+    elemento.className =
+        "mensagem " +
+        (tipo || "");
+
+    setTimeout(function(){
+
+        elemento.textContent = "";
+
+    },4000);
+
+}
+
+
+/* =========================================================
+   ESCAPAR HTML
+========================================================= */
+
+function escaparHTML(valor){
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        String(valor ?? "");
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   ATUALIZAR TUDO
+========================================================= */
+
+function atualizarTudo(){
+
+    atualizarTabelaEstoque();
+
+    atualizarResumo();
+
+    atualizarTabelaFornecedores();
+
+}
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        const movData =
+            document.getElementById(
+                "mov-data"
+            );
+
+        const movEmissao =
+            document.getElementById(
+                "mov-emissao-nf"
+            );
+
+        const saidaData =
+            document.getElementById(
+                "saida-nf-data"
+            );
+
+        const nfData =
+            document.getElementById(
+                "nf-data"
+            );
+
+
+        if(movData){
+            movData.value =
+                dataHojeISO();
+        }
+
+        if(movEmissao){
+            movEmissao.value =
+                dataHojeISO();
+        }
+
+        if(saidaData){
+            saidaData.value =
+                dataHojeISO();
+        }
+
+        if(nfData){
+            nfData.value =
+                dataHojeISO();
+        }
+
+
+        const logado =
+            localStorage.getItem(
+                "sistema_logado"
+            ) === "sim";
+
+
+        if(logado){
+
+            document.getElementById(
+                "tela-login"
+            ).style.display =
+                "none";
+
+            document.getElementById(
+                "sistema"
+            ).style.display =
+                "block";
+
+        }
+
+
+        const campoSenha =
+            document.getElementById(
+                "campo-senha"
+            );
+
+        if(campoSenha){
+
+            campoSenha.addEventListener(
+                "keydown",
+                function(e){
+
+                    if(e.key === "Enter"){
+
+                        e.preventDefault();
+
+                        entrarSistema();
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        atualizarTudo();
+
+    }
+);
+
 </script>
+
 </body>
 </html>
