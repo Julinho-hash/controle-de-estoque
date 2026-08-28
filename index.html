@@ -1,3 +1,5 @@
+HTML FUNCIONANDO NORMAL
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -597,6 +599,7 @@ hr{
 }
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -3550,121 +3553,165 @@ function exportarParaExcel(){
 
 
 /* =========================================================
-   IMPORTAR CSV
+   IMPORTAR EXCEL / CSV  (versão corrigida)
+
+   Correções:
+   - Aceita .xlsx / .xls de verdade (não só CSV)
+   - Detecta o separador do CSV automaticamente (; ou , ou TAB)
+   - ATUALIZA o produto que já existe (antes ele era ignorado -> por isso
+     o estoque "buscava mas não atualizava")
+   - Ignora acentos/maiúsculas no cabeçalho e aceita colunas em qualquer ordem
 ========================================================= */
 
 function importarDoExcel(){
 
-    const input =
-        document.createElement("input");
-
+    const input = document.createElement("input");
     input.type = "file";
-
-    input.accept =
-        ".csv,.xlsx,.xls";
+    input.accept = ".csv,.xlsx,.xls";
 
     input.onchange = function(){
 
-        const arquivo =
-            input.files[0];
+        const arquivo = input.files[0];
+        if(!arquivo) return;
 
-        if(!arquivo){
-            return;
+        const nome = arquivo.name.toLowerCase();
+        const reader = new FileReader();
+
+        if(nome.endsWith(".xlsx") || nome.endsWith(".xls")){
+
+            if(typeof XLSX === "undefined"){
+                alert("Falta incluir a biblioteca XLSX no <head> do HTML.");
+                return;
+            }
+
+            reader.onload = function(e){
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type:"array" });
+                const linhas = XLSX.utils.sheet_to_json(
+                    wb.Sheets[wb.SheetNames[0]],
+                    { header:1, defval:"", raw:false }
+                );
+                processarLinhasImportacao(linhas);
+            };
+
+            reader.readAsArrayBuffer(arquivo);
+
+        } else {
+
+            reader.onload = function(e){
+                const texto = e.target.result.replace(/^\uFEFF/, "");
+                const brutas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
+                if(!brutas.length){ alert("Arquivo vazio."); return; }
+
+                const cab = brutas[0];
+                const sep = [";", ",", "\t"]
+                    .map(s => ({ s, n: cab.split(s).length }))
+                    .sort((a,b) => b.n - a.n)[0].s;
+
+                const linhas = brutas.map(l =>
+                    l.split(sep).map(c => c.trim().replace(/^"(.*)"$/, "$1"))
+                );
+                processarLinhasImportacao(linhas);
+            };
+
+            reader.readAsText(arquivo, "UTF-8");
         }
-
-        if(
-            !arquivo.name
-                .toLowerCase()
-                .endsWith(".csv")
-        ){
-
-            alert(
-                "Para esta versão, importe o Excel salvo como CSV."
-            );
-
-            return;
-        }
-
-        const reader =
-            new FileReader();
-
-        reader.onload = function(e){
-
-            const linhas =
-                e.target.result
-                .replace(/^\uFEFF/,"")
-                .split(/\r?\n/);
-
-            linhas.shift();
-
-            linhas.forEach(function(linha){
-
-                if(!linha.trim()){
-                    return;
-                }
-
-                const dados =
-                    linha.split(";");
-
-                if(dados.length < 6){
-                    return;
-                }
-
-                const codigo =
-                    dados[0].trim();
-
-                if(encontrarProduto(codigo)){
-                    return;
-                }
-
-                produtos.push({
-
-                    codigo:codigo,
-
-                    nome:dados[1] || "",
-
-                    categoria:dados[2] || "",
-
-                    preco:
-                        parseFloat(
-                            String(dados[3])
-                            .replace(",",".")
-                        ) || 0,
-
-                    unidade:dados[4] || "UN",
-
-                    quantidade:
-                        parseFloat(
-                            String(dados[5])
-                            .replace(",",".")
-                        ) || 0,
-
-                    ultimaMovimentacao:
-                        dataHora()
-
-                });
-
-            });
-
-            salvarDados();
-
-            atualizarTudo();
-
-            alert(
-                "Importação concluída."
-            );
-
-        };
-
-        reader.readAsText(
-            arquivo,
-            "UTF-8"
-        );
-
     };
 
     input.click();
+}
 
+
+function processarLinhasImportacao(linhas){
+
+    if(!linhas || linhas.length < 2){
+        alert("Nenhuma linha encontrada no arquivo.");
+        return;
+    }
+
+    const limpar = t => String(t || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().trim();
+
+    const cab = linhas[0].map(limpar);
+
+    const achar = (...nomes) => {
+        for(const n of nomes){
+            const i = cab.findIndex(c => c === n || c.includes(n));
+            if(i !== -1) return i;
+        }
+        return -1;
+    };
+
+    let iCod  = achar("codigo", "cod", "sku");
+    let iNome = achar("nome", "descricao", "produto");
+    let iCat  = achar("categoria", "grupo");
+    let iPre  = achar("preco", "valor");
+    let iUni  = achar("unidade", "un");
+    let iQtd  = achar("quantidade", "qtd", "estoque");
+
+    // Sem cabeçalho reconhecido: usa a ordem padrão
+    if(iCod === -1 && iNome === -1){
+        iCod = 0; iNome = 1; iCat = 2; iPre = 3; iUni = 4; iQtd = 5;
+    }
+
+    const num = v => {
+        const s = String(v ?? "").replace(/[^\d,.-]/g, "").trim();
+        if(!s) return 0;
+        const n = s.includes(",")
+            ? parseFloat(s.replace(/\./g, "").replace(",", "."))
+            : parseFloat(s);
+        return isNaN(n) ? 0 : n;
+    };
+
+    let novos = 0, atualizados = 0;
+
+    linhas.slice(1).forEach(function(dados){
+
+        if(!dados || !dados.length) return;
+        if(dados.every(c => String(c).trim() === "")) return;
+
+        const codigo = String(dados[iCod] ?? "").trim();
+        if(!codigo) return;
+
+        const nomeProd  = String(dados[iNome] ?? "").trim();
+        const categoria = iCat !== -1 ? String(dados[iCat] ?? "").trim() : "";
+        const preco     = iPre !== -1 ? num(dados[iPre]) : 0;
+        const unidade   = iUni !== -1 ? (String(dados[iUni] ?? "").trim() || "UN") : "UN";
+        const quantidade= iQtd !== -1 ? num(dados[iQtd]) : 0;
+
+        const existente = encontrarProduto(codigo);
+
+        if(existente){
+            // AQUI estava o problema: antes o produto existente era ignorado
+            if(nomeProd)  existente.nome = nomeProd;
+            if(categoria) existente.categoria = categoria;
+            if(iPre !== -1) existente.preco = preco;
+            if(iUni !== -1) existente.unidade = unidade;
+            if(iQtd !== -1) existente.quantidade = quantidade; // sobrescreve o estoque
+            existente.ultimaMovimentacao = dataHora();
+            atualizados++;
+        } else {
+            produtos.push({
+                codigo: codigo,
+                nome: nomeProd,
+                categoria: categoria,
+                preco: preco,
+                unidade: unidade,
+                quantidade: quantidade,
+                ultimaMovimentacao: dataHora()
+            });
+            novos++;
+        }
+    });
+
+    salvarDados();
+    atualizarTudo();
+
+    alert(
+        "Importação concluída.\n" +
+        novos + " produto(s) novo(s)\n" +
+        atualizados + " produto(s) atualizado(s)"
+    );
 }
 
 
