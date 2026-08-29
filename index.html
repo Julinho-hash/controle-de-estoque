@@ -1,11 +1,10 @@
-HTML FUNCIONANDO NORMAL
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistema de Controle de Estoque</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 
@@ -63,6 +62,10 @@ button:hover{
     background:#f59e0b;
     padding:8px 12px;
     margin-right:5px;
+}
+
+.botao-copiar-codigo{
+    background:#7c3aed;
 }
 
 
@@ -599,7 +602,6 @@ hr{
 }
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -993,6 +995,15 @@ hr{
                 onclick="gerarRelatorio()">
 
                 📋 Gerar Relatório
+
+            </button>
+
+            <button
+                type="button"
+                class="botao-copiar-codigo"
+                onclick="copiarCodigoFonte()">
+
+                📄 Copiar Código Fonte
 
             </button>
 
@@ -2119,17 +2130,33 @@ function trocarAba(numeroAba){
    PRODUTOS
 ========================================================= */
 
+function normalizarCodigoProduto(codigo){
+
+    const texto = String(codigo ?? "")
+        .trim()
+        .toUpperCase();
+
+    if(/^\d+(?:\.0+)?$/.test(texto)){
+        return String(parseInt(texto,10));
+    }
+
+    return texto;
+}
+
+
 function encontrarProduto(codigo){
+
+    const codigoProcurado =
+        normalizarCodigoProduto(codigo);
 
     return produtos.find(function(produto){
 
-        return String(produto.codigo).trim() ===
-               String(codigo).trim();
+        return normalizarCodigoProduto(produto.codigo) ===
+               codigoProcurado;
 
     });
 
 }
-
 
 function cadastrarProduto(){
 
@@ -3553,15 +3580,188 @@ function exportarParaExcel(){
 
 
 /* =========================================================
-   IMPORTAR EXCEL / CSV  (versão corrigida)
-
-   Correções:
-   - Aceita .xlsx / .xls de verdade (não só CSV)
-   - Detecta o separador do CSV automaticamente (; ou , ou TAB)
-   - ATUALIZA o produto que já existe (antes ele era ignorado -> por isso
-     o estoque "buscava mas não atualizava")
-   - Ignora acentos/maiúsculas no cabeçalho e aceita colunas em qualquer ordem
+   IMPORTAR CSV
 ========================================================= */
+
+function normalizarNumero(valor){
+
+    if(valor === undefined || valor === null || valor === ""){
+        return 0;
+    }
+
+    if(typeof valor === "number"){
+        return Number.isFinite(valor) ? valor : 0;
+    }
+
+    let texto = String(valor).trim();
+
+    if(!texto){
+        return 0;
+    }
+
+    texto = texto.replace(/\s/g,"").replace(/R\$/gi,"");
+    texto = texto.replace(/[^\d,.\-]/g,"");
+
+    const ultimaVirgula = texto.lastIndexOf(",");
+    const ultimoPonto = texto.lastIndexOf(".");
+
+    if(ultimaVirgula > -1 && ultimoPonto > -1){
+        if(ultimaVirgula > ultimoPonto){
+            texto = texto.replace(/\./g,"").replace(",",".");
+        }else{
+            texto = texto.replace(/,/g,"");
+        }
+    }else if(ultimaVirgula > -1){
+        texto = texto.replace(/\./g,"").replace(",",".");
+    }else if((texto.match(/\./g) || []).length > 1){
+        texto = texto.replace(/\./g,"");
+    }
+
+    const numeroConvertido = Number(texto);
+    return Number.isFinite(numeroConvertido) ? numeroConvertido : 0;
+}
+
+
+function normalizarCabecalho(valor){
+
+    return String(valor ?? "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-z0-9]/g,"");
+}
+
+
+function criarMapaImportacao(cabecalho){
+
+    const aliases = {
+        codigo:["codigo","cod","sku","referencia","ref","codigoproduto"],
+        nome:["nome","produto","descricao","descricaoproduto"],
+        categoria:["categoria","grupo","departamento"],
+        preco:["preco","valor","precocusto","custounitario","valorunitario","preçocusto"],
+        unidade:["unidade","un","und","medida"],
+        quantidade:["quantidade","qtd","estoque","saldo","quantidadeestoque","estoqueatual"]
+    };
+
+    const mapa = {};
+
+    cabecalho.forEach(function(titulo,indice){
+        const normalizado = normalizarCabecalho(titulo);
+
+        Object.keys(aliases).forEach(function(campo){
+            if(mapa[campo] === undefined &&
+               aliases[campo].map(normalizarCabecalho).includes(normalizado)){
+                mapa[campo] = indice;
+            }
+        });
+    });
+
+    mapa.temCabecalho =
+        mapa.codigo !== undefined &&
+        (mapa.nome !== undefined ||
+         mapa.preco !== undefined ||
+         mapa.quantidade !== undefined);
+
+    return mapa;
+}
+
+
+function obterValorImportado(dados,mapa,campo,posicaoPadrao){
+
+    const indice = mapa && mapa[campo] !== undefined
+        ? mapa[campo]
+        : posicaoPadrao;
+
+    return dados[indice];
+}
+
+
+function aplicarLinhaImportada(dados,resultado,mapa){
+
+    const codigoOriginal =
+        obterValorImportado(dados,mapa,"codigo",0);
+    const codigo = String(codigoOriginal ?? "").trim();
+
+    if(!codigo){
+        resultado.ignorados++;
+        return;
+    }
+
+    const nomeOriginal = obterValorImportado(dados,mapa,"nome",1);
+    const categoriaOriginal = obterValorImportado(dados,mapa,"categoria",2);
+    const precoOriginal = obterValorImportado(dados,mapa,"preco",3);
+    const unidadeOriginal = obterValorImportado(dados,mapa,"unidade",4);
+    const quantidadeOriginal = obterValorImportado(dados,mapa,"quantidade",5);
+
+    const nome = String(nomeOriginal ?? "").trim();
+    const categoria = String(categoriaOriginal ?? "").trim();
+    const unidade = String(unidadeOriginal ?? "").trim();
+    const temPreco = String(precoOriginal ?? "").trim() !== "";
+    const temQuantidade = String(quantidadeOriginal ?? "").trim() !== "";
+    const preco = normalizarNumero(precoOriginal);
+    const quantidade = normalizarNumero(quantidadeOriginal);
+    const existente = encontrarProduto(codigo);
+
+    if(existente){
+        if(nome){ existente.nome = nome; }
+        if(categoria){ existente.categoria = categoria; }
+        if(temPreco){ existente.preco = preco; }
+        if(unidade){ existente.unidade = unidade; }
+        if(temQuantidade){ existente.quantidade = quantidade; }
+        existente.ultimaMovimentacao = dataHora();
+        resultado.atualizados++;
+    }else{
+        produtos.push({
+            codigo:codigo,
+            nome:nome || "Produto sem nome",
+            categoria:categoria,
+            preco:preco,
+            unidade:unidade || "UN",
+            quantidade:quantidade,
+            ultimaMovimentacao:dataHora()
+        });
+        resultado.novos++;
+    }
+}
+
+
+function finalizarImportacao(resultado){
+
+    salvarDados();
+    atualizarTudo();
+    alert(
+        "Importação concluída.\n" +
+        "Produtos novos: " + resultado.novos + "\n" +
+        "Produtos atualizados: " + resultado.atualizados + "\n" +
+        "Linhas ignoradas: " + resultado.ignorados
+    );
+}
+
+
+function processarLinhasImportadas(linhas,resultado){
+
+    if(!linhas || !linhas.length){
+        alert("A planilha está vazia.");
+        return;
+    }
+
+    const mapa = criarMapaImportacao(linhas[0] || []);
+    const inicio = mapa.temCabecalho ? 1 : 0;
+
+    for(let indice = inicio; indice < linhas.length; indice++){
+        const linha = linhas[indice];
+        if(!linha || !linha.some(function(valor){
+            return String(valor ?? "").trim() !== "";
+        })){
+            continue;
+        }
+        aplicarLinhaImportada(linha,resultado,mapa);
+    }
+
+    finalizarImportacao(resultado);
+}
+
 
 function importarDoExcel(){
 
@@ -3572,148 +3772,58 @@ function importarDoExcel(){
     input.onchange = function(){
 
         const arquivo = input.files[0];
-        if(!arquivo) return;
+        if(!arquivo){ return; }
 
-        const nome = arquivo.name.toLowerCase();
-        const reader = new FileReader();
+        const nomeArquivo = arquivo.name.toLowerCase();
+        const resultado = {novos:0,atualizados:0,ignorados:0};
+        const ehExcel = nomeArquivo.endsWith(".xlsx") ||
+                        nomeArquivo.endsWith(".xls");
 
-        if(nome.endsWith(".xlsx") || nome.endsWith(".xls")){
-
+        if(ehExcel){
             if(typeof XLSX === "undefined"){
-                alert("Falta incluir a biblioteca XLSX no <head> do HTML.");
+                alert("Leitor de Excel não carregado. Verifique a internet ou salve a planilha como CSV.");
                 return;
             }
 
+            const reader = new FileReader();
             reader.onload = function(e){
-                const wb = XLSX.read(new Uint8Array(e.target.result), { type:"array" });
-                const linhas = XLSX.utils.sheet_to_json(
-                    wb.Sheets[wb.SheetNames[0]],
-                    { header:1, defval:"", raw:false }
-                );
-                processarLinhasImportacao(linhas);
+                try{
+                    const planilha = XLSX.read(
+                        new Uint8Array(e.target.result),
+                        {type:"array",cellDates:false}
+                    );
+                    const aba = planilha.Sheets[planilha.SheetNames[0]];
+                    const linhas = XLSX.utils.sheet_to_json(aba,{header:1,defval:"",raw:false});
+                    processarLinhasImportadas(linhas,resultado);
+                }catch(erro){
+                    alert("Não foi possível ler a planilha: " + erro.message);
+                }
             };
-
             reader.readAsArrayBuffer(arquivo);
-
-        } else {
-
-            reader.onload = function(e){
-                const texto = e.target.result.replace(/^\uFEFF/, "");
-                const brutas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
-                if(!brutas.length){ alert("Arquivo vazio."); return; }
-
-                const cab = brutas[0];
-                const sep = [";", ",", "\t"]
-                    .map(s => ({ s, n: cab.split(s).length }))
-                    .sort((a,b) => b.n - a.n)[0].s;
-
-                const linhas = brutas.map(l =>
-                    l.split(sep).map(c => c.trim().replace(/^"(.*)"$/, "$1"))
-                );
-                processarLinhasImportacao(linhas);
-            };
-
-            reader.readAsText(arquivo, "UTF-8");
+            return;
         }
+
+        const reader = new FileReader();
+        reader.onload = function(e){
+            try{
+                const texto = String(e.target.result || "").replace(/^\uFEFF/,"");
+                const cabecalho = (texto.split(/\r?\n/)[0] || "");
+                const separador = cabecalho.split(";").length > cabecalho.split(",").length ? ";" : ",";
+                const linhas = texto.split(/\r?\n/).map(function(linha){
+                    return linha.split(separador).map(function(item){
+                        return item.trim().replace(/^"|"$/g,"").replace(/""/g,'"');
+                    });
+                });
+                processarLinhasImportadas(linhas,resultado);
+            }catch(erro){
+                alert("Não foi possível ler o arquivo: " + erro.message);
+            }
+        };
+        reader.readAsText(arquivo,"UTF-8");
     };
 
     input.click();
 }
-
-
-function processarLinhasImportacao(linhas){
-
-    if(!linhas || linhas.length < 2){
-        alert("Nenhuma linha encontrada no arquivo.");
-        return;
-    }
-
-    const limpar = t => String(t || "")
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase().trim();
-
-    const cab = linhas[0].map(limpar);
-
-    const achar = (...nomes) => {
-        for(const n of nomes){
-            const i = cab.findIndex(c => c === n || c.includes(n));
-            if(i !== -1) return i;
-        }
-        return -1;
-    };
-
-    let iCod  = achar("codigo", "cod", "sku");
-    let iNome = achar("nome", "descricao", "produto");
-    let iCat  = achar("categoria", "grupo");
-    let iPre  = achar("preco", "valor");
-    let iUni  = achar("unidade", "un");
-    let iQtd  = achar("quantidade", "qtd", "estoque");
-
-    // Sem cabeçalho reconhecido: usa a ordem padrão
-    if(iCod === -1 && iNome === -1){
-        iCod = 0; iNome = 1; iCat = 2; iPre = 3; iUni = 4; iQtd = 5;
-    }
-
-    const num = v => {
-        const s = String(v ?? "").replace(/[^\d,.-]/g, "").trim();
-        if(!s) return 0;
-        const n = s.includes(",")
-            ? parseFloat(s.replace(/\./g, "").replace(",", "."))
-            : parseFloat(s);
-        return isNaN(n) ? 0 : n;
-    };
-
-    let novos = 0, atualizados = 0;
-
-    linhas.slice(1).forEach(function(dados){
-
-        if(!dados || !dados.length) return;
-        if(dados.every(c => String(c).trim() === "")) return;
-
-        const codigo = String(dados[iCod] ?? "").trim();
-        if(!codigo) return;
-
-        const nomeProd  = String(dados[iNome] ?? "").trim();
-        const categoria = iCat !== -1 ? String(dados[iCat] ?? "").trim() : "";
-        const preco     = iPre !== -1 ? num(dados[iPre]) : 0;
-        const unidade   = iUni !== -1 ? (String(dados[iUni] ?? "").trim() || "UN") : "UN";
-        const quantidade= iQtd !== -1 ? num(dados[iQtd]) : 0;
-
-        const existente = encontrarProduto(codigo);
-
-        if(existente){
-            // AQUI estava o problema: antes o produto existente era ignorado
-            if(nomeProd)  existente.nome = nomeProd;
-            if(categoria) existente.categoria = categoria;
-            if(iPre !== -1) existente.preco = preco;
-            if(iUni !== -1) existente.unidade = unidade;
-            if(iQtd !== -1) existente.quantidade = quantidade; // sobrescreve o estoque
-            existente.ultimaMovimentacao = dataHora();
-            atualizados++;
-        } else {
-            produtos.push({
-                codigo: codigo,
-                nome: nomeProd,
-                categoria: categoria,
-                preco: preco,
-                unidade: unidade,
-                quantidade: quantidade,
-                ultimaMovimentacao: dataHora()
-            });
-            novos++;
-        }
-    });
-
-    salvarDados();
-    atualizarTudo();
-
-    alert(
-        "Importação concluída.\n" +
-        novos + " produto(s) novo(s)\n" +
-        atualizados + " produto(s) atualizado(s)"
-    );
-}
-
 
 /* =========================================================
    IMPORTAR XML
@@ -4527,6 +4637,38 @@ document.addEventListener(
 
     }
 );
+
+
+function copiarCodigoFonte(){
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(html).then(function(){
+            alert('Código HTML copiado para a área de transferência!');
+        }).catch(function(err){
+            console.error('Erro ao copiar:', err);
+            copiarCodigoFonteFallback(html);
+        });
+    } else {
+        copiarCodigoFonteFallback(html);
+    }
+}
+
+function copiarCodigoFonteFallback(html){
+    const textarea = document.createElement('textarea');
+    textarea.value = html;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        alert('Código HTML copiado para a área de transferência!');
+    } catch (err) {
+        console.error('Erro ao copiar (fallback):', err);
+        alert('Não foi possível copiar automaticamente. Use Ctrl+A e Ctrl+C no código fonte.');
+    }
+    document.body.removeChild(textarea);
+}
 
 </script>
 
