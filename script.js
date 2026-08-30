@@ -8,6 +8,7 @@
 // ============================================================
 
 const SENHA_SISTEMA = "1234";
+const SENHA_ENTRADA_VENDA = "5678";
 
 let produtos = [];
 let movimentacoes = [];
@@ -3422,36 +3423,35 @@ function registrarEntradaRapida() {
         dataHojeISO();
 
 
-    movimentacoes.push({
+    const precoUnitario = Number(p.preco || 0);
+const valorTotal = Number(qtd) * precoUnitario;
 
-        id:
-            Date.now(),
+movimentacoes.push({
 
-        codigo:
-            produto.codigo,
+    data: dt,
 
-        produto:
-            produto.nome,
+    codigo: cod,
 
-        tipo:
-            "entrada",
+    produto: p.nome,
 
-        quantidade:
-            quantidade,
+    tipo: tipo,
 
-        numeroNF:
-            numeroNF,
+    quantidade: Number(qtd),
 
-        emissaoNF:
-            "",
+    nf: nf,
 
-        data:
-            dataHojeISO(),
+    responsavel: resp,
 
-        responsavel:
-            ""
+    precoUnitario: precoUnitario,
 
-    });
+    valorTotal: valorTotal
+
+});
+           
+
+       
+
+       
 
 
     salvarDados();
