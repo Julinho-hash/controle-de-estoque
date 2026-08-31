@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head><script src="https://happyseeds.ai/app/__happyseeds__/preview-runtime.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistema de Controle de Estoque</title>
@@ -667,24 +667,15 @@ tr:hover{
     button{
         display:none !important;
     }
-
 }
 </style>
-
-
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-
-
 </head>
 
 <body>
-
-<!-- =========================================================
-     LOGIN
-========================================================= -->
 
 <section id="tela-login">
 
@@ -711,7 +702,6 @@ Senha incorreta!
 
 </section>
 
-
 <main id="sistema">
 
 <header class="cabecalho">
@@ -725,11 +715,6 @@ Sair
 </button>
 
 </header>
-
-
-<!-- =========================================================
-     NAVEGAÇÃO
-========================================================= -->
 
 <nav class="navegacao-abas">
 
@@ -777,11 +762,6 @@ onclick="abrirVendasComSenha()">
 
 </nav>
 
-
-<!-- =========================================================
-     ESTOQUE
-========================================================= -->
-
 <section class="conteudo-aba visivel">
 
 <h2>📊 Controle de Estoque</h2>
@@ -814,11 +794,10 @@ onclick="abrirVendasComSenha()">
 
 </div>
 
-
 <input
 type="file"
 id="arquivoExcel"
-accept=".xlsx,.xls,.csv"
+accept=".xlsx,.xls"
 style="display:none"
 onchange="importarExcel(event)"
 >
@@ -828,22 +807,19 @@ type="file"
 id="arquivoXML"
 accept=".xml"
 style="display:none"
-onchange="alert('XML carregado!')"
+onchange="importarXML(event)"
 >
 
-
 <div
-class="filtro-categoria"
-id="area-filtro"
-style="display:none;">
-
-<div class="grupo-form">
-
-<label>Filtrar por Categoria:</label>
+id="filtro-categoria-container"
+style="display:none;margin-bottom:15px"
+>
 
 <select
-id="filtroCategoriaSelect"
-onchange="aplicarFiltroCategoria()">
+id="filtro-categoria"
+class="filtro-categoria"
+onchange="atualizarTabelaEstoque()"
+>
 
 <option value="">
 Todas as categorias
@@ -852,9 +828,6 @@ Todas as categorias
 </select>
 
 </div>
-
-</div>
-
 
 <div class="resumo">
 
@@ -870,881 +843,76 @@ Qtd Total
 
 <div class="card-resumo">
 Valor Total
-<strong id="valor-estoque">R$ 0,00</strong>
+<strong id="valor-total">R$ 0,00</strong>
 </div>
 
 </div>
 
-
-<table id="tabela-estoque">
+<table>
 
 <thead>
 
 <tr>
-<th>Código</th>
-<th>Nome</th>
-<th>Categoria</th>
-<th>Preço</th>
-<th>Un</th>
-<th>Qtd</th>
-<th>Valor</th>
-<th>Última Movimentação</th>
-<th>Ação</th>
+
+<th class="col-estoque">
+Código
+</th>
+
+<th class="col-estoque">
+Nome
+</th>
+
+<th class="col-estoque">
+Categoria
+</th>
+
+<th class="col-estoque">
+Preço
+</th>
+
+<th class="col-estoque">
+Un
+</th>
+
+<th class="col-estoque">
+Qtd
+</th>
+
+<th class="col-estoque">
+Valor
+</th>
+
+<th class="col-estoque">
+Última Movimentação
+</th>
+
+<th>
+Ação
+</th>
+
 </tr>
 
 </thead>
 
-<tbody id="tabela-estoque-body"></tbody>
+<tbody id="tabela-estoque-body">
+</tbody>
 
 </table>
 
+<div
+id="mensagem-estoque"
+class="mensagem">
+</div>
 
 <div
 id="area-relatorio"
 class="caixa-relatorio"
-style="display:none;">
+style="display:none"
+>
 
-<h3>
-📋 Relatório de Movimentações por Período
-</h3>
+<h3>📋 Relatório de Estoque / Movimentações</h3>
 
 <div class="filtros-periodo">
-
-<div class="grupo-form">
-<label>Data Inicial</label>
-<input type="date" id="rel-data-inicial">
-</div>
-
-<div class="grupo-form">
-<label>Data Final</label>
-<input type="date" id="rel-data-final">
-</div>
-
-<button onclick="aplicarFiltroRelatorio()">
-🔍 Gerar
-</button>
-
-</div>
-
-
-<div class="relatorio-totais">
-
-<div class="card-resumo">
-Total Mov.
-<strong id="rel-produtos">0</strong>
-</div>
-
-<div class="card-resumo">
-Entradas
-<strong id="rel-entradas">0</strong>
-</div>
-
-<div class="card-resumo">
-Saídas
-<strong id="rel-saidas">0</strong>
-</div>
-
-<div class="card-resumo">
-Saldo
-<strong id="rel-saldo">0</strong>
-</div>
-
-</div>
-
-
-<h4 style="margin:15px 0 8px 0;">
-Movimentações no Período
-</h4>
-
-<div id="rel-movimentacoes"></div>
-
-<br>
-
-<button onclick="imprimirRelatorio()">
-🖨️ Imprimir
-</button>
-
-<button
-onclick="fecharRelatorio()"
-class="botao-cancelar">
-Fechar
-</button>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     CADASTRO
-========================================================= -->
-
-<section class="conteudo-aba">
-
-<h2>📝 Cadastro de Produtos</h2>
-
-<div class="form-secao">
-
-<h3>Novo Produto</h3>
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Código</label>
-<input type="text" id="codigoNovo">
-</div>
-
-<div class="grupo-form">
-<label>Nome</label>
-<input type="text" id="nomeNovo">
-</div>
-
-<div class="grupo-form">
-<label>Categoria</label>
-<input type="text" id="categoriaNova">
-</div>
-
-</div>
-
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Preço R$</label>
-<input type="text" id="precoNovo">
-</div>
-
-<div class="grupo-form">
-<label>Qtd Inicial</label>
-<input type="number" id="qtdNovo" value="0" step="0.01">
-</div>
-
-<div class="grupo-form">
-<label>Unidade</label>
-
-<select id="unidadeNova">
-<option value="UN">UN</option>
-<option value="KG">KG</option>
-<option value="L">Litro</option>
-<option value="CX">Caixa</option>
-</select>
-
-</div>
-
-</div>
-
-<button onclick="cadastrarProduto()">
-✅ Cadastrar
-</button>
-
-<div id="msg-cadastro" class="mensagem"></div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     MOVIMENTAÇÃO
-========================================================= -->
-
-<section class="conteudo-aba">
-
-<h2>📥 Movimentação de Estoque</h2>
-
-<div class="form-secao">
-
-<h3>Registrar Entrada / Saída</h3>
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Código do Produto</label>
-<input type="text" id="codigoMov">
-</div>
-
-<div class="grupo-form">
-<label>Tipo</label>
-
-<select id="tipoMov">
-
-<option value="entrada">
-📥 Entrada
-</option>
-
-<option value="saida">
-📤 Saída
-</option>
-
-</select>
-
-</div>
-
-<div class="grupo-form">
-<label>Quantidade</label>
-<input type="number" id="qtdProd" value="1" step="0.01">
-</div>
-
-</div>
-
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Nº NF</label>
-<input type="text" id="mov-numero-nf">
-</div>
-
-<div class="grupo-form">
-<label>Data</label>
-<input type="date" id="mov-data">
-</div>
-
-<div class="grupo-form">
-<label>Responsável</label>
-<input type="text" id="responsavel">
-</div>
-
-</div>
-
-
-<button onclick="registrarMovimentacao()">
-✅ Registrar Movimentação
-</button>
-
-<div id="msg-movimentacao" class="mensagem"></div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     NF ENTRADA
-========================================================= -->
-
-<section class="conteudo-aba">
-
-<h2>📄 Entrada por NF</h2>
-
-<button onclick="abrirNFEntrada()">
-+ Nova Entrada
-</button>
-
-
-<div
-id="form-nf-entrada"
-class="form-secao"
-style="display:none;">
-
-<h3>Dados da Nota Fiscal</h3>
-
-<div class="dois-colunas">
-
-<div class="grupo-form">
-<label>Número NF</label>
-<input type="text" id="nf-numero">
-</div>
-
-<div class="grupo-form">
-<label>Data</label>
-<input type="date" id="nf-data">
-</div>
-
-</div>
-
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Código Produto</label>
-<input type="text" id="nf-cod">
-</div>
-
-<div class="grupo-form">
-<label>Quantidade</label>
-<input type="number" id="nf-qtd" step="0.01">
-</div>
-
-<div class="grupo-form">
-<label>Preço Unitário</label>
-<input type="text" id="nf-preco">
-</div>
-
-</div>
-
-
-<button onclick="adicionarItemNF()">
-+ Adicionar Item
-</button>
-
-<div id="lista-itens-nf"></div>
-
-<br>
-
-<button onclick="finalizarNF()">
-✅ Finalizar Entrada
-</button>
-
-<div id="msg-nf" class="mensagem"></div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     NF SAÍDA
-========================================================= -->
-
-<section class="conteudo-aba">
-
-<h2>📄 Saída por NF</h2>
-
-<div class="form-secao">
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Número NF</label>
-<input type="text" id="saida-nf-num">
-</div>
-
-<div class="grupo-form">
-<label>Código Produto</label>
-<input type="text" id="saida-cod">
-</div>
-
-<div class="grupo-form">
-<label>Quantidade</label>
-<input type="number" id="saida-qtd" step="0.01">
-</div>
-
-</div>
-
-
-<div class="dois-colunas">
-
-<div class="grupo-form">
-<label>Data</label>
-<input type="date" id="saida-data">
-</div>
-
-<div class="grupo-form">
-<label>Responsável</label>
-<input type="text" id="saida-resp">
-</div>
-
-</div>
-
-
-<button onclick="registrarSaidaNF()">
-📤 Registrar Saída NF
-</button>
-
-<div id="msg-saida" class="mensagem"></div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     HISTÓRICO
-========================================================= -->
-
-<section class="conteudo-aba">
-
-<h2>📋 Histórico de Movimentações</h2>
-
-<p style="margin-bottom:15px;color:#555;">
-Todas as entradas e saídas registradas
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-<th>Data</th>
-<th>Tipo</th>
-<th>Código</th>
-<th>Produto</th>
-<th>Quantidade</th>
-<th>Nº NF</th>
-<th>Responsável</th>
-</tr>
-
-</thead>
-
-<tbody id="tabela-movimentacoes-body"></tbody>
-
-</table>
-
-<div
-id="sem-movimentacoes"
-style="padding:20px;text-align:center;color:#777;">
-
-Nenhuma movimentação registrada ainda.
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     VENDAS
-========================================================= -->
-
-<section id="area-vendas" class="conteudo-aba">
-
-<div class="cabecalho-vendas">
-
-<h2>
-💰 Comercial / Vendas
-</h2>
-
-<div class="linha-botoes" style="margin-bottom:0;">
-
-<button
-class="botao-relatorio-vendas"
-onclick="abrirRelatorioVendas()">
-📊 Relatório de Vendas
-</button>
-
-<!-- IMPORTANTE: ESTE BOTÃO PEDE SENHA -->
-
-<button
-type="button"
-class="botao-cancelar"
-onclick="abrirSenhaVoltarEstoque()">
-← Voltar
-</button>
-
-</div>
-
-</div>
-
-
-<div class="resumo-venda">
-
-<div class="card-venda">
-Venda Nº
-<strong id="numero-venda">0001</strong>
-</div>
-
-<div class="card-venda">
-Itens
-<strong id="venda-total-itens">0</strong>
-</div>
-
-<div class="card-venda">
-Subtotal
-<strong id="venda-subtotal">R$ 0,00</strong>
-</div>
-
-<div class="card-venda">
-Total
-<strong id="venda-total" class="valor-final-venda">
-R$ 0,00
-</strong>
-</div>
-
-</div>
-
-
-<!-- DADOS DA VENDA -->
-
-<div class="caixa-venda">
-
-<h3>
-🧾 Dados da Venda
-</h3>
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Nº da Venda</label>
-<input type="text" id="venda-numero" readonly>
-</div>
-
-<div class="grupo-form">
-<label>Data</label>
-<input type="date" id="venda-data">
-</div>
-
-<div class="grupo-form">
-<label>Cliente</label>
-<input
-type="text"
-id="venda-cliente"
-placeholder="Nome do cliente">
-</div>
-
-</div>
-
-
-<div class="dois-colunas">
-
-<div class="grupo-form">
-<label>Vendedor / Responsável</label>
-<input
-type="text"
-id="venda-vendedor"
-placeholder="Nome do vendedor">
-</div>
-
-<div class="grupo-form">
-<label>Observação</label>
-<input
-type="text"
-id="venda-observacao"
-placeholder="Observações">
-</div>
-
-</div>
-
-</div>
-
-
-<!-- ADICIONAR PRODUTO -->
-
-<div class="caixa-venda">
-
-<h3>
-🛒 Adicionar Produto
-</h3>
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-<label>Código do Produto</label>
-<input
-type="text"
-id="venda-codigo"
-placeholder="Digite o código"
-oninput="buscarProdutoVenda()">
-</div>
-
-<div class="grupo-form">
-<label>Quantidade</label>
-<input
-type="number"
-id="venda-quantidade"
-value="1"
-min="0.01"
-step="0.01">
-</div>
-
-<div class="grupo-form">
-<label>Preço Unitário</label>
-<input
-type="text"
-id="venda-preco"
-readonly>
-</div>
-
-</div>
-
-
-<div
-id="info-produto-venda"
-class="info-produto-venda">
-</div>
-
-<br>
-
-<button onclick="adicionarProdutoVenda()">
-➕ Adicionar à Venda
-</button>
-
-<div
-id="msg-venda-produto"
-class="mensagem">
-</div>
-
-</div>
-
-
-<!-- ITENS -->
-
-<div class="caixa-venda">
-
-<h3>
-📦 Produtos da Venda
-</h3>
-
-<div class="tabela-itens-venda">
-
-<table>
-
-<thead>
-
-<tr>
-<th>Código</th>
-<th>Produto</th>
-<th>Un.</th>
-<th>Qtd.</th>
-<th>Preço Unit.</th>
-<th>Subtotal</th>
-<th>Ação</th>
-</tr>
-
-</thead>
-
-<tbody id="tabela-itens-venda"></tbody>
-
-</table>
-
-</div>
-
-
-<div
-id="sem-itens-venda"
-style="padding:20px;text-align:center;color:#777;">
-
-Nenhum produto adicionado à venda.
-
-</div>
-
-</div>
-
-
-<!-- PAGAMENTO -->
-
-<div class="caixa-venda">
-
-<h3>
-💳 Pagamento
-</h3>
-
-<div class="tres-colunas">
-
-<div class="grupo-form">
-
-<label>
-Desconto R$
-</label>
-
-<input
-type="number"
-id="venda-desconto"
-value="0"
-min="0"
-step="0.01"
-oninput="calcularTotalVenda">
-
-</div>
-
-<div class="grupo-form">
-
-<label>
-Forma de Pagamento
-</label>
-
-<select
-id="venda-pagamento"
-onchange="ajustarCamposPagamento()">
-
-<option value="Dinheiro">
-💵 Dinheiro
-</option>
-
-<option value="PIX">
-📱 PIX
-</option>
-
-<option value="Cartão de Débito">
-💳 Cartão de Débito
-</option>
-
-<option value="Cartão de Crédito">
-💳 Cartão de Crédito
-</option>
-
-<option value="Boleto">
-🧾 Boleto
-</option>
-
-<option value="Transferência">
-🏦 Transferência
-</option>
-
-<option value="Outros">
-💰 Outros
-</option>
-
-</select>
-
-</div>
-
-
-<div
-class="grupo-form"
-id="campo-valor-recebido">
-
-<label>
-Valor Recebido R$
-</label>
-
-<input
-type="number"
-id="venda-recebido"
-value="0"
-min="0"
-step="0.01"
-oninput="calcularTroco()">
-
-</div>
-
-</div>
-
-
-<div
-id="campo-troco"
-style="
-display:none;
-background:#ecfdf5;
-border:1px solid #86efac;
-padding:12px;
-border-radius:6px;
-margin-top:10px;">
-
-<strong>
-Troco:
-</strong>
-
-<span id="venda-troco">
-R$ 0,00
-</span>
-
-</div>
-
-
-<div class="total-venda-box">
-
-<div class="total-linha">
-
-<span>
-Subtotal:
-</span>
-
-<strong id="total-subtotal">
-R$ 0,00
-</strong>
-
-</div>
-
-
-<div class="total-linha">
-
-<span>
-Desconto:
-</span>
-
-<strong id="total-desconto">
-R$ 0,00
-</strong>
-
-</div>
-
-
-<div class="total-linha-final">
-
-<span>
-TOTAL DA VENDA:
-</span>
-
-<span id="total-final">
-R$ 0,00
-</span>
-
-</div>
-
-</div>
-
-<br>
-
-<button
-class="botao-venda-finalizar"
-onclick="finalizarVenda()">
-
-✅ FINALIZAR VENDA
-
-</button>
-
-
-<button
-class="botao-cancelar"
-onclick="cancelarVenda()">
-
-❌ Cancelar Venda
-
-</button>
-
-
-<div
-id="msg-final-venda"
-class="mensagem">
-</div>
-
-</div>
-
-
-<!-- HISTÓRICO DE VENDAS -->
-
-<div class="caixa-venda">
-
-<h3>
-📋 Últimas Vendas
-</h3>
-
-<table>
-
-<thead>
-
-<tr>
-<th>Nº</th>
-<th>Data</th>
-<th>Cliente</th>
-<th>Pagamento</th>
-<th>Itens</th>
-<th>Total</th>
-</tr>
-
-</thead>
-
-<tbody id="tabela-vendas-body"></tbody>
-
-</table>
-
-
-<div
-id="sem-vendas"
-style="
-padding:20px;
-text-align:center;
-color:#777;">
-
-Nenhuma venda realizada ainda.
-
-</div>
-
-</div>
-
-
-<!-- =========================================================
-     RELATÓRIO DE VENDAS
-========================================================= -->
-
-<div id="area-relatorio-vendas">
-
-<h3>
-📊 Relatório Detalhado de Vendas
-</h3>
-
-
-<div class="filtros-relatorio-vendas">
 
 <div class="grupo-form">
 
@@ -1754,10 +922,10 @@ Data Inicial
 
 <input
 type="date"
-id="rv-data-inicial">
+id="relatorio-data-inicial"
+>
 
 </div>
-
 
 <div class="grupo-form">
 
@@ -1767,21 +935,61 @@ Data Final
 
 <input
 type="date"
-id="rv-data-final">
+id="relatorio-data-final"
+>
 
 </div>
 
+<div>
+
+<button onclick="aplicarFiltrosRelatorio()">
+Aplicar Filtros
+</button>
+
+</div>
+
+</div>
+
+<div class="dois-colunas">
 
 <div class="grupo-form">
 
 <label>
-Vendedor
+Produto
 </label>
 
-<select id="rv-vendedor">
+<select id="relatorio-produto">
 
 <option value="">
-Todos os vendedores
+Todos
+</option>
+
+</select>
+
+</div>
+
+<div class="grupo-form">
+
+<label>
+Tipo
+</label>
+
+<select id="relatorio-tipo">
+
+<option value="">
+Todos
+</option>
+
+<option value="Entrada">
+Entrada
+</option>
+
+<option value="Saída">
+Saída
+</option>
+
+<option value="Venda">
+Venda
 </option>
 
 </select>
@@ -1790,82 +998,862 @@ Todos os vendedores
 
 </div>
 
+<div class="tres-colunas">
+
+<div class="grupo-form">
+
+<label>
+Código
+</label>
+
+<input
+type="text"
+id="relatorio-codigo"
+placeholder="Código"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>
+NF
+</label>
+
+<input
+type="text"
+id="relatorio-nf"
+placeholder="Número da NF"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>
+Responsável
+</label>
+
+<input
+type="text"
+id="relatorio-responsavel"
+placeholder="Responsável"
+>
+
+</div>
+
+</div>
+
+<div class="relatorio-totais">
+
+<div class="card-resumo">
+Movimentações
+<strong id="relatorio-total-mov">
+0
+</strong>
+</div>
+
+<div class="card-resumo">
+Quantidade
+<strong id="relatorio-total-qtd">
+0
+</strong>
+</div>
+
+<div class="card-resumo">
+Valor Total
+<strong id="relatorio-total-valor">
+R$ 0,00
+</strong>
+</div>
+
+<div class="card-resumo">
+Valor Médio
+<strong id="relatorio-valor-medio">
+R$ 0,00
+</strong>
+</div>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Data</th>
+<th>Código</th>
+<th>Produto</th>
+<th>Tipo</th>
+<th>Quantidade</th>
+<th>NF</th>
+<th>Responsável</th>
+<th>Preço Unit.</th>
+<th>Valor Total</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabela-relatorio-body">
+</tbody>
+
+</table>
+
+<div class="linha-botoes">
+
+<button onclick="imprimirRelatorio()">
+🖨️ Imprimir
+</button>
+
+<button onclick="fecharRelatorio()">
+❌ Fechar
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📝 Cadastro de Produtos</h2>
+
+<div class="form-secao">
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Código</label>
+<input type="number" id="cad-codigo" placeholder="Automático">
+</div>
+
+<div class="grupo-form">
+<label>Nome do Produto</label>
+<input type="text" id="cad-nome" placeholder="Nome do produto">
+</div>
+
+<div class="grupo-form">
+<label>Categoria</label>
+<input type="text" id="cad-categoria" placeholder="Categoria">
+</div>
+
+</div>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Preço Unitário</label>
+<input type="number" step="0.01" id="cad-preco" placeholder="0,00">
+</div>
+
+<div class="grupo-form">
+<label>Unidade</label>
+
+<select id="cad-unidade">
+
+<option value="UN">UN</option>
+<option value="KG">KG</option>
+<option value="G">G</option>
+<option value="L">L</option>
+<option value="ML">ML</option>
+<option value="CX">CX</option>
+<option value="PC">PC</option>
+<option value="FD">FD</option>
+<option value="SC">SC</option>
+
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Quantidade Inicial</label>
+<input type="number" id="cad-quantidade" placeholder="0">
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="cadastrarProduto()">
+💾 Cadastrar Produto
+</button>
+
+<button class="botao-cancelar" onclick="limparCadastro()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-cadastro" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📥 Movimentação de Estoque</h2>
+
+<div class="form-secao">
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Produto</label>
+
+<select id="mov-produto" onchange="mostrarProdutoMovimentacao()">
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Tipo</label>
+
+<select id="mov-tipo">
+
+<option value="Entrada">Entrada</option>
+<option value="Saída">Saída</option>
+
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Quantidade</label>
+
+<input type="number" id="mov-quantidade" min="1" placeholder="Quantidade">
+
+</div>
+
+</div>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>NF</label>
+<input type="text" id="mov-nf" placeholder="Número da NF">
+</div>
+
+<div class="grupo-form">
+<label>Responsável</label>
+<input type="text" id="mov-responsavel" placeholder="Responsável">
+</div>
+
+<div class="grupo-form">
+<label>Data</label>
+<input type="date" id="mov-data">
+</div>
+
+</div>
+
+<div id="info-mov-produto" class="info-produto-venda"></div>
+
+<div class="linha-botoes">
+
+<button onclick="registrarMovimentacao()">
+💾 Registrar Movimentação
+</button>
+
+<button class="botao-cancelar" onclick="limparMovimentacao()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-movimentacao" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📄 Nota Fiscal de Entrada</h2>
+
+<div class="form-secao">
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Número da NF</label>
+<input type="text" id="nf-entrada-numero" placeholder="Número da NF">
+</div>
+
+<div class="grupo-form">
+<label>Fornecedor</label>
+<input type="text" id="nf-entrada-fornecedor" placeholder="Fornecedor">
+</div>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Data</label>
+<input type="date" id="nf-entrada-data">
+</div>
+
+<div class="grupo-form">
+<label>Responsável</label>
+<input type="text" id="nf-entrada-responsavel" placeholder="Responsável">
+</div>
+
+</div>
+
+<h3>Itens da Nota Fiscal</h3>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Produto</label>
+<select id="nf-entrada-produto"></select>
+</div>
+
+<div class="grupo-form">
+<label>Quantidade</label>
+<input type="number" id="nf-entrada-quantidade" min="1" placeholder="Quantidade">
+</div>
+
+<div class="grupo-form">
+<label>Preço Unitário</label>
+<input type="number" step="0.01" id="nf-entrada-preco" placeholder="0,00">
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="adicionarItemNFEntrada()">
+➕ Adicionar Item
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Código</th>
+<th>Produto</th>
+<th>Quantidade</th>
+<th>Preço</th>
+<th>Total</th>
+<th>Ação</th>
+</tr>
+
+</thead>
+
+<tbody id="tabela-nf-entrada-body"></tbody>
+
+</table>
+
+<div class="total-venda-box">
+
+<div class="total-linha-final">
+
+<span>Total da NF</span>
+<span id="nf-entrada-total">R$ 0,00</span>
+
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="finalizarNFEntrada()">
+💾 Finalizar NF Entrada
+</button>
+
+<button class="botao-cancelar" onclick="limparNFEntrada()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-nf-entrada" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📄 Nota Fiscal de Saída</h2>
+
+<div class="form-secao">
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Número da NF</label>
+<input type="text" id="nf-saida-numero" placeholder="Número da NF">
+</div>
+
+<div class="grupo-form">
+<label>Cliente</label>
+<input type="text" id="nf-saida-cliente" placeholder="Cliente">
+</div>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Data</label>
+<input type="date" id="nf-saida-data">
+</div>
+
+<div class="grupo-form">
+<label>Responsável</label>
+<input type="text" id="nf-saida-responsavel" placeholder="Responsável">
+</div>
+
+</div>
+
+<h3>Itens da Nota Fiscal</h3>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Produto</label>
+<select id="nf-saida-produto"></select>
+</div>
+
+<div class="grupo-form">
+<label>Quantidade</label>
+<input type="number" id="nf-saida-quantidade" min="1" placeholder="Quantidade">
+</div>
+
+<div class="grupo-form">
+<label>Preço Unitário</label>
+<input type="number" step="0.01" id="nf-saida-preco" placeholder="0,00">
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="adicionarItemNFSaida()">
+➕ Adicionar Item
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Código</th>
+<th>Produto</th>
+<th>Quantidade</th>
+<th>Preço</th>
+<th>Total</th>
+<th>Ação</th>
+</tr>
+
+</thead>
+
+<tbody id="tabela-nf-saida-body"></tbody>
+
+</table>
+
+<div class="total-venda-box">
+
+<div class="total-linha-final">
+
+<span>Total da NF</span>
+<span id="nf-saida-total">R$ 0,00</span>
+
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="finalizarNFSaida()">
+💾 Finalizar NF Saída
+</button>
+
+<button class="botao-cancelar" onclick="limparNFSaida()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-nf-saida" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📋 Histórico de Movimentações</h2>
+
+<div class="linha-botoes">
+
+<button onclick="atualizarTabelaMovimentacoes()">
+🔄 Atualizar Histórico
+</button>
+
+<button onclick="limparHistorico()">
+🗑️ Limpar Histórico
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Data</th>
+<th>Código</th>
+<th>Produto</th>
+<th>Tipo</th>
+<th>Quantidade</th>
+<th>NF</th>
+<th>Responsável</th>
+<th>Preço Unit.</th>
+<th>Valor Total</th>
+</tr>
+
+</thead>
+
+<tbody id="tabela-movimentacoes-body"></tbody>
+
+</table>
+
+<p
+id="sem-movimentacoes"
+style="text-align:center;padding:20px;color:#777;display:none">
+Nenhuma movimentação registrada ainda.
+</p>
+
+</section>
+
+<section class="conteudo-aba" id="area-vendas">
+
+<div class="cabecalho-vendas">
+
+<h2>💰 Vendas</h2>
+
+<button
+class="botao-vendas"
+onclick="prepararNovaVenda()">
+➕ Nova Venda
+</button>
+
+</div>
+
+<div class="resumo-venda">
+
+<div class="card-venda">
+Vendas Hoje
+<strong id="vendas-hoje">0</strong>
+</div>
+
+<div class="card-venda">
+Itens Vendidos
+<strong id="itens-vendidos-hoje">0</strong>
+</div>
+
+<div class="card-venda">
+Faturamento Hoje
+<strong id="faturamento-hoje">R$ 0,00</strong>
+</div>
+
+<div class="card-venda">
+Venda Atual
+<strong id="numero-venda-atual">-</strong>
+</div>
+
+</div>
+
+<div class="caixa-venda">
+
+<h3>Dados da Venda</h3>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Vendedor</label>
+<input type="text" id="venda-vendedor" placeholder="Nome do vendedor">
+</div>
+
+<div class="grupo-form">
+<label>Cliente</label>
+<input type="text" id="venda-cliente" placeholder="Cliente">
+</div>
+
+<div class="grupo-form">
+<label>Forma de Pagamento</label>
+
+<select id="venda-pagamento">
+
+<option value="Dinheiro">Dinheiro</option>
+<option value="PIX">PIX</option>
+<option value="Cartão de Débito">Cartão de Débito</option>
+<option value="Cartão de Crédito">Cartão de Crédito</option>
+<option value="Boleto">Boleto</option>
+<option value="Outro">Outro</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+
+<label>Produto</label>
+
+<select id="venda-produto" onchange="mostrarProdutoVenda()">
+</select>
+
+</div>
+
+<div class="grupo-form">
+
+<label>Quantidade</label>
+
+<input
+type="number"
+id="venda-quantidade"
+min="1"
+value="1"
+onkeydown="if(event.key==='Enter') adicionarItemVenda()"
+>
+
+</div>
+
+</div>
+
+<div id="info-produto-venda" class="info-produto-venda"></div>
+
+<div class="linha-botoes">
+
+<button onclick="adicionarItemVenda()">
+➕ Adicionar Produto
+</button>
+
+</div>
+
+</div>
+
+<div class="caixa-venda tabela-itens-venda">
+
+<h3>Itens da Venda</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Código</th>
+<th>Produto</th>
+<th>Un</th>
+<th>Quantidade</th>
+<th>Preço Unit.</th>
+<th>Total</th>
+<th>Ação</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabela-itens-venda-body"></tbody>
+
+</table>
+
+</div>
+
+<div class="total-venda-box">
+
+<div class="total-linha">
+
+<span>Subtotal</span>
+<strong id="venda-subtotal">R$ 0,00</strong>
+
+</div>
+
+<div class="total-linha">
+
+<span>Desconto</span>
+<strong id="venda-desconto-exibicao">R$ 0,00</strong>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+
+<label>Desconto</label>
+
+<input
+type="number"
+step="0.01"
+min="0"
+id="venda-desconto"
+value="0"
+oninput="atualizarTotalVenda()"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>Observação</label>
+
+<input
+type="text"
+id="venda-observacao"
+placeholder="Observação"
+>
+
+</div>
+
+</div>
+
+<div class="total-linha-final">
+
+<span>TOTAL</span>
+
+<span
+id="venda-total"
+class="valor-final-venda">
+R$ 0,00
+</span>
+
+</div>
+
+<div
+id="troco-container"
+style="display:none;margin-top:15px">
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+
+<label>Valor Recebido</label>
+
+<input
+type="number"
+step="0.01"
+min="0"
+id="venda-valor-recebido"
+oninput="calcularTroco()"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>Troco</label>
+
+<input
+type="text"
+id="venda-troco"
+readonly
+>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button
+class="botao-venda-finalizar"
+onclick="finalizarVenda()">
+💰 FINALIZAR VENDA
+</button>
+
+<button
+class="botao-cancelar"
+onclick="cancelarVenda()">
+❌ Cancelar
+</button>
+
+<button
+class="botao-relatorio-vendas"
+onclick="abrirRelatorioVendas()">
+📊 Relatório de Vendas
+</button>
+
+</div>
+
+</div>
+
+<div id="area-relatorio-vendas">
+
+<h3>📊 Relatório de Vendas</h3>
+
+<div class="filtros-relatorio-vendas">
+
+<div class="grupo-form">
+<label>Data Inicial</label>
+<input type="date" id="rv-data-inicial">
+</div>
+
+<div class="grupo-form">
+<label>Data Final</label>
+<input type="date" id="rv-data-final">
+</div>
+
+<div class="grupo-form">
+<label>Vendedor</label>
+
+<select id="rv-vendedor">
+<option value="">Todos os vendedores</option>
+</select>
+
+</div>
+
+</div>
 
 <div class="filtros-relatorio-vendas-extra">
 
 <div class="grupo-form">
-
-<label>
-Cliente
-</label>
+<label>Cliente</label>
 
 <select id="rv-cliente">
-
-<option value="">
-Todos os clientes
-</option>
-
+<option value="">Todos os clientes</option>
 </select>
 
 </div>
 
-
 <div class="grupo-form">
-
-<label>
-Produto / Código
-</label>
+<label>Produto</label>
 
 <select id="rv-produto">
-
-<option value="">
-Todos os produtos
-</option>
-
+<option value="">Todos os produtos</option>
 </select>
 
 </div>
 
-
 <div class="grupo-form">
-
-<label>
-Forma de Pagamento
-</label>
+<label>Pagamento</label>
 
 <select id="rv-pagamento">
 
-<option value="">
-Todas as formas
-</option>
-
-<option value="Dinheiro">
-💵 Dinheiro
-</option>
-
-<option value="PIX">
-📱 PIX
-</option>
-
-<option value="Cartão de Débito">
-💳 Cartão de Débito
-</option>
-
-<option value="Cartão de Crédito">
-💳 Cartão de Crédito
-</option>
-
-<option value="Boleto">
-🧾 Boleto
-</option>
-
-<option value="Transferência">
-🏦 Transferência
-</option>
-
-<option value="Outros">
-💰 Outros
-</option>
+<option value="">Todas as formas</option>
+<option value="Dinheiro">Dinheiro</option>
+<option value="PIX">PIX</option>
+<option value="Cartão de Débito">Cartão de Débito</option>
+<option value="Cartão de Crédito">Cartão de Crédito</option>
+<option value="Boleto">Boleto</option>
+<option value="Outro">Outro</option>
 
 </select>
 
@@ -1873,118 +1861,46 @@ Todas as formas
 
 </div>
 
+<div class="linha-botoes">
 
-<div class="relatorio-vendas-botoes">
-
-<button
-onclick="gerarRelatorioVendas()"
-class="botao-relatorio-vendas">
-
-🔍 Gerar Relatório
-
+<button onclick="gerarRelatorioVendas()">
+🔎 Gerar Relatório
 </button>
 
-
-<button
-onclick="imprimirRelatorioVendas()"
-style="background:#0f766e;">
-
-🖨️ Imprimir
-
-</button>
-
-
-<button
-onclick="exportarRelatorioVendasExcel()"
-style="background:#166534;">
-
-📊 Exportar Excel
-
-</button>
-
-
-<button
-onclick="fecharRelatorioVendas()"
-class="botao-cancelar">
-
-Fechar
-
+<button onclick="fecharRelatorioVendas()">
+❌ Fechar
 </button>
 
 </div>
-
 
 <div class="cards-relatorio-vendas">
 
 <div class="card-relatorio-vendas">
-
-<span>
-Vendas
-</span>
-
-<strong id="rv-total-vendas">
-0
-</strong>
-
+<span>Total de Vendas</span>
+<strong id="rv-total-vendas">0</strong>
 </div>
-
 
 <div class="card-relatorio-vendas">
-
-<span>
-Itens Vendidos
-</span>
-
-<strong id="rv-total-itens">
-0
-</strong>
-
+<span>Itens Vendidos</span>
+<strong id="rv-total-itens">0</strong>
 </div>
-
 
 <div class="card-relatorio-vendas">
-
-<span>
-Descontos
-</span>
-
-<strong id="rv-total-desconto">
-R$ 0,00
-</strong>
-
+<span>Descontos</span>
+<strong id="rv-total-desconto">R$ 0,00</strong>
 </div>
-
 
 <div class="card-relatorio-vendas">
-
-<span>
-Faturamento
-</span>
-
-<strong id="rv-faturamento">
-R$ 0,00
-</strong>
-
+<span>Faturamento</span>
+<strong id="rv-faturamento">R$ 0,00</strong>
 </div>
 
 </div>
 
-
-<div
+<p
 id="rv-resumo-texto"
-style="
-background:white;
-border:1px solid #ddd6fe;
-padding:12px;
-border-radius:7px;
-margin-bottom:15px;
-font-weight:bold;
-color:#475569;">
-
-Selecione os filtros e clique em "Gerar Relatório".
-
-</div>
-
+style="margin:10px 0;font-weight:bold">
+</p>
 
 <div class="tabela-relatorio-vendas">
 
@@ -1993,18 +1909,20 @@ Selecione os filtros e clique em "Gerar Relatório".
 <thead>
 
 <tr>
+
 <th>Nº Venda</th>
 <th>Data</th>
-<th>Hora</th>
+<th>Horário</th>
 <th>Vendedor</th>
 <th>Cliente</th>
 <th>Código</th>
 <th>Produto</th>
-<th>Qtd.</th>
-<th>Preço Unit.</th>
+<th>Quantidade</th>
+<th>Preço Unitário</th>
 <th>Valor Total</th>
 <th>Pagamento</th>
 <th>Observação</th>
+
 </tr>
 
 </thead>
@@ -2015,132 +1933,111 @@ Selecione os filtros e clique em "Gerar Relatório".
 
 </div>
 
+<div class="relatorio-vendas-botoes">
+
+<button onclick="imprimirRelatorioVendas()">
+🖨️ Imprimir
+</button>
+
+<button onclick="exportarRelatorioVendasExcel()">
+📊 Exportar Excel
+</button>
+
+</div>
+
 </div>
 
 </section>
 
-
-<!-- =========================================================
-     MODAL DE SENHA
-========================================================= -->
+</main>
 
 <div id="modal-senha">
 
 <div class="caixa-senha">
 
-<h3 id="modal-senha-titulo">
-🔐 Acesso
+<h3>
+🔐 Autorização necessária
 </h3>
 
-<p id="modal-senha-texto">
-Digite a senha:
+<p>
+Digite a senha para voltar ao Estoque.
 </p>
 
 <input
 type="password"
-id="modal-senha-campo"
+id="senha-voltar-estoque"
 placeholder="Digite a senha"
-autocomplete="off"
-onkeydown="if(event.key==='Enter') confirmarSenhaModal()"
+onkeydown="if(event.key==='Enter') confirmarVoltarEstoque()"
 >
 
 <div class="botoes-senha">
 
-<button
-type="button"
-onclick="confirmarSenhaModal()">
+<button onclick="confirmarVoltarEstoque()">
 Confirmar
 </button>
 
 <button
-type="button"
 class="botao-cancelar"
-onclick="fecharSenhaModal()">
+onclick="fecharModalSenha()">
 Cancelar
 </button>
 
 </div>
 
-<div
-id="modal-senha-erro"
-class="mensagem erro">
-</div>
+<p
+id="erro-senha-voltar"
+style="display:none;color:#dc2626;font-weight:bold;margin-top:12px">
+Senha incorreta!
+</p>
 
 </div>
 
 </div>
-
 
 <script>
-
-/* =========================================================
-   CONFIGURAÇÕES
-========================================================= */
-
-const SENHA_SISTEMA = "1234";
-
-const SENHA_ENTRADA_VENDA = "5678";
-
 
 /* =========================================================
    DADOS
 ========================================================= */
 
-let produtos =
-JSON.parse(
-    localStorage.getItem(
-        "produtos_estoque"
-    ) || "[]"
-);
+const SENHA_SISTEMA = "1234";
 
+let produtos =
+JSON.parse(localStorage.getItem("produtos_estoque") || "[]");
 
 let movimentacoes =
-JSON.parse(
-    localStorage.getItem(
-        "movimentacoes_estoque"
-    ) || "[]"
-);
-
+JSON.parse(localStorage.getItem("movimentacoes_estoque") || "[]");
 
 let vendas =
-JSON.parse(
-    localStorage.getItem(
-        "vendas_estoque"
-    ) || "[]"
-);
+JSON.parse(localStorage.getItem("vendas_estoque") || "[]");
 
-
-let itensNF = [];
-
+let itensNFEntrada = [];
+let itensNFSaida = [];
 let itensVenda = [];
-
-let estoqueEstaOculto = false;
-
-let categoriaAtual = "";
-
-let tipoSenhaModal = "";
+let vendaAtual = null;
+let estoqueOculto = false;
 
 
 /* =========================================================
-   SALVAR
+   SALVAR DADOS
 ========================================================= */
 
 function salvarDados(){
 
-    localStorage.setItem(
-        "produtos_estoque",
-        JSON.stringify(produtos)
-    );
+localStorage.setItem(
+"produtos_estoque",
+JSON.stringify(produtos)
+);
 
-    localStorage.setItem(
-        "movimentacoes_estoque",
-        JSON.stringify(movimentacoes)
-    );
+localStorage.setItem(
+"movimentacoes_estoque",
+JSON.stringify(movimentacoes)
+);
 
-    localStorage.setItem(
-        "vendas_estoque",
-        JSON.stringify(vendas)
-    );
+localStorage.setItem(
+"vendas_estoque",
+JSON.stringify(vendas)
+);
 
 }
 
@@ -2151,40 +2048,17 @@ function salvarDados(){
 
 function dataHojeISO(){
 
-    const d = new Date();
+const hoje = new Date();
 
-    return d.getFullYear()
-        + "-"
-        + String(d.getMonth()+1).padStart(2,"0")
-        + "-"
-        + String(d.getDate()).padStart(2,"0");
+const ano = hoje.getFullYear();
 
-}
+const mes =
+String(hoje.getMonth()+1).padStart(2,"0");
 
+const dia =
+String(hoje.getDate()).padStart(2,"0");
 
-/* =========================================================
-   HORÁRIO
-========================================================= */
-
-function horaAtual(){
-
-    const d = new Date();
-
-    return String(
-        d.getHours()
-    ).padStart(2,"0")
-    +
-    ":"
-    +
-    String(
-        d.getMinutes()
-    ).padStart(2,"0")
-    +
-    ":"
-    +
-    String(
-        d.getSeconds()
-    ).padStart(2,"0");
+return ano + "-" + mes + "-" + dia;
 
 }
 
@@ -2195,48 +2069,29 @@ function horaAtual(){
 
 function moeda(valor){
 
-    return Number(
-        valor || 0
-    ).toLocaleString(
-        "pt-BR",
-        {
-            style:"currency",
-            currency:"BRL"
-        }
-    );
+return Number(valor || 0).toLocaleString(
+"pt-BR",
+{
+style:"currency",
+currency:"BRL"
+}
+);
 
 }
 
 
 /* =========================================================
-   SEGURANÇA HTML
+   ESCAPAR HTML
 ========================================================= */
 
 function escaparHTML(valor){
 
-    return String(
-        valor ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
+return String(valor ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 
 }
 
@@ -2245,86 +2100,56 @@ function escaparHTML(valor){
    MENSAGEM
 ========================================================= */
 
-function mostrarMensagem(
-    id,
-    texto,
-    tipo
-){
+function mostrarMensagem(id,texto,tipo="ok"){
 
-    const el =
-        document.getElementById(
-            id
-        );
+const elemento =
+document.getElementById(id);
 
-    if(!el)
-        return;
+if(!elemento)
+return;
 
-    el.textContent =
-        texto;
+elemento.textContent = texto;
 
-    el.className =
-        "mensagem "
-        +
-        tipo;
+elemento.className =
+"mensagem " + tipo;
 
-    setTimeout(
-        function(){
+setTimeout(function(){
 
-            el.textContent =
-                "";
+elemento.textContent = "";
 
-        },
-        4000
-    );
+},4000);
 
 }
 
 
 /* =========================================================
-   LOGIN PRINCIPAL
+   ENTRAR
 ========================================================= */
 
 function entrarSistema(){
 
-    const senha =
-        document.getElementById(
-            "campo-senha"
-        ).value;
+const senha =
+document.getElementById("campo-senha").value;
 
+if(senha === SENHA_SISTEMA){
 
-    if(
-        senha ===
-        SENHA_SISTEMA
-    ){
+document.getElementById("tela-login").style.display = "none";
 
-        document.getElementById(
-            "tela-login"
-        ).style.display =
-            "none";
+document.getElementById("sistema").style.display = "block";
 
+document.getElementById("aviso-erro").style.display = "none";
 
-        document.getElementById(
-            "sistema"
-        ).style.display =
-            "block";
+atualizarTudo();
 
+}else{
 
-        document.getElementById(
-            "aviso-erro"
-        ).style.display =
-            "none";
+document.getElementById("aviso-erro").style.display = "block";
 
+document.getElementById("campo-senha").value = "";
 
-        atualizarTudo();
+document.getElementById("campo-senha").focus();
 
-    }else{
-
-        document.getElementById(
-            "aviso-erro"
-        ).style.display =
-            "block";
-
-    }
+}
 
 }
 
@@ -2335,481 +2160,287 @@ function entrarSistema(){
 
 function sairSistema(){
 
-    document.getElementById(
-        "sistema"
-    ).style.display =
-        "none";
+document.getElementById("sistema").style.display = "none";
 
+document.getElementById("tela-login").style.display = "flex";
 
-    document.getElementById(
-        "tela-login"
-    ).style.display =
-        "flex";
-
-
-    document.getElementById(
-        "campo-senha"
-    ).value =
-        "";
-
-}
-
-
-/* =========================================================
-   ATUALIZAR TUDO
-========================================================= */
-
-function atualizarTudo(){
-
-    atualizarTabelaEstoque();
-
-    atualizarTabelaMovimentacoes();
-
-    carregarCategoriasNoFiltro();
-
-    atualizarTabelaVendas();
+document.getElementById("campo-senha").value = "";
 
 }
 
 
 /* =========================================================
    TROCAR ABA
+   ALTERAÇÃO: AO ESTAR EM VENDAS, ESTOQUE EXIGE SENHA
 ========================================================= */
 
-function trocarAba(n){
+function trocarAba(indice){
 
-    if(n === 6){
+const abas =
+document.querySelectorAll(".aba");
 
-        abrirVendasComSenha();
-
-        return;
-
-    }
+const conteudos =
+document.querySelectorAll(".conteudo-aba");
 
 
-    document
-        .querySelectorAll(
-            ".aba"
-        )
-        .forEach(
-            function(el,i){
+/*
+=========================================================
+PROTEÇÃO PRINCIPAL
 
-                el.classList.toggle(
-                    "ativa",
-                    i === n
-                );
+Se o usuário estiver na aba VENDAS (índice 6)
+e tentar clicar em ESTOQUE (índice 0),
+NÃO permite a troca diretamente.
 
-            }
-        );
+Abre o modal de senha.
+=========================================================
+*/
+
+const abaAtual =
+document.querySelector(".aba.ativa");
+
+let indiceAtual = -1;
+
+abas.forEach(function(aba,i){
+
+if(aba === abaAtual){
+
+indiceAtual = i;
+
+}
+
+});
+
+if(
+indice === 0 &&
+indiceAtual === 6
+){
+
+voltarEstoqueComSenha();
+
+return;
+
+}
 
 
-    document
-        .querySelectorAll(
-            ".conteudo-aba"
-        )
-        .forEach(
-            function(el,i){
+/*
+=========================================================
+ESTOQUE NORMAL
+=========================================================
+*/
 
-                el.classList.toggle(
-                    "visivel",
-                    i === n
-                );
+if(indice === 0){
 
-            }
-        );
+abas.forEach(function(aba,i){
+
+if(i === 0){
+
+aba.classList.add("ativa");
+
+}else{
+
+aba.classList.remove("ativa");
+
+}
+
+});
+
+conteudos.forEach(function(conteudo,i){
+
+if(i === 0){
+
+conteudo.classList.add("visivel");
+
+}else{
+
+conteudo.classList.remove("visivel");
+
+}
+
+});
+
+return;
+
+}
 
 
-    if(n === 0){
+/*
+=========================================================
+VALIDAÇÃO DO ÍNDICE
+=========================================================
+*/
 
-        atualizarTabelaEstoque();
+if(indice >= conteudos.length)
+return;
 
-    }
+
+/*
+=========================================================
+ALTERA ABAS
+=========================================================
+*/
+
+abas.forEach(function(aba,i){
+
+if(i === indice){
+
+aba.classList.add("ativa");
+
+}else{
+
+aba.classList.remove("ativa");
+
+}
+
+});
 
 
-    if(n === 5){
+/*
+=========================================================
+ALTERA CONTEÚDOS
+=========================================================
+*/
 
-        atualizarTabelaMovimentacoes();
+conteudos.forEach(function(conteudo,i){
 
-    }
+if(i === indice){
+
+conteudo.classList.add("visivel");
+
+}else{
+
+conteudo.classList.remove("visivel");
+
+}
+
+});
+
+}
+
+/* =========================================================
+   IR PARA ABA DIRETO
+   (SEM a proteção de senha de Vendas -> Estoque)
+   Usada após a senha ser confirmada corretamente.
+========================================================= */
+
+function irParaAba(indice){
+
+const abas =
+document.querySelectorAll(".aba");
+
+const conteudos =
+document.querySelectorAll(".conteudo-aba");
+
+if(indice < 0 || indice >= conteudos.length)
+return;
+
+abas.forEach(function(aba,i){
+
+if(i === indice){
+
+aba.classList.add("ativa");
+
+}else{
+
+aba.classList.remove("ativa");
+
+}
+
+});
+
+conteudos.forEach(function(conteudo,i){
+
+if(i === indice){
+
+conteudo.classList.add("visivel");
+
+}else{
+
+conteudo.classList.remove("visivel");
+
+}
+
+});
 
 }
 
 
 /* =========================================================
-   MODAL DE SENHA - ABRIR
-========================================================= */
-
-function abrirSenhaModal(tipo){
-
-    tipoSenhaModal =
-        tipo;
-
-
-    const titulo =
-        document.getElementById(
-            "modal-senha-titulo"
-        );
-
-
-    const texto =
-        document.getElementById(
-            "modal-senha-texto"
-        );
-
-
-    const campo =
-        document.getElementById(
-            "modal-senha-campo"
-        );
-
-
-    const erro =
-        document.getElementById(
-            "modal-senha-erro"
-        );
-
-
-    if(tipo === "vendas"){
-
-        titulo.textContent =
-            "🔐 Acesso ao Comercial / Vendas";
-
-        texto.textContent =
-            "Digite a senha do Comercial:";
-
-    }else{
-
-        titulo.textContent =
-            "🔐 Acesso ao Estoque";
-
-        texto.textContent =
-            "Digite a senha do Estoque:";
-
-    }
-
-
-    campo.value =
-        "";
-
-
-    erro.textContent =
-        "";
-
-
-    document.getElementById(
-        "modal-senha"
-    ).style.display =
-        "flex";
-
-
-    setTimeout(
-        function(){
-
-            campo.focus();
-
-        },
-        100
-    );
-
-}
-
-
-/* =========================================================
-   ABRIR VENDAS COM SENHA
+   VENDAS
 ========================================================= */
 
 function abrirVendasComSenha(){
 
-    abrirSenhaModal(
-        "vendas"
-    );
+trocarAba(6);
 
 }
 
 
 /* =========================================================
-   ABRIR SENHA PARA VOLTAR AO ESTOQUE
+   VOLTAR PARA ESTOQUE COM SENHA
 ========================================================= */
 
-function abrirSenhaVoltarEstoque(){
+function voltarEstoqueComSenha(){
 
-    /*
-       ESTA FUNÇÃO É USADA EXCLUSIVAMENTE
-       PELO BOTÃO ← VOLTAR DA ÁREA DE VENDAS.
-    */
+document.getElementById(
+"modal-senha"
+).style.display = "flex";
 
-    abrirSenhaModal(
-        "estoque"
-    );
+document.getElementById(
+"senha-voltar-estoque"
+).value = "";
+
+document.getElementById(
+"erro-senha-voltar"
+).style.display = "none";
+
+setTimeout(function(){
+
+document.getElementById(
+"senha-voltar-estoque"
+).focus();
+
+},100);
 
 }
 
 
-/* =========================================================
-   FECHAR MODAL
-========================================================= */
+function confirmarVoltarEstoque(){
 
-function fecharSenhaModal(){
+const senha =
+document.getElementById(
+"senha-voltar-estoque"
+).value;
 
-    document.getElementById(
-        "modal-senha"
-    ).style.display =
-        "none";
+if(senha === SENHA_SISTEMA){
 
+fecharModalSenha();
 
-    document.getElementById(
-        "modal-senha-campo"
-    ).value =
-        "";
+irParaAba(0);
 
+}else{
 
-    document.getElementById(
-        "modal-senha-erro"
-    ).textContent =
-        "";
+document.getElementById(
+"erro-senha-voltar"
+).style.display = "block";
 
+document.getElementById(
+"senha-voltar-estoque"
+).value = "";
 
-    tipoSenhaModal =
-        "";
+document.getElementById(
+"senha-voltar-estoque"
+).focus();
+
+}
 
 }
 
 
-/* =========================================================
-   CONFIRMAR SENHA
-========================================================= */
-
-function confirmarSenhaModal(){
-
-    const campo =
-        document.getElementById(
-            "modal-senha-campo"
-        );
-
-
-    const senha =
-        campo.value;
-
-
-    let senhaCorreta =
-        "";
-
-
-    if(
-        tipoSenhaModal ===
-        "vendas"
-    ){
-
-        senhaCorreta =
-            SENHA_ENTRADA_VENDA;
-
-    }
-
-
-    if(
-        tipoSenhaModal ===
-        "estoque"
-    ){
-
-        senhaCorreta =
-            SENHA_SISTEMA;
-
-    }
-
-
-    if(
-        senha !==
-        senhaCorreta
-    ){
-
-        document.getElementById(
-            "modal-senha-erro"
-        ).textContent =
-            "❌ Senha incorreta.";
-
-        campo.value =
-            "";
-
-        campo.focus();
-
-        return;
-
-    }
-
-
-    const destino =
-        tipoSenhaModal;
-
-
-    fecharSenhaModal();
-
-
-    if(
-        destino ===
-        "vendas"
-    ){
-
-        entrarAreaVendas();
-
-    }
-
-
-    if(
-        destino ===
-        "estoque"
-    ){
-
-        sairAreaVendasParaEstoque();
-
-    }
-
-}
-
-
-/* =========================================================
-   ENTRAR NA ÁREA DE VENDAS
-========================================================= */
-
-function entrarAreaVendas(){
-
-    document
-        .querySelectorAll(
-            ".conteudo-aba"
-        )
-        .forEach(
-            function(el){
-
-                el.classList.remove(
-                    "visivel"
-                );
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".aba"
-        )
-        .forEach(
-            function(el){
-
-                el.classList.remove(
-                    "ativa"
-                );
-
-            }
-        );
-
-
-    document
-        .getElementById(
-            "area-vendas"
-        )
-        .classList.add(
-            "visivel"
-        );
-
-
-    document
-        .querySelector(
-            ".aba-vendas"
-        )
-        .classList.add(
-            "ativa"
-        );
-
-
-    prepararNovaVenda();
-
-}
-
-
-/* =========================================================
-   SAIR DE VENDAS PARA ESTOQUE
-   SOMENTE APÓS SENHA
-========================================================= */
-
-function sairAreaVendasParaEstoque(){
-
-    document.getElementById(
-        "area-relatorio-vendas"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "area-vendas"
-    ).classList.remove(
-        "visivel"
-    );
-
-
-    document
-        .querySelectorAll(
-            ".conteudo-aba"
-        )
-        .forEach(
-            function(el){
-
-                el.classList.remove(
-                    "visivel"
-                );
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".aba"
-        )
-        .forEach(
-            function(el){
-
-                el.classList.remove(
-                    "ativa"
-                );
-
-            }
-        );
-
-
-    const abas =
-        document.querySelectorAll(
-            ".aba"
-        );
-
-
-    const conteudos =
-        document.querySelectorAll(
-            ".conteudo-aba"
-        );
-
-
-    if(
-        abas.length > 0
-    ){
-
-        abas[0].classList.add(
-            "ativa"
-        );
-
-    }
-
-
-    if(
-        conteudos.length > 0
-    ){
-
-        conteudos[0].classList.add(
-            "visivel"
-        );
-
-    }
-
-
-    atualizarTabelaEstoque();
+function fecharModalSenha(){
+
+document.getElementById(
+"modal-senha"
+).style.display = "none";
 
 }
 
@@ -2818,21 +2449,13 @@ function sairAreaVendasParaEstoque(){
    ENCONTRAR PRODUTO
 ========================================================= */
 
-function encontrarProduto(cod){
+function encontrarProduto(codigo){
 
-    return produtos.find(
-        function(p){
+return produtos.find(function(p){
 
-            return String(
-                p.codigo
-            ).trim()
-            ===
-            String(
-                cod
-            ).trim();
+return String(p.codigo) === String(codigo);
 
-        }
-    );
+});
 
 }
 
@@ -2843,381 +2466,298 @@ function encontrarProduto(cod){
 
 function cadastrarProduto(){
 
-    const cod =
-        document.getElementById(
-            "codigoNovo"
-        ).value.trim();
+const nome =
+document.getElementById("cad-nome").value.trim();
 
+const categoria =
+document.getElementById("cad-categoria").value.trim();
 
-    const nome =
-        document.getElementById(
-            "nomeNovo"
-        ).value.trim();
+const preco =
+Number(document.getElementById("cad-preco").value || 0);
 
+const unidade =
+document.getElementById("cad-unidade").value;
 
-    const cat =
-        document.getElementById(
-            "categoriaNova"
-        ).value.trim();
+const quantidade =
+Number(document.getElementById("cad-quantidade").value || 0);
 
+let codigo =
+document.getElementById("cad-codigo").value;
 
-    const preco =
-        parseFloat(
-            document.getElementById(
-                "precoNovo"
-            ).value
-            .replace(",",".")
-        )
-        ||
-        0;
+if(!nome){
 
+mostrarMensagem(
+"mensagem-cadastro",
+"Informe o nome do produto.",
+"erro"
+);
 
-    const qtd =
-        parseFloat(
-            document.getElementById(
-                "qtdNovo"
-            ).value
-        )
-        ||
-        0;
+return;
 
+}
 
-    const un =
-        document.getElementById(
-            "unidadeNova"
-        ).value;
+if(preco < 0){
 
+mostrarMensagem(
+"mensagem-cadastro",
+"Informe um preço válido.",
+"erro"
+);
 
-    if(
-        !cod
-        ||
-        !nome
-    ){
+return;
 
-        mostrarMensagem(
-            "msg-cadastro",
-            "Preencha Código e Nome",
-            "erro"
-        );
+}
 
-        return;
+if(!codigo){
 
-    }
+const codigos =
+produtos.map(function(p){
 
+return Number(p.codigo) || 0;
 
-    if(
-        encontrarProduto(cod)
-    ){
+});
 
-        mostrarMensagem(
-            "msg-cadastro",
-            "Código já cadastrado",
-            "erro"
-        );
+codigo =
+codigos.length
+?
+Math.max(...codigos) + 1
+:
+1;
 
-        return;
+}else{
 
-    }
+codigo = Number(codigo);
 
+}
 
-    produtos.push({
+if(encontrarProduto(codigo)){
 
-        codigo:cod,
+mostrarMensagem(
+"mensagem-cadastro",
+"Já existe um produto com esse código.",
+"erro"
+);
 
-        nome:nome,
+return;
 
-        categoria:cat,
+}
 
-        preco:preco,
+const produto = {
 
-        quantidade:qtd,
+codigo:codigo,
+nome:nome,
+categoria:categoria || "Sem categoria",
+preco:preco,
+unidade:unidade,
+quantidade:quantidade,
+valor:quantidade * preco,
+ultimaMov:quantidade > 0 ? dataHojeISO() : ""
 
-        unidade:un,
+};
 
-        ultimaMov:
-            dataHojeISO()
+produtos.push(produto);
 
-    });
+if(quantidade > 0){
 
+movimentacoes.push({
 
-    salvarDados();
+data:dataHojeISO(),
+codigo:codigo,
+produto:nome,
+tipo:"Entrada",
+quantidade:quantidade,
+nf:"",
+responsavel:"Cadastro",
+preco:preco,
+valorTotal:quantidade * preco
 
-    atualizarTabelaEstoque();
+});
 
-    carregarCategoriasNoFiltro();
+}
 
+salvarDados();
 
-    mostrarMensagem(
-        "msg-cadastro",
-        "✅ Produto cadastrado!",
-        "ok"
-    );
+atualizarTudo();
 
+limparCadastro();
 
-    document.getElementById(
-        "codigoNovo"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "nomeNovo"
-    ).value =
-        "";
+mostrarMensagem(
+"mensagem-cadastro",
+"Produto cadastrado com sucesso!",
+"ok"
+);
 
 }
 
 
 /* =========================================================
-   TABELA ESTOQUE
+   LIMPAR CADASTRO
+========================================================= */
+
+function limparCadastro(){
+
+document.getElementById("cad-codigo").value = "";
+document.getElementById("cad-nome").value = "";
+document.getElementById("cad-categoria").value = "";
+document.getElementById("cad-preco").value = "";
+document.getElementById("cad-quantidade").value = "";
+
+}
+
+
+/* =========================================================
+   ATUALIZAR ESTOQUE
 ========================================================= */
 
 function atualizarTabelaEstoque(){
 
-    const tbody =
-        document.getElementById(
-            "tabela-estoque-body"
-        );
+const tbody =
+document.getElementById("tabela-estoque-body");
+
+if(!tbody)
+return;
+
+tbody.innerHTML = "";
+
+const filtro =
+document.getElementById("filtro-categoria");
+
+const categoriaFiltro =
+filtro ? filtro.value : "";
+
+let lista = produtos.slice();
+
+if(categoriaFiltro){
+
+lista =
+lista.filter(function(p){
+
+return String(p.categoria || "") === categoriaFiltro;
+
+});
+
+}
+
+let totalQuantidade = 0;
+let totalValor = 0;
+
+lista.forEach(function(p){
+
+const quantidade =
+Number(p.quantidade || 0);
+
+const valor =
+quantidade * Number(p.preco || 0);
+
+totalQuantidade += quantidade;
+totalValor += valor;
+
+const tr =
+document.createElement("tr");
+
+tr.innerHTML =
+
+"<td class='col-estoque'>" +
+escaparHTML(p.codigo) +
+"</td>" +
+
+"<td class='col-estoque'>" +
+escaparHTML(p.nome) +
+"</td>" +
+
+"<td class='col-estoque'>" +
+escaparHTML(p.categoria || "-") +
+"</td>" +
+
+"<td class='col-estoque'>" +
+moeda(p.preco) +
+"</td>" +
+
+"<td class='col-estoque'>" +
+escaparHTML(p.unidade || "UN") +
+"</td>" +
+
+"<td class='col-estoque'>" +
+quantidade +
+"</td>" +
+
+"<td class='col-estoque'>" +
+moeda(valor) +
+"</td>" +
+
+"<td class='col-estoque'>" +
+escaparHTML(p.ultimaMov || "-") +
+"</td>" +
+
+"<td>" +
+
+"<button class='botao-excluir' onclick='excluirProduto(" +
+JSON.stringify(p.codigo) +
+")'>" +
+
+"Excluir" +
+
+"</button>" +
+
+"</td>";
+
+tbody.appendChild(tr);
+
+});
+
+document.getElementById(
+"total-produtos"
+).textContent = lista.length;
+
+document.getElementById(
+"total-quantidade"
+).textContent = totalQuantidade;
+
+document.getElementById(
+"valor-total"
+).textContent = moeda(totalValor);
+
+if(estoqueOculto){
+
+aplicarOcultarEstoque();
+
+}
+
+}
 
 
-    if(!tbody)
-        return;
+/* =========================================================
+   EXCLUIR PRODUTO
+========================================================= */
 
+function excluirProduto(codigo){
 
-    tbody.innerHTML =
-        "";
+const produto =
+encontrarProduto(codigo);
 
+if(!produto)
+return;
 
-    let totalQtd =
-        0;
+if(!confirm(
+"Excluir o produto " +
+produto.nome +
+"?"
+)){
 
+return;
 
-    let totalValor =
-        0;
+}
 
+produtos =
+produtos.filter(function(p){
 
-    let lista =
-        produtos;
+return String(p.codigo) !== String(codigo);
 
+});
 
-    if(
-        categoriaAtual
-    ){
+salvarDados();
 
-        lista =
-            produtos.filter(
-                function(p){
-
-                    return (
-                        p.categoria
-                        ||
-                        ""
-                    )
-                    ===
-                    categoriaAtual;
-
-                }
-            );
-
-    }
-
-
-    lista.forEach(
-        function(p){
-
-            const val =
-                Number(
-                    p.quantidade
-                    ||
-                    0
-                )
-                *
-                Number(
-                    p.preco
-                    ||
-                    0
-                );
-
-
-            totalQtd +=
-                Number(
-                    p.quantidade
-                    ||
-                    0
-                );
-
-
-            totalValor +=
-                val;
-
-
-            const tr =
-                document.createElement(
-                    "tr"
-                );
-
-
-            if(
-                estoqueEstaOculto
-            ){
-
-                tr.innerHTML =
-                    "<td class='estoque-oculto'></td>"
-                    .repeat(9);
-
-            }else{
-
-                tr.innerHTML =
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        p.codigo
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        p.nome
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        p.categoria
-                        ||
-                        ""
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    moeda(
-                        p.preco
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        p.unidade
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    p.quantidade
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    moeda(
-                        val
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        p.ultimaMov
-                        ||
-                        "-"
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-
-                    "<button"
-                    +
-                    " class='botao-excluir'"
-                    +
-                    " onclick='excluirProd(\""
-                    +
-                    String(
-                        p.codigo
-                    ).replace(
-                        /"/g,
-                        "&quot;"
-                    )
-                    +
-                    "\")'>"
-                    +
-                    "Excluir"
-                    +
-                    "</button>"
-
-                    +
-
-                    "</td>";
-
-            }
-
-
-            tbody.appendChild(
-                tr
-            );
-
-        }
-    );
-
-
-    document.getElementById(
-        "total-produtos"
-    ).textContent =
-        estoqueEstaOculto
-        ?
-        ""
-        :
-        produtos.length;
-
-
-    document.getElementById(
-        "total-quantidade"
-    ).textContent =
-        estoqueEstaOculto
-        ?
-        ""
-        :
-        totalQtd;
-
-
-    document.getElementById(
-        "valor-estoque"
-    ).textContent =
-        estoqueEstaOculto
-        ?
-        ""
-        :
-        moeda(
-            totalValor
-        );
+atualizarTudo();
 
 }
 
@@ -3228,172 +2768,168 @@ function atualizarTabelaEstoque(){
 
 function alternarOcultarEstoque(){
 
-    estoqueEstaOculto =
-        !estoqueEstaOculto;
+estoqueOculto =
+!estoqueOculto;
+
+aplicarOcultarEstoque();
+
+}
 
 
-    const botao =
-        document.querySelector(
-            'button[onclick="alternarOcultarEstoque()"]'
-        );
+function aplicarOcultarEstoque(){
 
+const colunas =
+document.querySelectorAll(".col-estoque");
 
-    if(botao){
+colunas.forEach(function(c){
 
-        botao.textContent =
-            estoqueEstaOculto
-            ?
-            "👁️ Mostrar Estoque"
-            :
-            "👁️ Ocultar Estoque";
+if(estoqueOculto){
 
-    }
+c.classList.add("estoque-oculto");
 
+}else{
 
-    atualizarTabelaEstoque();
+c.classList.remove("estoque-oculto");
+
+}
+
+});
+
+const botao =
+document.querySelector(
+"button[onclick='alternarOcultarEstoque()']"
+);
+
+if(botao){
+
+botao.innerHTML =
+estoqueOculto
+?
+"👁️ Mostrar Estoque"
+:
+"👁️ Ocultar Estoque";
+
+}
 
 }
 
 
 /* =========================================================
-   EXCLUIR
+   FILTRO CATEGORIA
 ========================================================= */
-
-function excluirProd(codigo){
-
-    if(
-        confirm(
-            "Excluir este produto?"
-        )
-    ){
-
-        produtos =
-            produtos.filter(
-                function(p){
-
-                    return String(
-                        p.codigo
-                    )
-                    !==
-                    String(
-                        codigo
-                    );
-
-                }
-            );
-
-
-        salvarDados();
-
-        atualizarTabelaEstoque();
-
-        carregarCategoriasNoFiltro();
-
-    }
-
-}
-
-
-/* =========================================================
-   CATEGORIAS
-========================================================= */
-
-function carregarCategoriasNoFiltro(){
-
-    const sel =
-        document.getElementById(
-            "filtroCategoriaSelect"
-        );
-
-
-    if(!sel)
-        return;
-
-
-    const cats = [];
-
-
-    produtos.forEach(
-        function(p){
-
-            const c =
-                p.categoria
-                ||
-                "";
-
-
-            if(
-                c
-                &&
-                !cats.includes(
-                    c
-                )
-            ){
-
-                cats.push(
-                    c
-                );
-
-            }
-
-        }
-    );
-
-
-    sel.innerHTML =
-        '<option value="">Todas as categorias</option>';
-
-
-    cats.sort()
-        .forEach(
-            function(c){
-
-                sel.innerHTML +=
-                    '<option value="'
-                    +
-                    escaparHTML(c)
-                    +
-                    '">'
-                    +
-                    escaparHTML(c)
-                    +
-                    '</option>';
-
-            }
-        );
-
-}
-
 
 function abrirFiltroCategoria(){
 
-    const area =
-        document.getElementById(
-            "area-filtro"
-        );
+const area =
+document.getElementById(
+"filtro-categoria-container"
+);
 
+if(area.style.display === "none"){
 
-    area.style.display =
-        area.style.display
-        ===
-        "none"
-        ?
-        "block"
-        :
-        "none";
+area.style.display = "block";
+
+carregarCategoriasNoFiltro();
+
+}else{
+
+area.style.display = "none";
+
+}
 
 }
 
 
-function aplicarFiltroCategoria(){
+function carregarCategoriasNoFiltro(){
 
-    categoriaAtual =
-        document.getElementById(
-            "filtroCategoriaSelect"
-        ).value;
+const select =
+document.getElementById(
+"filtro-categoria"
+);
+
+if(!select)
+return;
+
+const atual =
+select.value;
+
+const categorias =
+[
+...new Set(
+produtos.map(function(p){
+
+return p.categoria;
+
+})
+)
+]
+.filter(Boolean)
+.sort();
+
+select.innerHTML =
+'<option value="">Todas as categorias</option>';
+
+categorias.forEach(function(c){
+
+const option =
+document.createElement("option");
+
+option.value = c;
+option.textContent = c;
+
+select.appendChild(option);
+
+});
+
+select.value = atual;
+
+}
 
 
-    atualizarTabelaEstoque();
+/* =========================================================
+   ATUALIZAR SELECTS
+========================================================= */
+
+function atualizarSelectProdutos(){
+
+const ids = [
+"mov-produto",
+"nf-entrada-produto",
+"nf-saida-produto",
+"venda-produto"
+];
+
+ids.forEach(function(id){
+
+const select =
+document.getElementById(id);
+
+if(!select)
+return;
+
+const valorAtual =
+select.value;
+
+select.innerHTML =
+'<option value="">Selecione o produto</option>';
+
+produtos.forEach(function(p){
+
+const option =
+document.createElement("option");
+
+option.value = p.codigo;
+
+option.textContent =
+p.codigo + " - " + p.nome;
+
+select.appendChild(option);
+
+});
+
+select.value = valorAtual;
+
+});
 
 }
 
@@ -3402,179 +2938,176 @@ function aplicarFiltroCategoria(){
    MOVIMENTAÇÃO
 ========================================================= */
 
+function mostrarProdutoMovimentacao(){
+
+const codigo =
+document.getElementById(
+"mov-produto"
+).value;
+
+const produto =
+encontrarProduto(codigo);
+
+const info =
+document.getElementById(
+"info-mov-produto"
+);
+
+if(!produto){
+
+info.style.display = "none";
+
+return;
+
+}
+
+info.innerHTML =
+
+"<strong>" +
+escaparHTML(produto.nome) +
+"</strong>" +
+
+"<br>" +
+
+"Estoque atual: " +
+produto.quantidade +
+" " +
+escaparHTML(produto.unidade || "UN") +
+
+"<br>" +
+
+"Preço: " +
+moeda(produto.preco);
+
+info.style.display = "block";
+
+}
+
+
 function registrarMovimentacao(){
 
-    const cod =
-        document.getElementById(
-            "codigoMov"
-        ).value.trim();
+const codigo =
+document.getElementById("mov-produto").value;
+
+const tipo =
+document.getElementById("mov-tipo").value;
+
+const quantidade =
+Number(
+document.getElementById("mov-quantidade").value || 0
+);
+
+const nf =
+document.getElementById("mov-nf").value.trim();
+
+const responsavel =
+document.getElementById("mov-responsavel").value.trim();
+
+const data =
+document.getElementById("mov-data").value ||
+dataHojeISO();
+
+const produto =
+encontrarProduto(codigo);
+
+if(!produto){
+
+mostrarMensagem(
+"mensagem-movimentacao",
+"Selecione um produto.",
+"erro"
+);
+
+return;
+
+}
+
+if(quantidade <= 0){
+
+mostrarMensagem(
+"mensagem-movimentacao",
+"Informe uma quantidade válida.",
+"erro"
+);
+
+return;
+
+}
+
+if(
+tipo === "Saída" &&
+quantidade > Number(produto.quantidade || 0)
+){
+
+mostrarMensagem(
+"mensagem-movimentacao",
+"Quantidade de saída maior que o estoque disponível.",
+"erro"
+);
+
+return;
+
+}
+
+if(tipo === "Entrada"){
+
+produto.quantidade =
+Number(produto.quantidade || 0) + quantidade;
+
+}else{
+
+produto.quantidade =
+Number(produto.quantidade || 0) - quantidade;
+
+}
+
+produto.valor =
+produto.quantidade * Number(produto.preco || 0);
+
+produto.ultimaMov = data;
+
+movimentacoes.push({
+
+data:data,
+codigo:produto.codigo,
+produto:produto.nome,
+tipo:tipo,
+quantidade:quantidade,
+nf:nf,
+responsavel:responsavel,
+preco:Number(produto.preco || 0),
+valorTotal:
+quantidade * Number(produto.preco || 0)
+
+});
+
+salvarDados();
+
+atualizarTudo();
+
+limparMovimentacao();
+
+mostrarMensagem(
+"mensagem-movimentacao",
+"Movimentação registrada com sucesso!",
+"ok"
+);
+
+}
 
 
-    const tipo =
-        document.getElementById(
-            "tipoMov"
-        ).value;
+function limparMovimentacao(){
 
+document.getElementById("mov-produto").value = "";
+document.getElementById("mov-tipo").value = "Entrada";
+document.getElementById("mov-quantidade").value = "";
+document.getElementById("mov-nf").value = "";
+document.getElementById("mov-responsavel").value = "";
+document.getElementById("mov-data").value = dataHojeISO();
 
-    const qtd =
-        parseFloat(
-            document.getElementById(
-                "qtdProd"
-            ).value
-        )
-        ||
-        0;
-
-
-    const nf =
-        document.getElementById(
-            "mov-numero-nf"
-        ).value.trim();
-
-
-    const dt =
-        document.getElementById(
-            "mov-data"
-        ).value
-        ||
-        dataHojeISO();
-
-
-    const resp =
-        document.getElementById(
-            "responsavel"
-        ).value.trim();
-
-
-    const p =
-        encontrarProduto(
-            cod
-        );
-
-
-    if(
-        !cod
-        ||
-        !qtd
-    ){
-
-        mostrarMensagem(
-            "msg-movimentacao",
-            "Informe código e quantidade",
-            "erro"
-        );
-
-        return;
-
-    }
-
-
-    if(!p){
-
-        mostrarMensagem(
-            "msg-movimentacao",
-            "Produto não encontrado",
-            "erro"
-        );
-
-        return;
-
-    }
-
-
-    if(
-        tipo === "saida"
-        &&
-        Number(
-            p.quantidade
-        )
-        <
-        qtd
-    ){
-
-        mostrarMensagem(
-            "msg-movimentacao",
-            "Estoque insuficiente",
-            "erro"
-        );
-
-        return;
-
-    }
-
-
-    p.quantidade +=
-        tipo === "entrada"
-        ?
-        qtd
-        :
-        -qtd;
-
-
-    p.ultimaMov =
-        dt;
-
-
-    const precoUnitario =
-        Number(
-            p.preco
-            ||
-            0
-        );
-
-
-    movimentacoes.push({
-
-        data:dt,
-
-        codigo:cod,
-
-        produto:p.nome,
-
-        tipo:tipo,
-
-        quantidade:
-            Number(qtd),
-
-        nf:nf,
-
-        responsavel:resp,
-
-        precoUnitario:
-            precoUnitario,
-
-        valorTotal:
-            Number(qtd)
-            *
-            precoUnitario
-
-    });
-
-
-    salvarDados();
-
-    atualizarTabelaEstoque();
-
-    atualizarTabelaMovimentacoes();
-
-
-    mostrarMensagem(
-        "msg-movimentacao",
-        "✅ Movimentação registrada!",
-        "ok"
-    );
-
-
-    document.getElementById(
-        "codigoMov"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "qtdProd"
-    ).value =
-        "1";
+document.getElementById(
+"info-mov-produto"
+).style.display = "none";
 
 }
 
@@ -3585,141 +3118,109 @@ function registrarMovimentacao(){
 
 function atualizarTabelaMovimentacoes(){
 
-    const tbody =
-        document.getElementById(
-            "tabela-movimentacoes-body"
-        );
+const tbody =
+document.getElementById(
+"tabela-movimentacoes-body"
+);
+
+const aviso =
+document.getElementById(
+"sem-movimentacoes"
+);
+
+if(!tbody)
+return;
+
+tbody.innerHTML = "";
+
+if(movimentacoes.length === 0){
+
+aviso.style.display = "block";
+
+return;
+
+}
+
+aviso.style.display = "none";
+
+movimentacoes
+.slice()
+.reverse()
+.forEach(function(m){
+
+const tr =
+document.createElement("tr");
+
+tr.innerHTML =
+
+"<td>" +
+escaparHTML(m.data || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.codigo || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.produto || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.tipo || "-") +
+"</td>" +
+
+"<td>" +
+Number(m.quantidade || 0) +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.nf || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.responsavel || "-") +
+"</td>" +
+
+"<td>" +
+moeda(m.preco) +
+"</td>" +
+
+"<td>" +
+moeda(m.valorTotal) +
+"</td>";
+
+tbody.appendChild(tr);
+
+});
+
+}
 
 
-    const aviso =
-        document.getElementById(
-            "sem-movimentacoes"
-        );
+function limparHistorico(){
 
+if(movimentacoes.length === 0){
 
-    if(!tbody)
-        return;
+alert("Não há histórico para limpar.");
 
+return;
 
-    tbody.innerHTML =
-        "";
+}
 
+if(!confirm(
+"Deseja realmente limpar todo o histórico?"
+)){
 
-    if(
-        movimentacoes.length
-        ===
-        0
-    ){
+return;
 
-        if(aviso)
-            aviso.style.display =
-                "block";
+}
 
-        return;
+movimentacoes = [];
 
-    }
+salvarDados();
 
+atualizarTabelaMovimentacoes();
 
-    if(aviso)
-        aviso.style.display =
-            "none";
-
-
-    movimentacoes
-        .slice()
-        .reverse()
-        .forEach(
-            function(m){
-
-                const tr =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                tr.innerHTML =
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.data
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    (
-                        m.tipo === "entrada"
-                        ?
-                        "📥 Entrada"
-                        :
-                        "📤 Saída"
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.codigo
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.produto
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    m.quantidade
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.nf
-                        ||
-                        "-"
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.responsavel
-                        ||
-                        "-"
-                    )
-                    +
-                    "</td>";
-
-
-                tbody.appendChild(
-                    tr
-                );
-
-            }
-        );
+atualizarTabelaEstoque();
 
 }
 
@@ -3728,329 +3229,249 @@ function atualizarTabelaMovimentacoes(){
    NF ENTRADA
 ========================================================= */
 
-function abrirNFEntrada(){
+function adicionarItemNFEntrada(){
 
-    document.getElementById(
-        "form-nf-entrada"
-    ).style.display =
-        "block";
+const codigo =
+document.getElementById(
+"nf-entrada-produto"
+).value;
 
+const quantidade =
+Number(
+document.getElementById(
+"nf-entrada-quantidade"
+).value || 0
+);
 
-    itensNF =
-        [];
+const preco =
+Number(
+document.getElementById(
+"nf-entrada-preco"
+).value || 0
+);
 
+const produto =
+encontrarProduto(codigo);
 
-    atualizarListaItensNF();
+if(!produto){
+
+alert("Selecione um produto.");
+
+return;
+
+}
+
+if(quantidade <= 0){
+
+alert("Informe a quantidade.");
+
+return;
+
+}
+
+if(preco < 0){
+
+alert("Informe um preço válido.");
+
+return;
+
+}
+
+itensNFEntrada.push({
+
+codigo:produto.codigo,
+produto:produto.nome,
+unidade:produto.unidade,
+quantidade:quantidade,
+preco:preco,
+total:quantidade * preco
+
+});
+
+atualizarTabelaNFEntrada();
+
+document.getElementById(
+"nf-entrada-quantidade"
+).value = "";
+
+document.getElementById(
+"nf-entrada-preco"
+).value = "";
 
 }
 
 
-function adicionarItemNF(){
+function atualizarTabelaNFEntrada(){
 
-    const cod =
-        document.getElementById(
-            "nf-cod"
-        ).value.trim();
+const tbody =
+document.getElementById(
+"tabela-nf-entrada-body"
+);
 
+tbody.innerHTML = "";
 
-    const qtd =
-        parseFloat(
-            document.getElementById(
-                "nf-qtd"
-            ).value
-        )
-        ||
-        0;
+let total = 0;
 
+itensNFEntrada.forEach(function(item,index){
 
-    const preco =
-        parseFloat(
-            document.getElementById(
-                "nf-preco"
-            ).value.replace(",",".")
-        )
-        ||
-        0;
+total += Number(item.total || 0);
 
+const tr =
+document.createElement("tr");
 
-    const p =
-        encontrarProduto(
-            cod
-        );
+tr.innerHTML =
 
+"<td>" +
+escaparHTML(item.codigo) +
+"</td>" +
 
-    if(
-        !cod
-        ||
-        !qtd
-    ){
+"<td>" +
+escaparHTML(item.produto) +
+"</td>" +
 
-        mostrarMensagem(
-            "msg-nf",
-            "Informe código e quantidade",
-            "erro"
-        );
+"<td>" +
+item.quantidade +
+"</td>" +
 
-        return;
+"<td>" +
+moeda(item.preco) +
+"</td>" +
 
-    }
+"<td>" +
+moeda(item.total) +
+"</td>" +
 
+"<td>" +
 
-    itensNF.push({
+"<button class='botao-excluir' onclick='removerItemNFEntrada(" +
+index +
+")'>" +
 
-        codigo:cod,
+"Excluir" +
 
-        produto:
-            p
-            ?
-            p.nome
-            :
-            "N/C",
+"</button>" +
 
-        quantidade:qtd,
+"</td>";
 
-        preco:preco
+tbody.appendChild(tr);
 
-    });
+});
 
-
-    atualizarListaItensNF();
-
-
-    document.getElementById(
-        "nf-cod"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "nf-qtd"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "nf-preco"
-    ).value =
-        "";
+document.getElementById(
+"nf-entrada-total"
+).textContent = moeda(total);
 
 }
 
 
-function atualizarListaItensNF(){
+function removerItemNFEntrada(index){
 
-    const area =
-        document.getElementById(
-            "lista-itens-nf"
-        );
+itensNFEntrada.splice(index,1);
 
-
-    if(!area)
-        return;
-
-
-    area.innerHTML =
-        itensNF.map(
-            function(item,i){
-
-                return
-
-                    "<div style='padding:8px;background:#f0f0f0;margin:4px 0;'>"
-                    +
-                    escaparHTML(
-                        item.codigo
-                    )
-                    +
-                    " - "
-                    +
-                    escaparHTML(
-                        item.produto
-                    )
-                    +
-                    " | Qtd: "
-                    +
-                    item.quantidade
-                    +
-                    " | R$ "
-                    +
-                    item.preco
-                    +
-                    " <button class='botao-excluir' onclick='itensNF.splice("
-                    +
-                    i
-                    +
-                    ",1);atualizarListaItensNF();'>X</button>"
-                    +
-                    "</div>";
-
-            }
-        ).join("");
+atualizarTabelaNFEntrada();
 
 }
 
 
-function finalizarNF(){
+function finalizarNFEntrada(){
 
-    const nf =
-        document.getElementById(
-            "nf-numero"
-        ).value.trim();
+if(itensNFEntrada.length === 0){
 
+alert("Adicione pelo menos um item.");
 
-    const dt =
-        document.getElementById(
-            "nf-data"
-        ).value
-        ||
-        dataHojeISO();
+return;
 
+}
 
-    if(
-        !nf
-        ||
-        itensNF.length === 0
-    ){
+const numero =
+document.getElementById(
+"nf-entrada-numero"
+).value.trim();
 
-        mostrarMensagem(
-            "msg-nf",
-            "Informe o Nº NF e adicione itens",
-            "erro"
-        );
+const fornecedor =
+document.getElementById(
+"nf-entrada-fornecedor"
+).value.trim();
 
-        return;
+const data =
+document.getElementById(
+"nf-entrada-data"
+).value ||
+dataHojeISO();
 
-    }
+const responsavel =
+document.getElementById(
+"nf-entrada-responsavel"
+).value.trim();
 
+itensNFEntrada.forEach(function(item){
 
-    itensNF.forEach(
-        function(item){
+const produto =
+encontrarProduto(item.codigo);
 
-            let p =
-                encontrarProduto(
-                    item.codigo
-                );
+if(!produto)
+return;
 
+produto.quantidade =
+Number(produto.quantidade || 0) +
+Number(item.quantidade || 0);
 
-            if(!p){
+produto.preco =
+Number(item.preco || 0);
 
-                p = {
+produto.valor =
+produto.quantidade * produto.preco;
 
-                    codigo:item.codigo,
+produto.ultimaMov = data;
 
-                    nome:item.codigo,
+movimentacoes.push({
 
-                    categoria:"",
+data:data,
+codigo:produto.codigo,
+produto:produto.nome,
+tipo:"Entrada",
+quantidade:item.quantidade,
+nf:numero,
+responsavel:responsavel || fornecedor,
+preco:item.preco,
+valorTotal:item.total
 
-                    preco:item.preco,
+});
 
-                    quantidade:0,
+});
 
-                    unidade:"UN",
+salvarDados();
 
-                    ultimaMov:dt
+alert("NF de entrada registrada com sucesso.");
 
-                };
+limparNFEntrada();
 
+atualizarTudo();
 
-                produtos.push(
-                    p
-                );
-
-            }
-
-
-            if(
-                item.preco
-                >
-                0
-            ){
-
-                p.preco =
-                    item.preco;
-
-            }
+}
 
 
-            p.quantidade +=
-                item.quantidade;
+function limparNFEntrada(){
 
+document.getElementById(
+"nf-entrada-numero"
+).value = "";
 
-            p.ultimaMov =
-                dt;
+document.getElementById(
+"nf-entrada-fornecedor"
+).value = "";
 
+document.getElementById(
+"nf-entrada-data"
+).value = dataHojeISO();
 
-            const precoUnitario =
-                Number(
-                    item.preco
-                    ||
-                    p.preco
-                    ||
-                    0
-                );
+document.getElementById(
+"nf-entrada-responsavel"
+).value = "";
 
+itensNFEntrada = [];
 
-            const valorTotal =
-                Number(
-                    item.quantidade
-                )
-                *
-                precoUnitario;
-
-
-            movimentacoes.push({
-
-                data:dt,
-
-                codigo:
-                    item.codigo,
-
-                produto:
-                    p.nome,
-
-                tipo:"entrada",
-
-                quantidade:
-                    Number(
-                        item.quantidade
-                    ),
-
-                nf:nf,
-
-                responsavel:
-                    "NF Entrada",
-
-                precoUnitario:
-                    precoUnitario,
-
-                valorTotal:
-                    valorTotal
-
-            });
-
-        }
-    );
-
-
-    salvarDados();
-
-    atualizarTabelaEstoque();
-
-    atualizarTabelaMovimentacoes();
-
-    carregarCategoriasNoFiltro();
-
-
-    mostrarMensagem(
-        "msg-nf",
-        "✅ Entrada NF finalizada!",
-        "ok"
-    );
-
-
-    document.getElementById(
-        "form-nf-entrada"
-    ).style.display =
-        "none";
+atualizarTabelaNFEntrada();
 
 }
 
@@ -4059,1080 +3480,1030 @@ function finalizarNF(){
    NF SAÍDA
 ========================================================= */
 
-function registrarSaidaNF(){
+function adicionarItemNFSaida(){
 
-    const cod =
-        document.getElementById(
-            "saida-cod"
-        ).value.trim();
+const codigo =
+document.getElementById(
+"nf-saida-produto"
+).value;
 
+const quantidade =
+Number(
+document.getElementById(
+"nf-saida-quantidade"
+).value || 0
+);
 
-    const qtd =
-        parseFloat(
-            document.getElementById(
-                "saida-qtd"
-            ).value
-        )
-        ||
-        0;
+const preco =
+Number(
+document.getElementById(
+"nf-saida-preco"
+).value || 0
+);
 
+const produto =
+encontrarProduto(codigo);
 
-    const nf =
-        document.getElementById(
-            "saida-nf-num"
-        ).value.trim();
+if(!produto){
 
+alert("Selecione um produto.");
 
-    const dt =
-        document.getElementById(
-            "saida-data"
-        ).value
-        ||
-        dataHojeISO();
+return;
 
+}
 
-    const resp =
-        document.getElementById(
-            "saida-resp"
-        ).value.trim();
+if(quantidade <= 0){
 
+alert("Informe a quantidade.");
 
-    const p =
-        encontrarProduto(
-            cod
-        );
+return;
 
+}
 
-    if(
-        !cod
-        ||
-        !qtd
-    ){
+if(
+quantidade >
+Number(produto.quantidade || 0)
+){
 
-        mostrarMensagem(
-            "msg-saida",
-            "Informe código e quantidade",
-            "erro"
-        );
+alert("Quantidade maior que o estoque disponível.");
 
-        return;
+return;
 
-    }
+}
 
+itensNFSaida.push({
 
-    if(!p){
+codigo:produto.codigo,
+produto:produto.nome,
+unidade:produto.unidade,
+quantidade:quantidade,
 
-        mostrarMensagem(
-            "msg-saida",
-            "Produto não encontrado",
-            "erro"
-        );
+preco:
+preco ||
+Number(produto.preco || 0),
 
-        return;
+total:
+quantidade *
+(
+preco ||
+Number(produto.preco || 0)
+)
 
-    }
+});
 
+atualizarTabelaNFSaida();
 
-    if(
-        Number(p.quantidade)
-        <
-        qtd
-    ){
+document.getElementById(
+"nf-saida-quantidade"
+).value = "";
 
-        mostrarMensagem(
-            "msg-saida",
-            "Estoque insuficiente",
-            "erro"
-        );
+document.getElementById(
+"nf-saida-preco"
+).value = "";
 
-        return;
-
-    }
+}
 
 
-    p.quantidade -=
-        qtd;
+function atualizarTabelaNFSaida(){
+
+const tbody =
+document.getElementById(
+"tabela-nf-saida-body"
+);
+
+tbody.innerHTML = "";
+
+let total = 0;
+
+itensNFSaida.forEach(function(item,index){
+
+total += Number(item.total || 0);
+
+const tr =
+document.createElement("tr");
+
+tr.innerHTML =
+
+"<td>" +
+escaparHTML(item.codigo) +
+"</td>" +
+
+"<td>" +
+escaparHTML(item.produto) +
+"</td>" +
+
+"<td>" +
+item.quantidade +
+"</td>" +
+
+"<td>" +
+moeda(item.preco) +
+"</td>" +
+
+"<td>" +
+moeda(item.total) +
+"</td>" +
+
+"<td>" +
+
+"<button class='botao-excluir' onclick='removerItemNFSaida(" +
+index +
+")'>" +
+
+"Excluir" +
+
+"</button>" +
+
+"</td>";
+
+tbody.appendChild(tr);
+
+});
+
+document.getElementById(
+"nf-saida-total"
+).textContent = moeda(total);
+
+}
 
 
-    p.ultimaMov =
-        dt;
+function removerItemNFSaida(index){
+
+itensNFSaida.splice(index,1);
+
+atualizarTabelaNFSaida();
+
+}
 
 
-    const precoUnitario =
-        Number(
-            p.preco
-            ||
-            0
-        );
+function finalizarNFSaida(){
+
+if(itensNFSaida.length === 0){
+
+alert("Adicione pelo menos um item.");
+
+return;
+
+}
+
+const numero =
+document.getElementById(
+"nf-saida-numero"
+).value.trim();
+
+const cliente =
+document.getElementById(
+"nf-saida-cliente"
+).value.trim();
+
+const data =
+document.getElementById(
+"nf-saida-data"
+).value ||
+dataHojeISO();
+
+const responsavel =
+document.getElementById(
+"nf-saida-responsavel"
+).value.trim();
+
+for(const item of itensNFSaida){
+
+const produto =
+encontrarProduto(item.codigo);
+
+if(!produto){
+
+alert("Produto não encontrado.");
+
+return;
+
+}
+
+if(
+Number(item.quantidade) >
+Number(produto.quantidade || 0)
+){
+
+alert(
+"Estoque insuficiente para " +
+produto.nome
+);
+
+return;
+
+}
+
+}
+
+itensNFSaida.forEach(function(item){
+
+const produto =
+encontrarProduto(item.codigo);
+
+produto.quantidade =
+Number(produto.quantidade || 0) -
+Number(item.quantidade || 0);
+
+produto.valor =
+produto.quantidade *
+Number(produto.preco || 0);
+
+produto.ultimaMov = data;
+
+movimentacoes.push({
+
+data:data,
+codigo:produto.codigo,
+produto:produto.nome,
+tipo:"Saída",
+quantidade:item.quantidade,
+nf:numero,
+responsavel:responsavel || cliente,
+preco:item.preco,
+valorTotal:item.total
+
+});
+
+});
+
+salvarDados();
+
+alert("NF de saída registrada com sucesso.");
+
+limparNFSaida();
+
+atualizarTudo();
+
+}
 
 
-    movimentacoes.push({
+function limparNFSaida(){
 
-        data:dt,
+document.getElementById(
+"nf-saida-numero"
+).value = "";
 
-        codigo:cod,
+document.getElementById(
+"nf-saida-cliente"
+).value = "";
 
-        produto:p.nome,
+document.getElementById(
+"nf-saida-data"
+).value = dataHojeISO();
 
-        tipo:"saida",
+document.getElementById(
+"nf-saida-responsavel"
+).value = "";
 
-        quantidade:
-            Number(qtd),
+itensNFSaida = [];
 
-        nf:nf,
-
-        responsavel:
-            resp,
-
-        precoUnitario:
-            precoUnitario,
-
-        valorTotal:
-            Number(qtd)
-            *
-            precoUnitario
-
-    });
-
-
-    salvarDados();
-
-    atualizarTabelaEstoque();
-
-    atualizarTabelaMovimentacoes();
-
-
-    mostrarMensagem(
-        "msg-saida",
-        "✅ Saída NF registrada!",
-        "ok"
-    );
+atualizarTabelaNFSaida();
 
 }
 
 
 /* =========================================================
-   RELATÓRIO MOVIMENTAÇÕES
+   EXPORTAR EXCEL
 ========================================================= */
 
-function gerarRelatorio(){
+function exportarParaExcel(){
 
-    document.getElementById(
-        "area-relatorio"
-    ).style.display =
-        "block";
+if(typeof XLSX === "undefined"){
 
+alert("Biblioteca do Excel não carregada.");
 
-    const hoje =
-        new Date();
+return;
 
+}
 
-    const primeiroDia =
-        new Date(
-            hoje.getFullYear(),
-            hoje.getMonth(),
-            1
-        );
+const dados =
+produtos.map(function(p){
 
+return {
 
-    document.getElementById(
-        "rel-data-inicial"
-    ).value =
-        primeiroDia
-        .toISOString()
-        .split("T")[0];
+"Código":p.codigo,
+"Nome":p.nome,
+"Categoria":p.categoria,
+"Preço":Number(p.preco || 0),
+"Unidade":p.unidade,
+"Quantidade":Number(p.quantidade || 0),
+"Valor":
+Number(p.quantidade || 0) *
+Number(p.preco || 0),
+"Última Movimentação":p.ultimaMov || ""
 
+};
 
-    document.getElementById(
-        "rel-data-final"
-    ).value =
-        dataHojeISO();
+});
 
+const wb =
+XLSX.utils.book_new();
 
-    aplicarFiltroRelatorio();
+const ws =
+XLSX.utils.json_to_sheet(dados);
 
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Estoque"
+);
 
-    document.getElementById(
-        "area-relatorio"
-    ).scrollIntoView({
-        behavior:"smooth"
-    });
+XLSX.writeFile(
+wb,
+"estoque.xlsx"
+);
 
 }
 
 
-function aplicarFiltroRelatorio(){
+/* =========================================================
+   IMPORTAR EXCEL
+========================================================= */
 
-    const ini =
-        document.getElementById(
-            "rel-data-inicial"
-        ).value;
+function importarExcel(event){
+
+const arquivo =
+event.target.files[0];
+
+if(!arquivo)
+return;
+
+const reader =
+new FileReader();
+
+reader.onload = function(e){
 
+try{
 
-    const fim =
-        document.getElementById(
-            "rel-data-final"
-        ).value;
+const dados =
+new Uint8Array(e.target.result);
 
+const workbook =
+XLSX.read(
+dados,
+{type:"array"}
+);
 
-    let filtradas =
-        movimentacoes.slice();
+const nomePlanilha =
+workbook.SheetNames[0];
 
+const worksheet =
+workbook.Sheets[nomePlanilha];
 
-    if(ini){
+const linhas =
+XLSX.utils.sheet_to_json(
+worksheet,
+{defval:""}
+);
 
-        filtradas =
-            filtradas.filter(
-                function(m){
+let importados = 0;
 
-                    return (
-                        m.data
-                        >=
-                        ini
-                    );
+linhas.forEach(function(linha){
 
-                }
-            );
+const codigo =
+Number(
+linha["Código"] ||
+linha["codigo"] ||
+linha["CODIGO"] ||
+0
+);
 
-    }
+if(!codigo)
+return;
 
+const nome =
+linha["Nome"] ||
+linha["Produto"] ||
+linha["nome"] ||
+"Produto";
 
-    if(fim){
+const categoria =
+linha["Categoria"] ||
+linha["categoria"] ||
+"Sem categoria";
 
-        filtradas =
-            filtradas.filter(
-                function(m){
+const preco =
+Number(
+linha["Preço"] ||
+linha["Preco"] ||
+linha["preco"] ||
+0
+);
 
-                    return (
-                        m.data
-                        <=
-                        fim
-                    );
+const unidade =
+linha["Unidade"] ||
+linha["unidade"] ||
+"UN";
 
-                }
-            );
+const quantidade =
+Number(
+linha["Quantidade"] ||
+linha["quantidade"] ||
+0
+);
 
-    }
+const existente =
+encontrarProduto(codigo);
 
+if(existente){
 
-    let entradas = 0;
+existente.nome = nome;
+existente.categoria = categoria;
+existente.preco = preco;
+existente.unidade = unidade;
+existente.quantidade = quantidade;
+existente.valor = quantidade * preco;
 
-    let saidas = 0;
+}else{
 
-    let valorEntradas = 0;
+produtos.push({
 
-    let valorSaidas = 0;
+codigo:codigo,
+nome:nome,
+categoria:categoria,
+preco:preco,
+unidade:unidade,
+quantidade:quantidade,
+valor:quantidade * preco,
+ultimaMov:""
 
+});
 
-    filtradas.forEach(
-        function(m){
+}
 
-            const q =
-                Number(
-                    m.quantidade
-                    ||
-                    0
-                );
+importados++;
 
+});
 
-            const preco =
-                Number(
-                    m.precoUnitario
-                    !==
-                    undefined
-                    ?
-                    m.precoUnitario
-                    :
-                    (
-                        encontrarProduto(
-                            m.codigo
-                        )
-                        ?.preco
-                        ||
-                        0
-                    )
-                );
+salvarDados();
 
+atualizarTudo();
 
-            const valor =
-                Number(
-                    m.valorTotal
-                    !==
-                    undefined
-                    ?
-                    m.valorTotal
-                    :
-                    q * preco
-                );
+alert(
+importados +
+" produto(s) importado(s) com sucesso."
+);
 
+}catch(erro){
 
-            if(
-                m.tipo ===
-                "entrada"
-            ){
-
-                entradas += q;
-
-                valorEntradas +=
-                    valor;
-
-            }else{
-
-                saidas += q;
-
-                valorSaidas +=
-                    valor;
-
-            }
-
-        }
-    );
-
-
-    document.getElementById(
-        "rel-produtos"
-    ).textContent =
-        filtradas.length;
-
-
-    document.getElementById(
-        "rel-entradas"
-    ).textContent =
-        entradas;
-
-
-    document.getElementById(
-        "rel-saidas"
-    ).textContent =
-        saidas;
-
-
-    document.getElementById(
-        "rel-saldo"
-    ).textContent =
-        entradas
-        -
-        saidas;
-
-
-    if(
-        filtradas.length === 0
-    ){
-
-        document.getElementById(
-            "rel-movimentacoes"
-        ).innerHTML =
-            "<p style='padding:15px;color:#666;'>"
-            +
-            "Nenhuma movimentação encontrada no período."
-            +
-            "</p>";
-
-        return;
-
-    }
-
-
-    let html =
-        "<table>"
-        +
-        "<tr>"
-        +
-        "<th>Data</th>"
-        +
-        "<th>Tipo</th>"
-        +
-        "<th>Código</th>"
-        +
-        "<th>Produto</th>"
-        +
-        "<th>Qtd</th>"
-        +
-        "<th>NF</th>"
-        +
-        "<th>Resp.</th>"
-        +
-        "<th>Preço Unit.</th>"
-        +
-        "<th>Valor Total</th>"
-        +
-        "</tr>";
-
-
-    filtradas
-        .slice()
-        .reverse()
-        .forEach(
-            function(m){
-
-                const preco =
-                    Number(
-                        m.precoUnitario
-                        !==
-                        undefined
-                        ?
-                        m.precoUnitario
-                        :
-                        (
-                            encontrarProduto(
-                                m.codigo
-                            )
-                            ?.preco
-                            ||
-                            0
-                        )
-                    );
-
-
-                const valor =
-                    Number(
-                        m.valorTotal
-                        !==
-                        undefined
-                        ?
-                        m.valorTotal
-                        :
-                        Number(
-                            m.quantidade
-                            ||
-                            0
-                        )
-                        *
-                        preco
-                    );
-
-
-                html +=
-
-                    "<tr>"
-                    +
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.data
-                    )
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    (
-                        m.tipo === "entrada"
-                        ?
-                        "📥 Entrada"
-                        :
-                        "📤 Saída"
-                    )
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.codigo
-                    )
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.produto
-                    )
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    m.quantidade
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.nf
-                        ||
-                        "-"
-                    )
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    escaparHTML(
-                        m.responsavel
-                        ||
-                        "-"
-                    )
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    moeda(
-                        preco
-                    )
-                    +
-                    "</td>"
-                    +
-                    "<td>"
-                    +
-                    moeda(
-                        valor
-                    )
-                    +
-                    "</td>"
-                    +
-                    "</tr>";
-
-            }
-        );
-
-
-    html +=
-        "</table>"
-        +
-        "<div style='margin-top:15px;font-weight:bold;'>"
-        +
-        "Valor das entradas: "
-        +
-        moeda(
-            valorEntradas
-        )
-        +
-        " | Valor das saídas: "
-        +
-        moeda(
-            valorSaidas
-        )
-        +
-        " | Valor movimentado: "
-        +
-        moeda(
-            valorEntradas
-            +
-            valorSaidas
-        )
-        +
-        "</div>";
-
-
-    document.getElementById(
-        "rel-movimentacoes"
-    ).innerHTML =
-        html;
+console.error(erro);
+
+alert("Erro ao importar o Excel.");
+
+}
+
+event.target.value = "";
+
+};
+
+reader.readAsArrayBuffer(arquivo);
+
+}
+
+
+/* =========================================================
+   IMPORTAR XML NF-E
+========================================================= */
+
+function importarXML(event){
+
+const arquivo =
+event.target.files[0];
+
+if(!arquivo)
+return;
+
+const reader =
+new FileReader();
+
+reader.onload = function(e){
+
+try{
+
+const texto =
+e.target.result;
+
+const parser =
+new DOMParser();
+
+const xml =
+parser.parseFromString(
+texto,
+"text/xml"
+);
+
+const erros =
+xml.getElementsByTagName(
+"parsererror"
+);
+
+if(erros.length){
+
+throw new Error("XML inválido");
+
+}
+
+const dets =
+xml.getElementsByTagName("det");
+
+let quantidadeItens = 0;
+
+for(
+let i=0;
+i<dets.length;
+i++
+){
+
+const det = dets[i];
+
+const prod =
+det.getElementsByTagName("prod")[0];
+
+if(!prod)
+continue;
+
+const cProd =
+prod.getElementsByTagName("cProd")[0];
+
+const xProd =
+prod.getElementsByTagName("xProd")[0];
+
+const qCom =
+prod.getElementsByTagName("qCom")[0];
+
+const uCom =
+prod.getElementsByTagName("uCom")[0];
+
+const vUnCom =
+prod.getElementsByTagName("vUnCom")[0];
+
+const codigo =
+cProd
+?
+cProd.textContent.trim()
+:
+"";
+
+const nome =
+xProd
+?
+xProd.textContent.trim()
+:
+"Produto";
+
+const quantidade =
+qCom
+?
+Number(
+qCom.textContent.replace(",",".")
+)
+:
+0;
+
+const unidade =
+uCom
+?
+uCom.textContent.trim()
+:
+"UN";
+
+const preco =
+vUnCom
+?
+Number(
+vUnCom.textContent.replace(",",".")
+)
+:
+0;
+
+if(!codigo)
+continue;
+
+let produto =
+encontrarProduto(codigo);
+
+if(produto){
+
+produto.nome = nome;
+produto.unidade = unidade;
+produto.preco = preco;
+
+produto.quantidade =
+Number(produto.quantidade || 0) +
+quantidade;
+
+produto.valor =
+produto.quantidade *
+produto.preco;
+
+produto.ultimaMov =
+dataHojeISO();
+
+}else{
+
+produto = {
+
+codigo:codigo,
+nome:nome,
+categoria:"Importado XML",
+preco:preco,
+unidade:unidade,
+quantidade:quantidade,
+valor:quantidade * preco,
+ultimaMov:dataHojeISO()
+
+};
+
+produtos.push(produto);
+
+}
+
+movimentacoes.push({
+
+data:dataHojeISO(),
+codigo:codigo,
+produto:nome,
+tipo:"Entrada",
+quantidade:quantidade,
+nf:"XML NF-e",
+responsavel:"Importação XML",
+preco:preco,
+valorTotal:quantidade * preco
+
+});
+
+quantidadeItens++;
+
+}
+
+salvarDados();
+
+atualizarTudo();
+
+alert(
+quantidadeItens +
+" item(ns) importado(s) do XML."
+);
+
+}catch(erro){
+
+console.error(erro);
+
+alert(
+"Não foi possível importar o XML NF-e."
+);
+
+}
+
+event.target.value = "";
+
+};
+
+reader.readAsText(arquivo);
+
+}
+
+
+/* =========================================================
+   RELATÓRIO
+========================================================= */
+
+function gerarRelatorio(){
+
+const area =
+document.getElementById(
+"area-relatorio"
+);
+
+area.style.display = "block";
+
+const hoje =
+dataHojeISO();
+
+const primeiroDia =
+new Date();
+
+primeiroDia.setDate(1);
+
+const ano =
+primeiroDia.getFullYear();
+
+const mes =
+String(
+primeiroDia.getMonth()+1
+).padStart(2,"0");
+
+const dataInicial =
+ano + "-" + mes + "-01";
+
+document.getElementById(
+"relatorio-data-inicial"
+).value =
+dataInicial;
+
+document.getElementById(
+"relatorio-data-final"
+).value =
+hoje;
+
+carregarProdutosRelatorio();
+
+aplicarFiltrosRelatorio();
+
+area.scrollIntoView({
+behavior:"smooth"
+});
+
+}
+
+
+function carregarProdutosRelatorio(){
+
+const select =
+document.getElementById(
+"relatorio-produto"
+);
+
+const atual =
+select.value;
+
+select.innerHTML =
+'<option value="">Todos</option>';
+
+produtos.forEach(function(p){
+
+const option =
+document.createElement("option");
+
+option.value = p.codigo;
+
+option.textContent =
+p.codigo + " - " + p.nome;
+
+select.appendChild(option);
+
+});
+
+select.value = atual;
+
+}
+
+
+function aplicarFiltrosRelatorio(){
+
+const dataInicial =
+document.getElementById(
+"relatorio-data-inicial"
+).value;
+
+const dataFinal =
+document.getElementById(
+"relatorio-data-final"
+).value;
+
+const produtoFiltro =
+document.getElementById(
+"relatorio-produto"
+).value;
+
+const tipoFiltro =
+document.getElementById(
+"relatorio-tipo"
+).value;
+
+const codigoFiltro =
+document.getElementById(
+"relatorio-codigo"
+).value.trim();
+
+const nfFiltro =
+document.getElementById(
+"relatorio-nf"
+).value.trim();
+
+const responsavelFiltro =
+document.getElementById(
+"relatorio-responsavel"
+).value.trim();
+
+const lista =
+movimentacoes.filter(function(m){
+
+if(
+dataInicial &&
+String(m.data || "") < dataInicial
+){
+
+return false;
+
+}
+
+if(
+dataFinal &&
+String(m.data || "") > dataFinal
+){
+
+return false;
+
+}
+
+if(
+produtoFiltro &&
+String(m.codigo || "") !==
+String(produtoFiltro)
+){
+
+return false;
+
+}
+
+if(
+tipoFiltro &&
+String(m.tipo || "") !==
+tipoFiltro
+){
+
+return false;
+
+}
+
+if(
+codigoFiltro &&
+String(m.codigo || "")
+.indexOf(codigoFiltro) === -1
+){
+
+return false;
+
+}
+
+if(
+nfFiltro &&
+String(m.nf || "")
+.toLowerCase()
+.indexOf(
+nfFiltro.toLowerCase()
+) === -1
+){
+
+return false;
+
+}
+
+if(
+responsavelFiltro &&
+String(m.responsavel || "")
+.toLowerCase()
+.indexOf(
+responsavelFiltro.toLowerCase()
+) === -1
+){
+
+return false;
+
+}
+
+return true;
+
+});
+
+const tbody =
+document.getElementById(
+"tabela-relatorio-body"
+);
+
+tbody.innerHTML = "";
+
+let totalQuantidade = 0;
+let totalValor = 0;
+
+if(lista.length === 0){
+
+tbody.innerHTML =
+
+"<tr>" +
+
+"<td colspan='9' style='text-align:center;padding:25px;color:#777;'>" +
+
+"Nenhuma movimentação encontrada para os filtros informados." +
+
+"</td>" +
+
+"</tr>";
+
+}else{
+
+lista
+.slice()
+.reverse()
+.forEach(function(m){
+
+const quantidade =
+Number(m.quantidade || 0);
+
+const valor =
+Number(
+m.valorTotal ||
+(
+quantidade *
+Number(m.preco || 0)
+)
+);
+
+totalQuantidade += quantidade;
+totalValor += valor;
+
+const tr =
+document.createElement("tr");
+
+tr.innerHTML =
+
+"<td>" +
+escaparHTML(m.data || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.codigo || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.produto || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.tipo || "-") +
+"</td>" +
+
+"<td>" +
+quantidade +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.nf || "-") +
+"</td>" +
+
+"<td>" +
+escaparHTML(m.responsavel || "-") +
+"</td>" +
+
+"<td>" +
+moeda(m.preco) +
+"</td>" +
+
+"<td>" +
+moeda(valor) +
+"</td>";
+
+tbody.appendChild(tr);
+
+});
+
+}
+
+document.getElementById(
+"relatorio-total-mov"
+).textContent =
+lista.length;
+
+document.getElementById(
+"relatorio-total-qtd"
+).textContent =
+totalQuantidade;
+
+document.getElementById(
+"relatorio-total-valor"
+).textContent =
+moeda(totalValor);
+
+document.getElementById(
+"relatorio-valor-medio"
+).textContent =
+lista.length
+?
+moeda(totalValor / lista.length)
+:
+moeda(0);
+
+}
+
+
+/* =========================================================
+   IMPRIMIR RELATÓRIO
+========================================================= */
+
+function imprimirRelatorio(){
+
+window.print();
 
 }
 
 
 function fecharRelatorio(){
 
-    document.getElementById(
-        "area-relatorio"
-    ).style.display =
-        "none";
-
-}
-
-
-function imprimirRelatorio(){
-
-    window.print();
-
-}
-
-
-/* =========================================================
-   EXCEL
-========================================================= */
-
-function exportarParaExcel(){
-
-    const wb =
-        XLSX.utils.book_new();
-
-
-    const ws =
-        XLSX.utils.json_to_sheet(
-
-            produtos.map(
-                function(p){
-
-                    return {
-
-                        Código:p.codigo,
-
-                        Nome:p.nome,
-
-                        Categoria:
-                            p.categoria
-                            ||
-                            "",
-
-                        Preço:
-                            p.preco,
-
-                        Quantidade:
-                            p.quantidade,
-
-                        Unidade:
-                            p.unidade
-
-                    };
-
-                }
-            )
-
-        );
-
-
-    XLSX.utils.book_append_sheet(
-        wb,
-        ws,
-        "Estoque"
-    );
-
-
-    XLSX.writeFile(
-        wb,
-        "estoque.xlsx"
-    );
-
-}
-
-
-function importarExcel(event){
-
-    const arquivo =
-        event.target.files[0];
-
-
-    if(!arquivo){
-
-        alert(
-            "Selecione um arquivo!"
-        );
-
-        return;
-
-    }
-
-
-    const leitor =
-        new FileReader();
-
-
-    leitor.onload =
-        function(e){
-
-            try{
-
-                const dados =
-                    new Uint8Array(
-                        e.target.result
-                    );
-
-
-                const wb =
-                    XLSX.read(
-                        dados,
-                        {
-                            type:"array"
-                        }
-                    );
-
-
-                const aba =
-                    wb.Sheets[
-                        wb.SheetNames[0]
-                    ];
-
-
-                const linhas =
-                    XLSX.utils.sheet_to_json(
-                        aba,
-                        {
-                            header:1
-                        }
-                    );
-
-
-                if(
-                    linhas.length
-                    <
-                    2
-                ){
-
-                    alert(
-                        "❌ Arquivo vazio!"
-                    );
-
-                    return;
-
-                }
-
-
-                const cab =
-                    linhas[0].map(
-                        function(c){
-
-                            return String(
-                                c || ""
-                            )
-                            .trim()
-                            .toLowerCase();
-
-                        }
-                    );
-
-
-                const idxCod =
-                    cab.findIndex(
-                        function(c){
-
-                            return
-                                c.includes("cód")
-                                ||
-                                c.includes("cod");
-
-                        }
-                    );
-
-
-                const idxNome =
-                    cab.findIndex(
-                        function(c){
-
-                            return
-                                c.includes("nome")
-                                ||
-                                c.includes("produto");
-
-                        }
-                    );
-
-
-                const idxCat =
-                    cab.findIndex(
-                        function(c){
-
-                            return c.includes(
-                                "categ"
-                            );
-
-                        }
-                    );
-
-
-                const idxPreco =
-                    cab.findIndex(
-                        function(c){
-
-                            return
-                                c.includes("preç")
-                                ||
-                                c.includes("preco")
-                                ||
-                                c.includes("valor");
-
-                        }
-                    );
-
-
-                const idxQtd =
-                    cab.findIndex(
-                        function(c){
-
-                            return
-                                c.includes("quant")
-                                ||
-                                c.includes("qtd")
-                                ||
-                                c.includes("estoque");
-
-                        }
-                    );
-
-
-                const idxUn =
-                    cab.findIndex(
-                        function(c){
-
-                            return
-                                c.includes("unid")
-                                ||
-                                c === "un";
-
-                        }
-                    );
-
-
-                if(
-                    idxCod === -1
-                    ||
-                    idxNome === -1
-                ){
-
-                    alert(
-                        "❌ Não achei coluna Código ou Nome."
-                    );
-
-                    return;
-
-                }
-
-
-                let novos = 0;
-
-                let atualizados = 0;
-
-                let ignorados = 0;
-
-
-                const dtHoje =
-                    dataHojeISO();
-
-
-                for(
-                    let i=1;
-                    i<linhas.length;
-                    i++
-                ){
-
-                    const linha =
-                        linhas[i];
-
-
-                    if(
-                        !linha
-                        ||
-                        !linha.length
-                    ){
-
-                        continue;
-
-                    }
-
-
-                    const cod =
-                        String(
-                            linha[idxCod]
-                            ||
-                            ""
-                        ).trim();
-
-
-                    const nome =
-                        String(
-                            linha[idxNome]
-                            ||
-                            ""
-                        ).trim();
-
-
-                    if(
-                        !cod
-                        ||
-                        !nome
-                    ){
-
-                        ignorados++;
-
-                        continue;
-
-                    }
-
-
-                    const cat =
-                        idxCat !== -1
-                        ?
-                        String(
-                            linha[idxCat]
-                            ||
-                            ""
-                        ).trim()
-                        :
-                        "";
-
-
-                    let preco =
-                        idxPreco !== -1
-                        ?
-                        parseFloat(
-                            String(
-                                linha[idxPreco]
-                                ||
-                                ""
-                            )
-                            .replace(",",".")
-                        )
-                        :
-                        0;
-
-
-                    if(
-                        isNaN(
-                            preco
-                        )
-                    ){
-
-                        preco =
-                            0;
-
-                    }
-
-
-                    let qtd =
-                        idxQtd !== -1
-                        ?
-                        parseFloat(
-                            String(
-                                linha[idxQtd]
-                                ||
-                                ""
-                            )
-                            .replace(",",".")
-                        )
-                        :
-                        0;
-
-
-                    if(
-                        isNaN(
-                            qtd
-                        )
-                    ){
-
-                        qtd =
-                            0;
-
-                    }
-
-
-                    let un =
-                        idxUn !== -1
-                        ?
-                        String(
-                            linha[idxUn]
-                            ||
-                            ""
-                        ).trim()
-                        :
-                        "UN";
-
-
-                    if(!un)
-                        un =
-                            "UN";
-
-
-                    let prod =
-                        encontrarProduto(
-                            cod
-                        );
-
-
-                    if(!prod){
-
-                        produtos.push({
-
-                            codigo:cod,
-
-                            nome:nome,
-
-                            categoria:cat,
-
-                            preco:preco,
-
-                            quantidade:qtd,
-
-                            unidade:un,
-
-                            ultimaMov:
-                                dtHoje
-
-                        });
-
-
-                        novos++;
-
-                    }else{
-
-                        if(cat)
-                            prod.categoria =
-                                cat;
-
-
-                        if(preco > 0)
-                            prod.preco =
-                                preco;
-
-
-                        prod.quantidade =
-                            qtd;
-
-
-                        if(un)
-                            prod.unidade =
-                                un;
-
-
-                        atualizados++;
-
-                    }
-
-                }
-
-
-                salvarDados();
-
-                atualizarTabelaEstoque();
-
-                carregarCategoriasNoFiltro();
-
-
-                alert(
-                    "✅ IMPORTAÇÃO CONCLUÍDA!\n\n"
-                    +
-                    "📦 Novos: "
-                    +
-                    novos
-                    +
-                    "\n"
-                    +
-                    "✏️ Atualizados: "
-                    +
-                    atualizados
-                    +
-                    "\n"
-                    +
-                    "⏭️ Ignorados: "
-                    +
-                    ignorados
-                );
-
-
-            }catch(erro){
-
-                alert(
-                    "❌ ERRO: "
-                    +
-                    erro.message
-                );
-
-            }
-
-        };
-
-
-    leitor.readAsArrayBuffer(
-        arquivo
-    );
-
-
-    event.target.value =
-        "";
+document.getElementById(
+"area-relatorio"
+).style.display = "none";
 
 }
 
@@ -5141,1618 +4512,734 @@ function importarExcel(event){
    VENDAS
 ========================================================= */
 
-function proximoNumeroVenda(){
-
-    if(
-        vendas.length === 0
-    ){
-
-        return 1;
-
-    }
-
-
-    let maior =
-        0;
-
-
-    vendas.forEach(
-        function(v){
-
-            const numero =
-                parseInt(
-                    v.numero
-                )
-                ||
-                0;
-
-
-            if(
-                numero
-                >
-                maior
-            ){
-
-                maior =
-                    numero;
-
-            }
-
-        }
-    );
-
-
-    return
-        maior
-        +
-        1;
-
-}
-
-
 function prepararNovaVenda(){
 
-    itensVenda =
-        [];
+itensVenda = [];
+vendaAtual = null;
 
+document.getElementById(
+"numero-venda-atual"
+).textContent = "-";
 
-    const numero =
-        proximoNumeroVenda();
+document.getElementById(
+"venda-vendedor"
+).value = "";
 
+document.getElementById(
+"venda-cliente"
+).value = "";
 
-    const n =
-        String(
-            numero
-        ).padStart(
-            4,
-            "0"
-        );
+document.getElementById(
+"venda-pagamento"
+).value = "Dinheiro";
 
+document.getElementById(
+"venda-quantidade"
+).value = "1";
 
-    document.getElementById(
-        "venda-numero"
-    ).value =
-        n;
+document.getElementById(
+"venda-desconto"
+).value = "0";
 
+document.getElementById(
+"venda-observacao"
+).value = "";
 
-    document.getElementById(
-        "numero-venda"
-    ).textContent =
-        n;
+document.getElementById(
+"venda-valor-recebido"
+).value = "";
 
+document.getElementById(
+"venda-troco"
+).value = "";
 
-    document.getElementById(
-        "venda-data"
-    ).value =
-        dataHojeISO();
+document.getElementById(
+"troco-container"
+).style.display = "none";
 
+document.getElementById(
+"info-produto-venda"
+).style.display = "none";
 
-    document.getElementById(
-        "venda-cliente"
-    ).value =
-        "";
+atualizarTabelaItensVenda();
 
+atualizarTotalVenda();
 
-    document.getElementById(
-        "venda-vendedor"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "venda-observacao"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "venda-codigo"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "venda-quantidade"
-    ).value =
-        "1";
-
-
-    document.getElementById(
-        "venda-preco"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "venda-desconto"
-    ).value =
-        "0";
-
-
-    document.getElementById(
-        "venda-recebido"
-    ).value =
-        "0";
-
-
-    document.getElementById(
-        "venda-pagamento"
-    ).value =
-        "Dinheiro";
-
-
-    document.getElementById(
-        "info-produto-venda"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "area-relatorio-vendas"
-    ).style.display =
-        "none";
-
-
-    atualizarTabelaItensVenda();
-
-    calcularTotalVenda();
-
-    ajustarCamposPagamento();
-
-    atualizarTabelaVendas();
+atualizarResumoVendas();
 
 }
 
 
-function buscarProdutoVenda(){
+function gerarNumeroVenda(){
 
-    const cod =
-        document.getElementById(
-            "venda-codigo"
-        ).value.trim();
+let maior = 0;
 
+vendas.forEach(function(v){
 
-    const info =
-        document.getElementById(
-            "info-produto-venda"
-        );
+const n =
+parseInt(
+String(v.numero || "")
+.replace(/\D/g,""),
+10
+);
 
+if(
+!isNaN(n) &&
+n > maior
+){
 
-    const preco =
-        document.getElementById(
-            "venda-preco"
-        );
+maior = n;
 
+}
 
-    if(!cod){
+});
 
-        info.style.display =
-            "none";
-
-
-        preco.value =
-            "";
-
-        return;
-
-    }
-
-
-    const p =
-        encontrarProduto(
-            cod
-        );
-
-
-    if(!p){
-
-        info.style.display =
-            "block";
-
-
-        info.innerHTML =
-            "<span class='alerta-estoque'>"
-            +
-            "❌ Produto não encontrado."
-            +
-            "</span>";
-
-
-        preco.value =
-            "";
-
-        return;
-
-    }
-
-
-    info.style.display =
-        "block";
-
-
-    const alerta =
-        Number(
-            p.quantidade
-        )
-        <=
-        0
-        ?
-        "<br><span class='alerta-estoque'>⚠️ Produto sem estoque.</span>"
-        :
-        "";
-
-
-    info.innerHTML =
-
-        "<strong>Produto:</strong> "
-        +
-        escaparHTML(
-            p.nome
-        )
-        +
-        "<br>"
-        +
-        "<strong>Categoria:</strong> "
-        +
-        escaparHTML(
-            p.categoria
-            ||
-            "-"
-        )
-        +
-        "<br>"
-        +
-        "<strong>Estoque disponível:</strong> "
-        +
-        p.quantidade
-        +
-        " "
-        +
-        escaparHTML(
-            p.unidade
-        )
-        +
-        alerta;
-
-
-    preco.value =
-        Number(
-            p.preco
-            ||
-            0
-        )
-        .toFixed(2)
-        .replace(
-            ".",
-            ","
-        );
+return String(
+maior + 1
+).padStart(4,"0");
 
 }
 
 
-function adicionarProdutoVenda(){
+function mostrarProdutoVenda(){
 
-    const cod =
-        document.getElementById(
-            "venda-codigo"
-        ).value.trim();
+const codigo =
+document.getElementById(
+"venda-produto"
+).value;
 
+const produto =
+encontrarProduto(codigo);
 
-    const qtd =
-        parseFloat(
-            document.getElementById(
-                "venda-quantidade"
-            ).value
-        )
-        ||
-        0;
+const info =
+document.getElementById(
+"info-produto-venda"
+);
 
+if(!produto){
 
-    if(!cod){
+info.style.display = "none";
 
-        mostrarMensagem(
-            "msg-venda-produto",
-            "Informe o código do produto.",
-            "erro"
-        );
+return;
 
-        return;
+}
 
-    }
+info.innerHTML =
 
+"<strong>" +
+escaparHTML(produto.nome) +
+"</strong>" +
 
-    if(
-        qtd
-        <=
-        0
-    ){
+"<br>" +
 
-        mostrarMensagem(
-            "msg-venda-produto",
-            "Informe uma quantidade válida.",
-            "erro"
-        );
+"Estoque disponível: " +
+produto.quantidade +
+" " +
+escaparHTML(produto.unidade || "UN") +
 
-        return;
+"<br>" +
 
-    }
+"Preço unitário: " +
+moeda(produto.preco);
+
+info.style.display = "block";
+
+}
 
 
-    const p =
-        encontrarProduto(
-            cod
-        );
+function adicionarItemVenda(){
 
+const codigo =
+document.getElementById(
+"venda-produto"
+).value;
 
-    if(!p){
+const quantidade =
+Number(
+document.getElementById(
+"venda-quantidade"
+).value || 0
+);
 
-        mostrarMensagem(
-            "msg-venda-produto",
-            "Produto não encontrado.",
-            "erro"
-        );
+const produto =
+encontrarProduto(codigo);
 
-        return;
+if(!produto){
 
-    }
+alert("Selecione um produto.");
 
+return;
 
-    let quantidadeJaAdicionada =
-        0;
+}
 
+if(quantidade <= 0){
 
-    itensVenda.forEach(
-        function(item){
+alert("Informe uma quantidade válida.");
 
-            if(
-                String(
-                    item.codigo
-                )
-                ===
-                String(
-                    p.codigo
-                )
-            ){
+return;
 
-                quantidadeJaAdicionada +=
-                    Number(
-                        item.quantidade
-                    );
+}
 
-            }
+const existente =
+itensVenda.find(function(item){
 
-        }
-    );
+return String(item.codigo) ===
+String(produto.codigo);
 
+});
 
-    if(
-        quantidadeJaAdicionada
-        +
-        qtd
-        >
-        Number(
-            p.quantidade
-        )
-    ){
+const quantidadeJaAdicionada =
+existente
+?
+Number(existente.quantidade)
+:
+0;
 
-        mostrarMensagem(
-            "msg-venda-produto",
-            "❌ Estoque insuficiente. Disponível: "
-            +
-            p.quantidade
-            +
-            " "
-            +
-            p.unidade,
-            "erro"
-        );
+if(
+quantidade + quantidadeJaAdicionada >
+Number(produto.quantidade || 0)
+){
 
-        return;
+alert(
+"Quantidade solicitada maior que o estoque disponível."
+);
 
-    }
+return;
 
+}
 
-    const itemExistente =
-        itensVenda.find(
-            function(item){
+if(existente){
 
-                return
-                    String(
-                        item.codigo
-                    )
-                    ===
-                    String(
-                        p.codigo
-                    );
+existente.quantidade += quantidade;
 
-            }
-        );
+existente.total =
+existente.quantidade *
+existente.preco;
 
+}else{
 
-    if(
-        itemExistente
-    ){
+itensVenda.push({
 
-        itemExistente.quantidade +=
-            qtd;
+codigo:produto.codigo,
+produto:produto.nome,
+unidade:produto.unidade || "UN",
+quantidade:quantidade,
+preco:Number(produto.preco || 0),
+total:
+quantidade *
+Number(produto.preco || 0)
 
-    }else{
+});
 
-        itensVenda.push({
+}
 
-            codigo:
-                p.codigo,
+atualizarTabelaItensVenda();
 
-            produto:
-                p.nome,
+atualizarTotalVenda();
 
-            unidade:
-                p.unidade,
-
-            quantidade:
-                qtd,
-
-            preco:
-                Number(
-                    p.preco
-                    ||
-                    0
-                )
-
-        });
-
-    }
-
-
-    atualizarTabelaItensVenda();
-
-    calcularTotalVenda();
-
-
-    document.getElementById(
-        "venda-codigo"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "venda-quantidade"
-    ).value =
-        "1";
-
-
-    document.getElementById(
-        "venda-preco"
-    ).value =
-        "";
-
-
-    document.getElementById(
-        "info-produto-venda"
-    ).style.display =
-        "none";
-
-
-    mostrarMensagem(
-        "msg-venda-produto",
-        "✅ Produto adicionado à venda!",
-        "ok"
-    );
+document.getElementById(
+"venda-quantidade"
+).value = "1";
 
 }
 
 
 function atualizarTabelaItensVenda(){
 
-    const tbody =
-        document.getElementById(
-            "tabela-itens-venda"
-        );
+const tbody =
+document.getElementById(
+"tabela-itens-venda-body"
+);
 
+tbody.innerHTML = "";
 
-    const aviso =
-        document.getElementById(
-            "sem-itens-venda"
-        );
+itensVenda.forEach(function(item,index){
 
+const tr =
+document.createElement("tr");
 
-    if(!tbody)
-        return;
+tr.innerHTML =
 
+"<td>" +
+escaparHTML(item.codigo) +
+"</td>" +
 
-    tbody.innerHTML =
-        "";
+"<td>" +
+escaparHTML(item.produto) +
+"</td>" +
 
+"<td>" +
+escaparHTML(item.unidade) +
+"</td>" +
 
-    if(
-        itensVenda.length
-        ===
-        0
-    ){
+"<td>" +
+item.quantidade +
+"</td>" +
 
-        aviso.style.display =
-            "block";
+"<td>" +
+moeda(item.preco) +
+"</td>" +
 
+"<td>" +
+moeda(
+item.quantidade * item.preco
+) +
+"</td>" +
 
-        document.getElementById(
-            "venda-total-itens"
-        ).textContent =
-            "0";
+"<td>" +
 
+"<button class='botao-excluir' onclick='removerItemVenda(" +
+index +
+")'>" +
 
-        return;
+"Excluir" +
 
-    }
+"</button>" +
 
+"</td>";
 
-    aviso.style.display =
-        "none";
+tbody.appendChild(tr);
 
-
-    itensVenda.forEach(
-        function(item,index){
-
-            const subtotal =
-                Number(
-                    item.quantidade
-                )
-                *
-                Number(
-                    item.preco
-                );
-
-
-            const tr =
-                document.createElement(
-                    "tr"
-                );
-
-
-            tr.innerHTML =
-
-                "<td>"
-                +
-                escaparHTML(
-                    item.codigo
-                )
-                +
-                "</td>"
-
-                +
-
-                "<td>"
-                +
-                escaparHTML(
-                    item.produto
-                )
-                +
-                "</td>"
-
-                +
-
-                "<td>"
-                +
-                escaparHTML(
-                    item.unidade
-                )
-                +
-                "</td>"
-
-                +
-
-                "<td>"
-                +
-                item.quantidade
-                +
-                "</td>"
-
-                +
-
-                "<td>"
-                +
-                moeda(
-                    item.preco
-                )
-                +
-                "</td>"
-
-                +
-
-                "<td>"
-                +
-                moeda(
-                    subtotal
-                )
-                +
-                "</td>"
-
-                +
-
-                "<td>"
-                +
-
-                "<button"
-                +
-                " class='botao-excluir'"
-                +
-                " onclick='removerItemVenda("
-                +
-                index
-                +
-                ")'>"
-                +
-                "Excluir"
-                +
-                "</button>"
-
-                +
-
-                "</td>";
-
-
-            tbody.appendChild(
-                tr
-            );
-
-        }
-    );
-
-
-    document.getElementById(
-        "venda-total-itens"
-    ).textContent =
-        itensVenda.length;
+});
 
 }
 
 
 function removerItemVenda(index){
 
-    if(
-        confirm(
-            "Remover este produto da venda?"
-        )
-    ){
+itensVenda.splice(index,1);
 
-        itensVenda.splice(
-            index,
-            1
-        );
+atualizarTabelaItensVenda();
 
-
-        atualizarTabelaItensVenda();
-
-        calcularTotalVenda();
-
-    }
+atualizarTotalVenda();
 
 }
 
 
-function calcularTotalVenda(){
+function atualizarTotalVenda(){
 
-    let subtotal =
-        0;
+let subtotal = 0;
 
+itensVenda.forEach(function(item){
 
-    itensVenda.forEach(
-        function(item){
+subtotal +=
+Number(item.quantidade || 0) *
+Number(item.preco || 0);
 
-            subtotal +=
-                Number(
-                    item.quantidade
-                )
-                *
-                Number(
-                    item.preco
-                );
+});
 
-        }
-    );
+const desconto =
+Number(
+document.getElementById(
+"venda-desconto"
+).value || 0
+);
 
+const total =
+Math.max(0,subtotal - desconto);
 
-    let desconto =
-        parseFloat(
-            document.getElementById(
-                "venda-desconto"
-            ).value
-        )
-        ||
-        0;
+document.getElementById(
+"venda-subtotal"
+).textContent =
+moeda(subtotal);
 
+document.getElementById(
+"venda-desconto-exibicao"
+).textContent =
+moeda(desconto);
 
-    if(
-        desconto
-        <
-        0
-    )
-        desconto =
-            0;
+document.getElementById(
+"venda-total"
+).textContent =
+moeda(total);
 
+const pagamento =
+document.getElementById(
+"venda-pagamento"
+).value;
 
-    if(
-        desconto
-        >
-        subtotal
-    )
-        desconto =
-            subtotal;
+document.getElementById(
+"troco-container"
+).style.display =
+pagamento === "Dinheiro"
+?
+"block"
+:
+"none";
 
-
-    const total =
-        subtotal
-        -
-        desconto;
-
-
-    document.getElementById(
-        "venda-subtotal"
-    ).textContent =
-        moeda(
-            subtotal
-        );
-
-
-    document.getElementById(
-        "venda-total"
-    ).textContent =
-        moeda(
-            total
-        );
-
-
-    document.getElementById(
-        "total-subtotal"
-    ).textContent =
-        moeda(
-            subtotal
-        );
-
-
-    document.getElementById(
-        "total-desconto"
-    ).textContent =
-        moeda(
-            desconto
-        );
-
-
-    document.getElementById(
-        "total-final"
-    ).textContent =
-        moeda(
-            total
-        );
-
-
-    calcularTroco();
-
-}
-
-
-function ajustarCamposPagamento(){
-
-    const forma =
-        document.getElementById(
-            "venda-pagamento"
-        ).value;
-
-
-    const campo =
-        document.getElementById(
-            "campo-valor-recebido"
-        );
-
-
-    const troco =
-        document.getElementById(
-            "campo-troco"
-        );
-
-
-    if(
-        forma
-        ===
-        "Dinheiro"
-    ){
-
-        campo.style.display =
-            "flex";
-
-
-        troco.style.display =
-            "block";
-
-    }else{
-
-        campo.style.display =
-            "none";
-
-
-        troco.style.display =
-            "none";
-
-
-        document.getElementById(
-            "venda-recebido"
-        ).value =
-            "0";
-
-    }
-
-
-    calcularTroco();
+calcularTroco();
 
 }
 
 
 function calcularTroco(){
 
-    const forma =
-        document.getElementById(
-            "venda-pagamento"
-        ).value;
+const pagamento =
+document.getElementById(
+"venda-pagamento"
+).value;
 
+if(pagamento !== "Dinheiro"){
 
-    if(
-        forma
-        !==
-        "Dinheiro"
-    ){
+document.getElementById(
+"venda-troco"
+).value = "";
 
-        return;
-
-    }
-
-
-    let subtotal =
-        0;
-
-
-    itensVenda.forEach(
-        function(item){
-
-            subtotal +=
-                Number(
-                    item.quantidade
-                )
-                *
-                Number(
-                    item.preco
-                );
-
-        }
-    );
-
-
-    const desconto =
-        parseFloat(
-            document.getElementById(
-                "venda-desconto"
-            ).value
-        )
-        ||
-        0;
-
-
-    const total =
-        Math.max(
-            0,
-            subtotal
-            -
-            desconto
-        );
-
-
-    const recebido =
-        parseFloat(
-            document.getElementById(
-                "venda-recebido"
-            ).value
-        )
-        ||
-        0;
-
-
-    const troco =
-        recebido
-        -
-        total;
-
-
-    document.getElementById(
-        "venda-troco"
-    ).textContent =
-        moeda(
-            Math.max(
-                0,
-                troco
-            )
-        );
+return;
 
 }
 
+const totalTexto =
+document.getElementById(
+"venda-total"
+).textContent;
+
+const total =
+Number(
+totalTexto
+.replace("R$","")
+.replace(/\./g,"")
+.replace(",",".")
+.trim()
+) || 0;
+
+const recebido =
+Number(
+document.getElementById(
+"venda-valor-recebido"
+).value || 0
+);
+
+const troco =
+recebido - total;
+
+document.getElementById(
+"venda-troco"
+).value =
+troco >= 0
+?
+moeda(troco)
+:
+"Valor insuficiente";
+
+}
+
+
+/* =========================================================
+   FINALIZAR VENDA
+========================================================= */
 
 function finalizarVenda(){
 
-    if(
-        itensVenda.length
-        ===
-        0
-    ){
+if(itensVenda.length === 0){
 
-        mostrarMensagem(
-            "msg-final-venda",
-            "❌ Adicione pelo menos um produto à venda.",
-            "erro"
-        );
+alert(
+"Adicione pelo menos um produto à venda."
+);
 
-        return;
-
-    }
-
-
-    const cliente =
-        document.getElementById(
-            "venda-cliente"
-        ).value.trim();
-
-
-    const vendedor =
-        document.getElementById(
-            "venda-vendedor"
-        ).value.trim();
-
-
-    const observacao =
-        document.getElementById(
-            "venda-observacao"
-        ).value.trim();
-
-
-    const data =
-        document.getElementById(
-            "venda-data"
-        ).value
-        ||
-        dataHojeISO();
-
-
-    const hora =
-        horaAtual();
-
-
-    const formaPagamento =
-        document.getElementById(
-            "venda-pagamento"
-        ).value;
-
-
-    let subtotal =
-        0;
-
-
-    itensVenda.forEach(
-        function(item){
-
-            subtotal +=
-                Number(
-                    item.quantidade
-                )
-                *
-                Number(
-                    item.preco
-                );
-
-        }
-    );
-
-
-    const desconto =
-        Math.min(
-            Math.max(
-                parseFloat(
-                    document.getElementById(
-                        "venda-desconto"
-                    ).value
-                )
-                ||
-                0,
-                0
-            ),
-            subtotal
-        );
-
-
-    const total =
-        subtotal
-        -
-        desconto;
-
-
-    for(
-        let i=0;
-        i<itensVenda.length;
-        i++
-    ){
-
-        const item =
-            itensVenda[i];
-
-
-        const p =
-            encontrarProduto(
-                item.codigo
-            );
-
-
-        if(!p){
-
-            alert(
-                "O produto "
-                +
-                item.produto
-                +
-                " não existe mais no estoque."
-            );
-
-            return;
-
-        }
-
-
-        if(
-            Number(
-                p.quantidade
-            )
-            <
-            Number(
-                item.quantidade
-            )
-        ){
-
-            alert(
-                "❌ Estoque insuficiente para "
-                +
-                item.produto
-                +
-                ".\n\nDisponível: "
-                +
-                p.quantidade
-                +
-                "\nSolicitado: "
-                +
-                item.quantidade
-            );
-
-            return;
-
-        }
-
-    }
-
-
-    if(
-        formaPagamento
-        ===
-        "Dinheiro"
-    ){
-
-        const recebidoInformado =
-            parseFloat(
-                document.getElementById(
-                    "venda-recebido"
-                ).value
-            )
-            ||
-            0;
-
-
-        if(
-            recebidoInformado
-            <
-            total
-        ){
-
-            alert(
-                "❌ Valor recebido é menor que o total da venda."
-            );
-
-            return;
-
-        }
-
-    }
-
-
-    const numero =
-        document.getElementById(
-            "venda-numero"
-        ).value;
-
-
-    const recebido =
-        formaPagamento
-        ===
-        "Dinheiro"
-        ?
-        parseFloat(
-            document.getElementById(
-                "venda-recebido"
-            ).value
-        )
-        ||
-        0
-        :
-        total;
-
-
-    const troco =
-        Math.max(
-            0,
-            recebido
-            -
-            total
-        );
-
-
-    if(
-        !confirm(
-            "CONFIRMAR VENDA?\n\n"
-            +
-            "Venda Nº: "
-            +
-            numero
-            +
-            "\n"
-            +
-            "Cliente: "
-            +
-            (
-                cliente
-                ||
-                "Não informado"
-            )
-            +
-            "\n"
-            +
-            "Vendedor: "
-            +
-            (
-                vendedor
-                ||
-                "Não informado"
-            )
-            +
-            "\n"
-            +
-            "Pagamento: "
-            +
-            formaPagamento
-            +
-            "\n"
-            +
-            "Total: "
-            +
-            moeda(
-                total
-            )
-            +
-            "\n\n"
-            +
-            "O estoque será reduzido automaticamente."
-        )
-    ){
-
-        return;
-
-    }
-
-
-    itensVenda.forEach(
-        function(item){
-
-            const p =
-                encontrarProduto(
-                    item.codigo
-                );
-
-
-            const precoUnitario =
-                Number(
-                    item.preco
-                    ||
-                    p.preco
-                    ||
-                    0
-                );
-
-
-            const valorItem =
-                Number(
-                    item.quantidade
-                )
-                *
-                precoUnitario;
-
-
-            p.quantidade -=
-                Number(
-                    item.quantidade
-                );
-
-
-            p.ultimaMov =
-                data;
-
-
-            movimentacoes.push({
-
-                data:data,
-
-                hora:hora,
-
-                codigo:
-                    p.codigo,
-
-                produto:
-                    p.nome,
-
-                tipo:
-                    "saida",
-
-                quantidade:
-                    Number(
-                        item.quantidade
-                    ),
-
-                nf:
-                    "VENDA "
-                    +
-                    numero,
-
-                responsavel:
-                    vendedor
-                    ||
-                    "Comercial / Venda",
-
-                precoUnitario:
-                    precoUnitario,
-
-                valorTotal:
-                    valorItem,
-
-                numeroVenda:
-                    numero,
-
-                cliente:
-                    cliente
-                    ||
-                    "Não informado",
-
-                formaPagamento:
-                    formaPagamento
-
-            });
-
-        }
-    );
-
-
-    const venda = {
-
-        numero:
-            numero,
-
-        data:
-            data,
-
-        hora:
-            hora,
-
-        cliente:
-            cliente
-            ||
-            "Não informado",
-
-        vendedor:
-            vendedor
-            ||
-            "Não informado",
-
-        observacao:
-            observacao,
-
-        pagamento:
-            formaPagamento,
-
-        subtotal:
-            subtotal,
-
-        desconto:
-            desconto,
-
-        total:
-            total,
-
-        recebido:
-            recebido,
-
-        troco:
-            troco,
-
-        itens:
-            itensVenda.map(
-                function(item){
-
-                    return {
-
-                        codigo:
-                            item.codigo,
-
-                        produto:
-                            item.produto,
-
-                        unidade:
-                            item.unidade,
-
-                        quantidade:
-                            Number(
-                                item.quantidade
-                            ),
-
-                        preco:
-                            Number(
-                                item.preco
-                            ),
-
-                        subtotal:
-                            Number(
-                                item.quantidade
-                            )
-                            *
-                            Number(
-                                item.preco
-                            )
-
-                    };
-
-                }
-            )
-
-    };
-
-
-    vendas.push(
-        venda
-    );
-
-
-    salvarDados();
-
-
-    atualizarTabelaEstoque();
-
-    atualizarTabelaMovimentacoes();
-
-    atualizarTabelaVendas();
-
-
-    alert(
-        "✅ VENDA FINALIZADA COM SUCESSO!\n\n"
-        +
-        "Venda Nº: "
-        +
-        numero
-        +
-        "\n"
-        +
-        "Data: "
-        +
-        data
-        +
-        "\n"
-        +
-        "Hora: "
-        +
-        hora
-        +
-        "\n"
-        +
-        "Total: "
-        +
-        moeda(
-            total
-        )
-        +
-        "\n"
-        +
-        "Pagamento: "
-        +
-        formaPagamento
-        +
-        (
-            formaPagamento
-            ===
-            "Dinheiro"
-            ?
-            "\nTroco: "
-            +
-            moeda(
-                troco
-            )
-            :
-            ""
-        )
-        +
-        "\n\n"
-        +
-        "📦 O estoque foi atualizado automaticamente."
-    );
-
-
-    prepararNovaVenda();
+return;
 
 }
 
+const vendedor =
+document.getElementById(
+"venda-vendedor"
+).value.trim();
+
+const cliente =
+document.getElementById(
+"venda-cliente"
+).value.trim();
+
+const formaPagamento =
+document.getElementById(
+"venda-pagamento"
+).value;
+
+const desconto =
+Number(
+document.getElementById(
+"venda-desconto"
+).value || 0
+);
+
+const observacao =
+document.getElementById(
+"venda-observacao"
+).value.trim();
+
+let subtotal = 0;
+
+itensVenda.forEach(function(item){
+
+subtotal +=
+Number(item.quantidade || 0) *
+Number(item.preco || 0);
+
+});
+
+const total =
+Math.max(0,subtotal - desconto);
+
+if(formaPagamento === "Dinheiro"){
+
+const recebido =
+Number(
+document.getElementById(
+"venda-valor-recebido"
+).value || 0
+);
+
+if(recebido < total){
+
+alert(
+"Valor recebido insuficiente para finalizar a venda."
+);
+
+return;
+
+}
+
+}
+
+for(const item of itensVenda){
+
+const produto =
+encontrarProduto(item.codigo);
+
+if(!produto){
+
+alert(
+"Produto não encontrado: " +
+item.produto
+);
+
+return;
+
+}
+
+if(
+Number(item.quantidade) >
+Number(produto.quantidade || 0)
+){
+
+alert(
+"Estoque insuficiente para " +
+produto.nome
+);
+
+return;
+
+}
+
+}
+
+const numero =
+gerarNumeroVenda();
+
+const data =
+dataHojeISO();
+
+const agora =
+new Date();
+
+const hora =
+String(
+agora.getHours()
+).padStart(2,"0")
++
+":"
++
+String(
+agora.getMinutes()
+).padStart(2,"0")
++
+":"
++
+String(
+agora.getSeconds()
+).padStart(2,"0");
+
+itensVenda.forEach(function(item){
+
+const produto =
+encontrarProduto(item.codigo);
+
+produto.quantidade =
+Number(produto.quantidade || 0) -
+Number(item.quantidade || 0);
+
+produto.valor =
+produto.quantidade *
+Number(produto.preco || 0);
+
+produto.ultimaMov = data;
+
+movimentacoes.push({
+
+data:data,
+codigo:produto.codigo,
+produto:produto.nome,
+tipo:"Venda",
+quantidade:item.quantidade,
+nf:numero,
+responsavel:vendedor || "Vendas",
+preco:item.preco,
+valorTotal:
+item.quantidade * item.preco
+
+});
+
+});
+
+const venda = {
+
+numero:numero,
+data:data,
+hora:hora,
+vendedor:vendedor,
+cliente:cliente,
+pagamento:formaPagamento,
+desconto:desconto,
+subtotal:subtotal,
+total:total,
+observacao:observacao,
+
+itens:
+itensVenda.map(function(item){
+
+return {
+
+codigo:item.codigo,
+produto:item.produto,
+unidade:item.unidade,
+quantidade:item.quantidade,
+preco:item.preco,
+total:
+item.quantidade * item.preco
+
+};
+
+})
+
+};
+
+vendas.push(venda);
+
+salvarDados();
+
+atualizarTudo();
+
+alert(
+"✅ VENDA FINALIZADA COM SUCESSO!\n\n" +
+
+"Venda Nº: " +
+numero +
+"\n" +
+
+"Data: " +
+data +
+"\n" +
+
+"Hora: " +
+hora +
+"\n" +
+
+"Total: " +
+moeda(total) +
+"\n" +
+
+"Pagamento: " +
+formaPagamento +
+"\n\n" +
+
+"📦 O estoque foi atualizado automaticamente."
+);
+
+prepararNovaVenda();
+
+}
+
+
+/* =========================================================
+   CANCELAR VENDA
+========================================================= */
 
 function cancelarVenda(){
 
-    if(
-        itensVenda.length
-        >
-        0
-    ){
+if(itensVenda.length > 0){
 
-        if(
-            !confirm(
-                "Cancelar esta venda e apagar os itens?"
-            )
-        ){
+if(!confirm(
+"Cancelar esta venda e apagar os itens?"
+)){
 
-            return;
+return;
 
-        }
+}
 
-    }
+}
 
-
-    prepararNovaVenda();
+prepararNovaVenda();
 
 }
 
 
+/* =========================================================
+   RESUMO VENDAS
+========================================================= */
+
+function atualizarResumoVendas(){
+
+const hoje =
+dataHojeISO();
+
+const vendasHoje =
+vendas.filter(function(v){
+
+return String(v.data || "") === hoje;
+
+});
+
+let itens = 0;
+let faturamento = 0;
+
+vendasHoje.forEach(function(v){
+
+faturamento +=
+Number(v.total || 0);
+
+(v.itens || []).forEach(function(item){
+
+itens +=
+Number(item.quantidade || 0);
+
+});
+
+});
+
+document.getElementById(
+"vendas-hoje"
+).textContent =
+vendasHoje.length;
+
+document.getElementById(
+"itens-vendidos-hoje"
+).textContent =
+itens;
+
+document.getElementById(
+"faturamento-hoje"
+).textContent =
+moeda(faturamento);
+
+}
+
+
+/* =========================================================
+   TABELA DE VENDAS
+========================================================= */
+
 function atualizarTabelaVendas(){
-
-    const tbody =
-        document.getElementById(
-            "tabela-vendas-body"
-        );
-
-
-    const aviso =
-        document.getElementById(
-            "sem-vendas"
-        );
-
-
-    if(!tbody)
-        return;
-
-
-    tbody.innerHTML =
-        "";
-
-
-    if(
-        vendas.length === 0
-    ){
-
-        aviso.style.display =
-            "block";
-
-        return;
-
-    }
-
-
-    aviso.style.display =
-        "none";
-
-
-    vendas
-        .slice()
-        .reverse()
-        .forEach(
-            function(v){
-
-                const tr =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                tr.innerHTML =
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        v.numero
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        v.data
-                        ||
-                        "-"
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    escaparHTML(
-                        v.cliente
-                        ||
-                        "-"
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    "<span class='badge-pagamento'>"
-                    +
-                    escaparHTML(
-                        v.pagamento
-                        ||
-                        "-"
-                    )
-                    +
-                    "</span>"
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    (
-                        v.itens
-                        ?
-                        v.itens.length
-                        :
-                        0
-                    )
-                    +
-                    "</td>"
-
-                    +
-
-                    "<td>"
-                    +
-                    moeda(
-                        v.total
-                    )
-                    +
-                    "</td>";
-
-
-                tbody.appendChild(
-                    tr
-                );
-
-            }
-        );
 
 }
 
@@ -6763,1160 +5250,793 @@ function atualizarTabelaVendas(){
 
 function abrirRelatorioVendas(){
 
-    const area =
-        document.getElementById(
-            "area-relatorio-vendas"
-        );
+const area =
+document.getElementById(
+"area-relatorio-vendas"
+);
 
+area.style.display = "block";
 
-    area.style.display =
-        "block";
+const hoje =
+new Date();
 
+const primeiroDia =
+new Date(
+hoje.getFullYear(),
+hoje.getMonth(),
+1
+);
 
-    const hoje =
-        new Date();
+document.getElementById(
+"rv-data-inicial"
+).value =
+primeiroDia
+.toISOString()
+.split("T")[0];
 
+document.getElementById(
+"rv-data-final"
+).value =
+dataHojeISO();
 
-    const primeiroDia =
-        new Date(
-            hoje.getFullYear(),
-            hoje.getMonth(),
-            1
-        );
+carregarFiltrosRelatorioVendas();
 
+gerarRelatorioVendas();
 
-    document.getElementById(
-        "rv-data-inicial"
-    ).value =
-        primeiroDia
-        .toISOString()
-        .split("T")[0];
-
-
-    document.getElementById(
-        "rv-data-final"
-    ).value =
-        dataHojeISO();
-
-
-    carregarFiltrosRelatorioVendas();
-
-    gerarRelatorioVendas();
-
-
-    area.scrollIntoView({
-        behavior:"smooth"
-    });
+area.scrollIntoView({
+behavior:"smooth"
+});
 
 }
 
 
 function carregarFiltrosRelatorioVendas(){
 
-    const vendedores = [];
+const vendedores = [];
+const clientes = [];
+const produtosRelatorio = [];
 
-    const clientes = [];
+vendas.forEach(function(v){
 
-    const produtosRelatorio = [];
+const vendedor =
+(
+v.vendedor ||
+"Não informado"
+).trim();
 
+const cliente =
+(
+v.cliente ||
+"Não informado"
+).trim();
 
-    vendas.forEach(
-        function(v){
+if(
+vendedor &&
+!vendedores.includes(vendedor)
+){
 
-            const vendedor =
-                (
-                    v.vendedor
-                    ||
-                    "Não informado"
-                ).trim();
-
-
-            const cliente =
-                (
-                    v.cliente
-                    ||
-                    "Não informado"
-                ).trim();
-
-
-            if(
-                vendedor
-                &&
-                !vendedores.includes(
-                    vendedor
-                )
-            ){
-
-                vendedores.push(
-                    vendedor
-                );
-
-            }
-
-
-            if(
-                cliente
-                &&
-                !clientes.includes(
-                    cliente
-                )
-            ){
-
-                clientes.push(
-                    cliente
-                );
-
-            }
-
-
-            (v.itens || [])
-                .forEach(
-                    function(item){
-
-                        const texto =
-                            item.codigo
-                            +
-                            " - "
-                            +
-                            item.produto;
-
-
-                        if(
-                            !produtosRelatorio.includes(
-                                texto
-                            )
-                        ){
-
-                            produtosRelatorio.push(
-                                texto
-                            );
-
-                        }
-
-                    }
-                );
-
-        }
-    );
-
-
-    const selVendedor =
-        document.getElementById(
-            "rv-vendedor"
-        );
-
-
-    const selCliente =
-        document.getElementById(
-            "rv-cliente"
-        );
-
-
-    const selProduto =
-        document.getElementById(
-            "rv-produto"
-        );
-
-
-    const atualVendedor =
-        selVendedor.value;
-
-
-    const atualCliente =
-        selCliente.value;
-
-
-    const atualProduto =
-        selProduto.value;
-
-
-    selVendedor.innerHTML =
-        '<option value="">Todos os vendedores</option>';
-
-
-    vendedores
-        .sort()
-        .forEach(
-            function(v){
-
-                selVendedor.innerHTML +=
-                    '<option value="'
-                    +
-                    escaparHTML(v)
-                    +
-                    '">'
-                    +
-                    escaparHTML(v)
-                    +
-                    '</option>';
-
-            }
-        );
-
-
-    if(atualVendedor)
-        selVendedor.value =
-            atualVendedor;
-
-
-    selCliente.innerHTML =
-        '<option value="">Todos os clientes</option>';
-
-
-    clientes
-        .sort()
-        .forEach(
-            function(c){
-
-                selCliente.innerHTML +=
-                    '<option value="'
-                    +
-                    escaparHTML(c)
-                    +
-                    '">'
-                    +
-                    escaparHTML(c)
-                    +
-                    '</option>';
-
-            }
-        );
-
-
-    if(atualCliente)
-        selCliente.value =
-            atualCliente;
-
-
-    selProduto.innerHTML =
-        '<option value="">Todos os produtos</option>';
-
-
-    produtosRelatorio
-        .sort()
-        .forEach(
-            function(p){
-
-                selProduto.innerHTML +=
-                    '<option value="'
-                    +
-                    escaparHTML(p)
-                    +
-                    '">'
-                    +
-                    escaparHTML(p)
-                    +
-                    '</option>';
-
-            }
-        );
-
-
-    if(atualProduto)
-        selProduto.value =
-            atualProduto;
+vendedores.push(vendedor);
 
 }
 
+if(
+cliente &&
+!clientes.includes(cliente)
+){
+
+clientes.push(cliente);
+
+}
+
+(v.itens || []).forEach(function(item){
+
+const texto =
+item.codigo +
+" - " +
+item.produto;
+
+if(
+!produtosRelatorio.includes(texto)
+){
+
+produtosRelatorio.push(texto);
+
+}
+
+});
+
+});
+
+const selVendedor =
+document.getElementById(
+"rv-vendedor"
+);
+
+const selCliente =
+document.getElementById(
+"rv-cliente"
+);
+
+const selProduto =
+document.getElementById(
+"rv-produto"
+);
+
+const atualVendedor =
+selVendedor.value;
+
+const atualCliente =
+selCliente.value;
+
+const atualProduto =
+selProduto.value;
+
+selVendedor.innerHTML =
+'<option value="">Todos os vendedores</option>';
+
+vendedores
+.sort()
+.forEach(function(v){
+
+selVendedor.innerHTML +=
+'<option value="' +
+escaparHTML(v) +
+'">' +
+escaparHTML(v) +
+'</option>';
+
+});
+
+if(atualVendedor){
+
+selVendedor.value =
+atualVendedor;
+
+}
+
+selCliente.innerHTML =
+'<option value="">Todos os clientes</option>';
+
+clientes
+.sort()
+.forEach(function(c){
+
+selCliente.innerHTML +=
+'<option value="' +
+escaparHTML(c) +
+'">' +
+escaparHTML(c) +
+'</option>';
+
+});
+
+if(atualCliente){
+
+selCliente.value =
+atualCliente;
+
+}
+
+selProduto.innerHTML =
+'<option value="">Todos os produtos</option>';
+
+produtosRelatorio
+.sort()
+.forEach(function(p){
+
+selProduto.innerHTML +=
+'<option value="' +
+escaparHTML(p) +
+'">' +
+escaparHTML(p) +
+'</option>';
+
+});
+
+if(atualProduto){
+
+selProduto.value =
+atualProduto;
+
+}
+
+}
+
+
+/* =========================================================
+   GERAR RELATÓRIO VENDAS
+========================================================= */
 
 function gerarRelatorioVendas(){
 
-    carregarFiltrosRelatorioVendas();
+carregarFiltrosRelatorioVendas();
 
+const dataInicial =
+document.getElementById(
+"rv-data-inicial"
+).value;
 
-    const dataInicial =
-        document.getElementById(
-            "rv-data-inicial"
-        ).value;
+const dataFinal =
+document.getElementById(
+"rv-data-final"
+).value;
 
+const vendedorFiltro =
+document.getElementById(
+"rv-vendedor"
+).value;
 
-    const dataFinal =
-        document.getElementById(
-            "rv-data-final"
-        ).value;
+const clienteFiltro =
+document.getElementById(
+"rv-cliente"
+).value;
 
+const produtoFiltro =
+document.getElementById(
+"rv-produto"
+).value;
 
-    const vendedorFiltro =
-        document.getElementById(
-            "rv-vendedor"
-        ).value;
+const pagamentoFiltro =
+document.getElementById(
+"rv-pagamento"
+).value;
 
+let vendasFiltradas =
+vendas.slice();
 
-    const clienteFiltro =
-        document.getElementById(
-            "rv-cliente"
-        ).value;
+if(dataInicial){
 
+vendasFiltradas =
+vendasFiltradas.filter(function(v){
 
-    const produtoFiltro =
-        document.getElementById(
-            "rv-produto"
-        ).value;
+return String(v.data || "") >= dataInicial;
 
-
-    const pagamentoFiltro =
-        document.getElementById(
-            "rv-pagamento"
-        ).value;
-
-
-    let vendasFiltradas =
-        vendas.slice();
-
-
-    if(dataInicial){
-
-        vendasFiltradas =
-            vendasFiltradas.filter(
-                function(v){
-
-                    return String(
-                        v.data
-                        ||
-                        ""
-                    )
-                    >=
-                    dataInicial;
-
-                }
-            );
-
-    }
-
-
-    if(dataFinal){
-
-        vendasFiltradas =
-            vendasFiltradas.filter(
-                function(v){
-
-                    return String(
-                        v.data
-                        ||
-                        ""
-                    )
-                    <=
-                    dataFinal;
-
-                }
-            );
-
-    }
-
-
-    if(vendedorFiltro){
-
-        vendasFiltradas =
-            vendasFiltradas.filter(
-                function(v){
-
-                    return String(
-                        v.vendedor
-                        ||
-                        "Não informado"
-                    )
-                    ===
-                    vendedorFiltro;
-
-                }
-            );
-
-    }
-
-
-    if(clienteFiltro){
-
-        vendasFiltradas =
-            vendasFiltradas.filter(
-                function(v){
-
-                    return String(
-                        v.cliente
-                        ||
-                        "Não informado"
-                    )
-                    ===
-                    clienteFiltro;
-
-                }
-            );
-
-    }
-
-
-    if(pagamentoFiltro){
-
-        vendasFiltradas =
-            vendasFiltradas.filter(
-                function(v){
-
-                    return String(
-                        v.pagamento
-                        ||
-                        ""
-                    )
-                    ===
-                    pagamentoFiltro;
-
-                }
-            );
-
-    }
-
-
-    let linhas = [];
-
-    let totalItens = 0;
-
-    let totalDesconto = 0;
-
-    let faturamento = 0;
-
-    let quantidadeVendas = 0;
-
-
-    vendasFiltradas.forEach(
-        function(v){
-
-            let itens =
-                v.itens
-                ||
-                [];
-
-
-            if(produtoFiltro){
-
-                itens =
-                    itens.filter(
-                        function(item){
-
-                            return
-                                (
-                                    item.codigo
-                                    +
-                                    " - "
-                                    +
-                                    item.produto
-                                )
-                                ===
-                                produtoFiltro;
-
-                        }
-                    );
-
-
-                if(
-                    itens.length === 0
-                ){
-
-                    return;
-
-                }
-
-            }
-
-
-            quantidadeVendas++;
-
-
-            if(
-                !produtoFiltro
-            ){
-
-                totalDesconto +=
-                    Number(
-                        v.desconto
-                        ||
-                        0
-                    );
-
-                faturamento +=
-                    Number(
-                        v.total
-                        ||
-                        0
-                    );
-
-            }
-
-
-            let valorItens =
-                0;
-
-
-            itens.forEach(
-                function(item){
-
-                    const quantidade =
-                        Number(
-                            item.quantidade
-                            ||
-                            0
-                        );
-
-
-                    const preco =
-                        Number(
-                            item.preco
-                            ||
-                            0
-                        );
-
-
-                    const valorItem =
-                        quantidade
-                        *
-                        preco;
-
-
-                    totalItens +=
-                        quantidade;
-
-
-                    valorItens +=
-                        valorItem;
-
-
-                    linhas.push({
-
-                        numero:
-                            v.numero
-                            ||
-                            "-",
-
-                        data:
-                            v.data
-                            ||
-                            "-",
-
-                        hora:
-                            v.hora
-                            ||
-                            "--:--:--",
-
-                        vendedor:
-                            v.vendedor
-                            ||
-                            "Não informado",
-
-                        cliente:
-                            v.cliente
-                            ||
-                            "Não informado",
-
-                        codigo:
-                            item.codigo
-                            ||
-                            "-",
-
-                        produto:
-                            item.produto
-                            ||
-                            "-",
-
-                        quantidade:
-                            quantidade,
-
-                        preco:
-                            preco,
-
-                        total:
-                            valorItem,
-
-                        pagamento:
-                            v.pagamento
-                            ||
-                            "-",
-
-                        observacao:
-                            v.observacao
-                            ||
-                            ""
-
-                    });
-
-                }
-            );
-
-
-            if(
-                produtoFiltro
-            ){
-
-                faturamento +=
-                    valorItens;
-
-            }
-
-        }
-    );
-
-
-    const tbody =
-        document.getElementById(
-            "tabela-relatorio-vendas-body"
-        );
-
-
-    tbody.innerHTML =
-        "";
-
-
-    if(
-        linhas.length === 0
-    ){
-
-        tbody.innerHTML =
-            "<tr>"
-            +
-            "<td colspan='12' style='text-align:center;padding:25px;color:#777;'>"
-            +
-            "Nenhuma venda encontrada para os filtros informados."
-            +
-            "</td>"
-            +
-            "</tr>";
-
-    }else{
-
-        linhas
-            .sort(
-                function(a,b){
-
-                    return (
-                        b.data
-                        +
-                        " "
-                        +
-                        b.hora
-                    ).localeCompare(
-                        a.data
-                        +
-                        " "
-                        +
-                        a.hora
-                    );
-
-                }
-            )
-            .forEach(
-                function(linha){
-
-                    const tr =
-                        document.createElement(
-                            "tr"
-                        );
-
-
-                    tr.innerHTML =
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.numero
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.data
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.hora
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.vendedor
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.cliente
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.codigo
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.produto
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        linha.quantidade
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        moeda(
-                            linha.preco
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        moeda(
-                            linha.total
-                        )
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        "<span class='badge-pagamento'>"
-                        +
-                        escaparHTML(
-                            linha.pagamento
-                        )
-                        +
-                        "</span>"
-                        +
-                        "</td>"
-
-                        +
-
-                        "<td>"
-                        +
-                        escaparHTML(
-                            linha.observacao
-                        )
-                        +
-                        "</td>";
-
-
-                    tbody.appendChild(
-                        tr
-                    );
-
-                }
-            );
-
-    }
-
-
-    document.getElementById(
-        "rv-total-vendas"
-    ).textContent =
-        quantidadeVendas;
-
-
-    document.getElementById(
-        "rv-total-itens"
-    ).textContent =
-        totalItens;
-
-
-    document.getElementById(
-        "rv-total-desconto"
-    ).textContent =
-        moeda(
-            totalDesconto
-        );
-
-
-    document.getElementById(
-        "rv-faturamento"
-    ).textContent =
-        moeda(
-            faturamento
-        );
-
-
-    let resumo =
-        "Relatório gerado";
-
-
-    if(dataInicial)
-        resumo +=
-            " de "
-            +
-            dataInicial;
-
-
-    if(dataFinal)
-        resumo +=
-            " até "
-            +
-            dataFinal;
-
-
-    if(vendedorFiltro)
-        resumo +=
-            " | Vendedor: "
-            +
-            vendedorFiltro;
-
-
-    if(clienteFiltro)
-        resumo +=
-            " | Cliente: "
-            +
-            clienteFiltro;
-
-
-    if(produtoFiltro)
-        resumo +=
-            " | Produto: "
-            +
-            produtoFiltro;
-
-
-    if(pagamentoFiltro)
-        resumo +=
-            " | Pagamento: "
-            +
-            pagamentoFiltro;
-
-
-    resumo +=
-        " | Registros detalhados: "
-        +
-        linhas.length;
-
-
-    document.getElementById(
-        "rv-resumo-texto"
-    ).textContent =
-        resumo;
+});
 
 }
 
+if(dataFinal){
+
+vendasFiltradas =
+vendasFiltradas.filter(function(v){
+
+return String(v.data || "") <= dataFinal;
+
+});
+
+}
+
+if(vendedorFiltro){
+
+vendasFiltradas =
+vendasFiltradas.filter(function(v){
+
+return String(
+v.vendedor ||
+"Não informado"
+) === vendedorFiltro;
+
+});
+
+}
+
+if(clienteFiltro){
+
+vendasFiltradas =
+vendasFiltradas.filter(function(v){
+
+return String(
+v.cliente ||
+"Não informado"
+) === clienteFiltro;
+
+});
+
+}
+
+if(pagamentoFiltro){
+
+vendasFiltradas =
+vendasFiltradas.filter(function(v){
+
+return String(
+v.pagamento || ""
+) === pagamentoFiltro;
+
+});
+
+}
+
+let linhas = [];
+let totalItens = 0;
+let totalDesconto = 0;
+let faturamento = 0;
+let quantidadeVendas = 0;
+
+vendasFiltradas.forEach(function(v){
+
+let itens =
+v.itens || [];
+
+if(produtoFiltro){
+
+itens =
+itens.filter(function(item){
+
+return (
+item.codigo +
+" - " +
+item.produto
+) === produtoFiltro;
+
+});
+
+if(itens.length === 0){
+
+return;
+
+}
+
+}
+
+quantidadeVendas++;
+
+if(!produtoFiltro){
+
+totalDesconto +=
+Number(v.desconto || 0);
+
+faturamento +=
+Number(v.total || 0);
+
+}
+
+let valorItens = 0;
+
+itens.forEach(function(item){
+
+const quantidade =
+Number(item.quantidade || 0);
+
+const preco =
+Number(item.preco || 0);
+
+const valorItem =
+quantidade * preco;
+
+totalItens += quantidade;
+
+valorItens += valorItem;
+
+linhas.push({
+
+numero:v.numero || "-",
+data:v.data || "-",
+hora:v.hora || "--:--:--",
+vendedor:v.vendedor || "Não informado",
+cliente:v.cliente || "Não informado",
+codigo:item.codigo || "-",
+produto:item.produto || "-",
+quantidade:quantidade,
+preco:preco,
+total:valorItem,
+pagamento:v.pagamento || "-",
+observacao:v.observacao || ""
+
+});
+
+});
+
+if(produtoFiltro){
+
+faturamento += valorItens;
+
+}
+
+});
+
+const tbody =
+document.getElementById(
+"tabela-relatorio-vendas-body"
+);
+
+tbody.innerHTML = "";
+
+if(linhas.length === 0){
+
+tbody.innerHTML =
+
+"<tr>" +
+
+"<td colspan='12' style='text-align:center;padding:25px;color:#777;'>" +
+
+"Nenhuma venda encontrada para os filtros informados." +
+
+"</td>" +
+
+"</tr>";
+
+}else{
+
+linhas
+.sort(function(a,b){
+
+return (
+b.data +
+" " +
+b.hora
+)
+.localeCompare(
+a.data +
+" " +
+a.hora
+);
+
+})
+.forEach(function(linha){
+
+const tr =
+document.createElement("tr");
+
+tr.innerHTML =
+
+"<td>" +
+escaparHTML(linha.numero) +
+"</td>" +
+
+"<td>" +
+escaparHTML(linha.data) +
+"</td>" +
+
+"<td>" +
+escaparHTML(linha.hora) +
+"</td>" +
+
+"<td>" +
+escaparHTML(linha.vendedor) +
+"</td>" +
+
+"<td>" +
+escaparHTML(linha.cliente) +
+"</td>" +
+
+"<td>" +
+escaparHTML(linha.codigo) +
+"</td>" +
+
+"<td>" +
+escaparHTML(linha.produto) +
+"</td>" +
+
+"<td>" +
+linha.quantidade +
+"</td>" +
+
+"<td>" +
+moeda(linha.preco) +
+"</td>" +
+
+"<td>" +
+moeda(linha.total) +
+"</td>" +
+
+"<td>" +
+
+"<span class='badge-pagamento'>" +
+
+escaparHTML(linha.pagamento) +
+
+"</span>" +
+
+"</td>" +
+
+"<td>" +
+escaparHTML(linha.observacao) +
+"</td>";
+
+tbody.appendChild(tr);
+
+});
+
+}
+
+document.getElementById(
+"rv-total-vendas"
+).textContent =
+quantidadeVendas;
+
+document.getElementById(
+"rv-total-itens"
+).textContent =
+totalItens;
+
+document.getElementById(
+"rv-total-desconto"
+).textContent =
+moeda(totalDesconto);
+
+document.getElementById(
+"rv-faturamento"
+).textContent =
+moeda(faturamento);
+
+let resumo = "Relatório gerado";
+
+if(dataInicial)
+resumo += " de " + dataInicial;
+
+if(dataFinal)
+resumo += " até " + dataFinal;
+
+if(vendedorFiltro)
+resumo +=
+" | Vendedor: " +
+vendedorFiltro;
+
+if(clienteFiltro)
+resumo +=
+" | Cliente: " +
+clienteFiltro;
+
+if(produtoFiltro)
+resumo +=
+" | Produto: " +
+produtoFiltro;
+
+if(pagamentoFiltro)
+resumo +=
+" | Pagamento: " +
+pagamentoFiltro;
+
+resumo +=
+" | Registros detalhados: " +
+linhas.length;
+
+document.getElementById(
+"rv-resumo-texto"
+).textContent =
+resumo;
+
+}
+
+
+/* =========================================================
+   FECHAR RELATÓRIO DE VENDAS
+========================================================= */
 
 function fecharRelatorioVendas(){
 
-    document.getElementById(
-        "area-relatorio-vendas"
-    ).style.display =
-        "none";
+document.getElementById(
+"area-relatorio-vendas"
+).style.display =
+"none";
 
 }
 
+
+/* =========================================================
+   IMPRIMIR RELATÓRIO DE VENDAS
+========================================================= */
 
 function imprimirRelatorioVendas(){
 
-    const area =
-        document.getElementById(
-            "area-relatorio-vendas"
-        );
+const area =
+document.getElementById(
+"area-relatorio-vendas"
+);
 
+if(area.style.display === "none"){
 
-    if(
-        area.style.display
-        ===
-        "none"
-    ){
+abrirRelatorioVendas();
 
-        abrirRelatorioVendas();
+}
 
-    }
-
-
-    window.print();
+window.print();
 
 }
 
 
+/* =========================================================
+   EXPORTAR RELATÓRIO VENDAS
+========================================================= */
+
 function exportarRelatorioVendasExcel(){
 
-    const dataInicial =
-        document.getElementById(
-            "rv-data-inicial"
-        ).value;
-
-
-    const dataFinal =
-        document.getElementById(
-            "rv-data-final"
-        ).value;
-
-
-    const vendedorFiltro =
-        document.getElementById(
-            "rv-vendedor"
-        ).value;
-
-
-    const clienteFiltro =
-        document.getElementById(
-            "rv-cliente"
-        ).value;
-
-
-    const produtoFiltro =
-        document.getElementById(
-            "rv-produto"
-        ).value;
-
-
-    const pagamentoFiltro =
-        document.getElementById(
-            "rv-pagamento"
-        ).value;
-
-
-    const linhasExcel =
-        [];
-
-
-    vendas.forEach(
-        function(v){
-
-            if(
-                dataInicial
-                &&
-                String(
-                    v.data || ""
-                )
-                <
-                dataInicial
-            )
-                return;
-
-
-            if(
-                dataFinal
-                &&
-                String(
-                    v.data || ""
-                )
-                >
-                dataFinal
-            )
-                return;
-
-
-            if(
-                vendedorFiltro
-                &&
-                String(
-                    v.vendedor
-                    ||
-                    "Não informado"
-                )
-                !==
-                vendedorFiltro
-            )
-                return;
-
-
-            if(
-                clienteFiltro
-                &&
-                String(
-                    v.cliente
-                    ||
-                    "Não informado"
-                )
-                !==
-                clienteFiltro
-            )
-                return;
-
-
-            if(
-                pagamentoFiltro
-                &&
-                String(
-                    v.pagamento
-                    ||
-                    ""
-                )
-                !==
-                pagamentoFiltro
-            )
-                return;
-
-
-            (v.itens || [])
-                .forEach(
-                    function(item){
-
-                        const chave =
-                            item.codigo
-                            +
-                            " - "
-                            +
-                            item.produto;
+const dataInicial =
+document.getElementById(
+"rv-data-inicial"
+).value;
+
+const dataFinal =
+document.getElementById(
+"rv-data-final"
+).value;
+
+const vendedorFiltro =
+document.getElementById(
+"rv-vendedor"
+).value;
+
+const clienteFiltro =
+document.getElementById(
+"rv-cliente"
+).value;
+
+const produtoFiltro =
+document.getElementById(
+"rv-produto"
+).value;
+
+const pagamentoFiltro =
+document.getElementById(
+"rv-pagamento"
+).value;
+
+const linhasExcel = [];
+
+vendas.forEach(function(v){
+
+if(
+dataInicial &&
+String(v.data || "") < dataInicial
+)
+return;
 
+if(
+dataFinal &&
+String(v.data || "") > dataFinal
+)
+return;
 
-                        if(
-                            produtoFiltro
-                            &&
-                            chave
-                            !==
-                            produtoFiltro
-                        )
-                            return;
+if(
+vendedorFiltro &&
+String(
+v.vendedor ||
+"Não informado"
+) !== vendedorFiltro
+)
+return;
 
+if(
+clienteFiltro &&
+String(
+v.cliente ||
+"Não informado"
+) !== clienteFiltro
+)
+return;
 
-                        const quantidade =
-                            Number(
-                                item.quantidade
-                                ||
-                                0
-                            );
+if(
+pagamentoFiltro &&
+String(
+v.pagamento || ""
+) !== pagamentoFiltro
+)
+return;
 
+(v.itens || []).forEach(function(item){
 
-                        const preco =
-                            Number(
-                                item.preco
-                                ||
-                                0
-                            );
+const chave =
+item.codigo +
+" - " +
+item.produto;
 
+if(
+produtoFiltro &&
+chave !== produtoFiltro
+)
+return;
 
-                        const total =
-                            quantidade
-                            *
-                            preco;
+const quantidade =
+Number(item.quantidade || 0);
 
+const preco =
+Number(item.preco || 0);
 
-                        linhasExcel.push({
+const total =
+quantidade * preco;
 
-                            "Nº Venda":
-                                v.numero
-                                ||
-                                "-",
+linhasExcel.push({
 
-                            "Data":
-                                v.data
-                                ||
-                                "-",
+"Nº Venda":
+v.numero || "-",
 
-                            "Horário":
-                                v.hora
-                                ||
-                                "--:--:--",
+"Data":
+v.data || "-",
 
-                            "Vendedor":
-                                v.vendedor
-                                ||
-                                "Não informado",
+"Horário":
+v.hora || "--:--:--",
 
-                            "Cliente":
-                                v.cliente
-                                ||
-                                "Não informado",
+"Vendedor":
+v.vendedor || "Não informado",
 
-                            "Código":
-                                item.codigo
-                                ||
-                                "-",
+"Cliente":
+v.cliente || "Não informado",
 
-                            "Produto":
-                                item.produto
-                                ||
-                                "-",
+"Código":
+item.codigo || "-",
 
-                            "Quantidade":
-                                quantidade,
+"Produto":
+item.produto || "-",
 
-                            "Preço Unitário":
-                                preco,
+"Quantidade":
+quantidade,
 
-                            "Valor Total":
-                                total,
+"Preço Unitário":
+preco,
 
-                            "Forma de Pagamento":
-                                v.pagamento
-                                ||
-                                "-",
+"Valor Total":
+total,
 
-                            "Observação":
-                                v.observacao
-                                ||
-                                ""
+"Forma de Pagamento":
+v.pagamento || "-",
 
-                        });
+"Observação":
+v.observacao || ""
 
-                    }
-                );
+});
 
-        }
-    );
+});
 
+});
 
-    if(
-        linhasExcel.length === 0
-    ){
+if(linhasExcel.length === 0){
 
-        alert(
-            "Nenhuma venda encontrada para exportar."
-        );
+alert(
+"Nenhuma venda encontrada para exportar."
+);
 
-        return;
+return;
 
-    }
+}
 
+const wb =
+XLSX.utils.book_new();
 
-    const wb =
-        XLSX.utils.book_new();
+const ws =
+XLSX.utils.json_to_sheet(
+linhasExcel
+);
 
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Relatório de Vendas"
+);
 
-    const ws =
-        XLSX.utils.json_to_sheet(
-            linhasExcel
-        );
+XLSX.writeFile(
+wb,
+"relatorio_vendas.xlsx"
+);
 
+}
 
-    XLSX.utils.book_append_sheet(
-        wb,
-        ws,
-        "Relatório de Vendas"
-    );
 
+/* =========================================================
+   ATUALIZAR TUDO
+========================================================= */
 
-    XLSX.writeFile(
-        wb,
-        "relatorio_vendas.xlsx"
-    );
+function atualizarTudo(){
+
+atualizarTabelaEstoque();
+
+atualizarTabelaMovimentacoes();
+
+atualizarSelectProdutos();
+
+carregarCategoriasNoFiltro();
+
+carregarProdutosRelatorio();
+
+atualizarTabelaNFEntrada();
+
+atualizarTabelaNFSaida();
+
+atualizarTabelaItensVenda();
+
+atualizarTotalVenda();
+
+atualizarResumoVendas();
 
 }
 
@@ -7925,12 +6045,26 @@ function exportarRelatorioVendasExcel(){
    INICIALIZAÇÃO
 ========================================================= */
 
-window.onload =
-    function(){
+window.onload = function(){
 
-        atualizarTudo();
+document.getElementById(
+"mov-data"
+).value =
+dataHojeISO();
 
-    };
+document.getElementById(
+"nf-entrada-data"
+).value =
+dataHojeISO();
+
+document.getElementById(
+"nf-saida-data"
+).value =
+dataHojeISO();
+
+atualizarTudo();
+
+};
 
 </script>
 
