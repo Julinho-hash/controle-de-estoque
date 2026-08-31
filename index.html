@@ -3,6 +3,9 @@
 <head><script src="https://happyseeds.ai/app/__happyseeds__/preview-runtime.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Sistema de Controle de Estoque</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -2002,6 +2005,8 @@ Senha incorreta!
 
 const SENHA_SISTEMA = "1234";
 
+const SENHA_VENDAS = "5678";
+
 let produtos =
 JSON.parse(localStorage.getItem("produtos_estoque") || "[]");
 
@@ -2370,7 +2375,18 @@ conteudo.classList.remove("visivel");
 
 function abrirVendasComSenha(){
 
+const senha =
+prompt("Digite a senha para acessar Vendas:");
+
+if(senha === SENHA_VENDAS){
+
 trocarAba(6);
+
+}else{
+
+alert("Senha incorreta!");
+
+}
 
 }
 
@@ -3823,138 +3839,248 @@ wb,
 
 function importarExcel(event){
 
-const arquivo =
-event.target.files[0];
+const arquivo = event.target.files[0];
 
-if(!arquivo)
-return;
+if(!arquivo){
+    return;
+}
 
-const reader =
-new FileReader();
+if(typeof XLSX === "undefined"){
+    alert("A biblioteca do Excel não foi carregada. Verifique sua conexão com a internet.");
+    event.target.value = "";
+    return;
+}
+
+const reader = new FileReader();
 
 reader.onload = function(e){
 
-try{
+    try{
 
-const dados =
-new Uint8Array(e.target.result);
+        const dados = new Uint8Array(e.target.result);
 
-const workbook =
-XLSX.read(
-dados,
-{type:"array"}
-);
+        const workbook = XLSX.read(dados, {
+            type: "array",
+            cellDates: true
+        });
 
-const nomePlanilha =
-workbook.SheetNames[0];
+        if(!workbook.SheetNames || workbook.SheetNames.length === 0){
+            throw new Error("Nenhuma planilha encontrada.");
+        }
 
-const worksheet =
-workbook.Sheets[nomePlanilha];
+        const nomePlanilha = workbook.SheetNames[0];
 
-const linhas =
-XLSX.utils.sheet_to_json(
-worksheet,
-{defval:""}
-);
+        const worksheet = workbook.Sheets[nomePlanilha];
 
-let importados = 0;
+        if(!worksheet){
+            throw new Error("Não foi possível abrir a planilha.");
+        }
 
-linhas.forEach(function(linha){
+        const linhas = XLSX.utils.sheet_to_json(
+            worksheet,
+            {
+                defval: "",
+                raw: false
+            }
+        );
 
-const codigo =
-Number(
-linha["Código"] ||
-linha["codigo"] ||
-linha["CODIGO"] ||
-0
-);
+        if(!linhas || linhas.length === 0){
+            alert("O arquivo Excel está vazio ou não foi possível encontrar dados na primeira planilha.");
+            event.target.value = "";
+            return;
+        }
 
-if(!codigo)
-return;
+        let importados = 0;
+        let atualizados = 0;
+        let ignorados = 0;
 
-const nome =
-linha["Nome"] ||
-linha["Produto"] ||
-linha["nome"] ||
-"Produto";
+        function normalizarColuna(valor){
+            return String(valor || "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g,"")
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g,"")
+                .trim();
+        }
 
-const categoria =
-linha["Categoria"] ||
-linha["categoria"] ||
-"Sem categoria";
+        function obterValor(linha, nomes){
+            const chaves = Object.keys(linha);
+            for(let i = 0; i < nomes.length; i++){
+                const procurada = normalizarColuna(nomes[i]);
+                for(let j = 0; j < chaves.length; j++){
+                    if(normalizarColuna(chaves[j]) === procurada){
+                        return linha[chaves[j]];
+                    }
+                }
+            }
+            return "";
+        }
 
-const preco =
-Number(
-linha["Preço"] ||
-linha["Preco"] ||
-linha["preco"] ||
-0
-);
+        function converterNumero(valor){
+            if(valor === null || valor === undefined || valor === ""){
+                return 0;
+            }
+            if(typeof valor === "number"){
+                return valor;
+            }
+            let texto = String(valor).trim();
+            texto = texto.replace(/R\$/gi,"").trim();
+            if(texto.includes(".") && texto.includes(",")){
+                texto = texto.replace(/\./g,"").replace(",",".");
+            }else if(texto.includes(",")){
+                texto = texto.replace(",",".");
+            }
+            texto = texto.replace(/\s/g,"");
+            const numero = Number(texto);
+            return isNaN(numero) ? 0 : numero;
+        }
 
-const unidade =
-linha["Unidade"] ||
-linha["unidade"] ||
-"UN";
+        linhas.forEach(function(linha){
 
-const quantidade =
-Number(
-linha["Quantidade"] ||
-linha["quantidade"] ||
-0
-);
+            const valoresLinha = Object.values(linha);
+            const linhaVazia = !valoresLinha.some(function(v){
+                return String(v ?? "").trim() !== "";
+            });
 
-const existente =
-encontrarProduto(codigo);
+            if(linhaVazia){
+                ignorados++;
+                return;
+            }
 
-if(existente){
+            let codigo = String(
+                obterValor(linha, [
+                    "Código","Codigo","CODIGO",
+                    "Código do Produto","Codigo do Produto","cod","codigo_produto"
+                ]) || ""
+            ).trim();
 
-existente.nome = nome;
-existente.categoria = categoria;
-existente.preco = preco;
-existente.unidade = unidade;
-existente.quantidade = quantidade;
-existente.valor = quantidade * preco;
+            const nome = String(
+                obterValor(linha, [
+                    "Nome","Produto","Nome do Produto","Descrição","Descricao","xProd"
+                ]) || ""
+            ).trim();
 
-}else{
+            if(!codigo && !nome){
+                ignorados++;
+                return;
+            }
 
-produtos.push({
+            if(!codigo){
+                let maior = 0;
+                produtos.forEach(function(p){
+                    const n = Number(p.codigo);
+                    if(!isNaN(n) && n > maior){
+                        maior = n;
+                    }
+                });
+                codigo = String(maior + 1);
+            }
 
-codigo:codigo,
-nome:nome,
-categoria:categoria,
-preco:preco,
-unidade:unidade,
-quantidade:quantidade,
-valor:quantidade * preco,
-ultimaMov:""
+            if(/^\d+\.0+$/.test(codigo)){
+                codigo = codigo.split(".")[0];
+            }
 
-});
+            if(/^\d+$/.test(codigo)){
+                codigo = Number(codigo);
+            }
 
-}
+            const categoria = String(
+                obterValor(linha, [
+                    "Categoria","categoria","Grupo","Tipo"
+                ]) || "Sem categoria"
+            ).trim();
 
-importados++;
+            const preco = converterNumero(
+                obterValor(linha, [
+                    "Preço","Preco","Preço Unitário","Preco Unitario",
+                    "Valor Unitário","Valor Unitario","Valor"
+                ])
+            );
 
-});
+            const unidade = String(
+                obterValor(linha, [
+                    "Unidade","unidade","Un","UN","Und"
+                ]) || "UN"
+            ).trim();
 
-salvarDados();
+            const quantidade = converterNumero(
+                obterValor(linha, [
+                    "Quantidade","quantidade","Qtd","QTD","Estoque","Saldo"
+                ])
+            );
 
-atualizarTudo();
+            const existente = encontrarProduto(codigo);
 
-alert(
-importados +
-" produto(s) importado(s) com sucesso."
-);
+            if(existente){
 
-}catch(erro){
+                existente.nome = nome || existente.nome;
+                existente.categoria = categoria || existente.categoria;
+                existente.preco = preco;
+                existente.unidade = unidade || "UN";
+                existente.quantidade = quantidade;
+                existente.valor = quantidade * preco;
 
-console.error(erro);
+                if(!existente.ultimaMov && quantidade > 0){
+                    existente.ultimaMov = dataHojeISO();
+                }
 
-alert("Erro ao importar o Excel.");
+                atualizados++;
 
-}
+            }else{
 
-event.target.value = "";
+                produtos.push({
+                    codigo: codigo,
+                    nome: nome,
+                    categoria: categoria || "Sem categoria",
+                    preco: preco,
+                    unidade: unidade || "UN",
+                    quantidade: quantidade,
+                    valor: quantidade * preco,
+                    ultimaMov: quantidade > 0 ? dataHojeISO() : ""
+                });
 
+                if(quantidade > 0){
+                    movimentacoes.push({
+                        data: dataHojeISO(),
+                        codigo: codigo,
+                        produto: nome,
+                        tipo: "Entrada",
+                        quantidade: quantidade,
+                        nf: "",
+                        responsavel: "Importação Excel",
+                        preco: preco,
+                        valorTotal: quantidade * preco
+                    });
+                }
+
+                importados++;
+            }
+
+        });
+
+        salvarDados();
+
+        atualizarTudo();
+
+        alert(
+            "IMPORTAÇÃO CONCLUÍDA!\n\n" +
+            "Produtos novos: " + importados +
+            "\nProdutos atualizados: " + atualizados +
+            "\nLinhas ignoradas: " + ignorados +
+            "\n\nTotal processado: " + (importados + atualizados)
+        );
+
+    }catch(erro){
+        console.error("Erro ao importar Excel:", erro);
+        alert("ERRO AO IMPORTAR O EXCEL!\n\nVerifique se o arquivo possui uma planilha válida e se a primeira linha contém os nomes das colunas.\n\nDetalhes: " + erro.message);
+    }
+
+    event.target.value = "";
+};
+
+reader.onerror = function(){
+    alert("Não foi possível ler o arquivo Excel.");
+    event.target.value = "";
 };
 
 reader.readAsArrayBuffer(arquivo);
