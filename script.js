@@ -8,14 +8,9 @@ const SENHA_SISTEMA = "1234";
 
 const SENHA_VENDAS = "5678";
 
-let produtos =
-JSON.parse(localStorage.getItem("produtos_estoque") || "[]");
-
-let movimentacoes =
-JSON.parse(localStorage.getItem("movimentacoes_estoque") || "[]");
-
-let vendas =
-JSON.parse(localStorage.getItem("vendas_estoque") || "[]");
+let produtos = [];
+let movimentacoes = [];
+let vendas = [];
 
 let itensNFEntrada = [];
 let itensNFSaida = [];
@@ -28,23 +23,26 @@ let estoqueOculto = false;
    SALVAR DADOS
 ========================================================= */
 
-function salvarDados(){
+async function salvarDados() {
+  try {
+    const resposta = await fetch("/api/dados", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        produtos,
+        movimentacoes,
+        vendas
+      })
+    });
 
-localStorage.setItem(
-"produtos_estoque",
-JSON.stringify(produtos)
-);
-
-localStorage.setItem(
-"movimentacoes_estoque",
-JSON.stringify(movimentacoes)
-);
-
-localStorage.setItem(
-"vendas_estoque",
-JSON.stringify(vendas)
-);
-
+    if (!resposta.ok) {
+      throw new Error("Não foi possível salvar no Firebase.");
+    }
+  } catch (erro) {
+    console.error("Erro ao salvar dados:", erro);
+  }
 }
 
 
@@ -4143,6 +4141,55 @@ wb,
 }
 
 
+
+async function carregarDadosFirebase() {
+  try {
+    const resposta = await fetch("/api/dados", {
+      cache: "no-store"
+    });
+
+    if (!resposta.ok) {
+      throw new Error("Não foi possível carregar os dados.");
+    }
+
+    const dados = await resposta.json();
+
+    produtos = Array.isArray(dados.produtos)
+      ? dados.produtos
+      : [];
+
+    movimentacoes = Array.isArray(
+      dados.movimentacoes
+    )
+      ? dados.movimentacoes
+      : [];
+
+    vendas = Array.isArray(dados.vendas)
+      ? dados.vendas
+      : [];
+
+    atualizarTudo();
+  } catch (erro) {
+    console.error(
+      "Erro ao carregar dados do Firebase:",
+      erro
+    );
+
+    alert(
+      "Não foi possível carregar os dados do servidor."
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    ATUALIZAR TUDO
 ========================================================= */
@@ -4176,7 +4223,7 @@ atualizarResumoVendas();
    INICIALIZAÇÃO
 ========================================================= */
 
-window.onload = function(){
+window.onload = async function() {
 
 document.getElementById(
 "mov-data"
@@ -4196,4 +4243,7 @@ dataHojeISO();
 atualizarTudo();
 
 };
+
+
+carregarDadosFirebase();
 
