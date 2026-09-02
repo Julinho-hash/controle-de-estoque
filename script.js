@@ -18,28 +18,52 @@ let estoqueOculto = false;
 /* =========================================================
    SALVAR DADOS (Com tratamento e feedback)
 ========================================================= */
-
 async function salvarDados() {
   try {
+    const dadosParaSalvar = {
+      produtos: produtos,
+      movimentacoes: movimentacoes,
+      vendas: vendas
+    };
+
     const resposta = await fetch("/api/dados", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        produtos,
-        movimentacoes,
-        vendas
-      })
+      body: JSON.stringify(dadosParaSalvar)
     });
 
     if (!resposta.ok) {
-      console.warn("Aviso: Servidor retornou status " + resposta.status + " ao tentar salvar em /api/dados.");
+      const erro = await resposta.text();
+
+      console.error(
+        "Erro ao salvar no servidor:",
+        resposta.status,
+        erro
+      );
+
+      return false;
     }
+
+    console.log("Dados salvos no Firebase com sucesso.");
+
+    return true;
+
   } catch (erro) {
-    console.error("Erro ao salvar dados no backend:", erro);
+
+    console.error(
+      "Erro de conexão ao salvar dados:",
+      erro
+    );
+
+    return false;
   }
 }
+
+
+  
+
 
 /* =========================================================
    CARREGAR DADOS DO BACKEND
@@ -47,24 +71,77 @@ async function salvarDados() {
 
 async function carregarDadosFirebase() {
   try {
-    const resposta = await fetch("/api/dados", {
-      cache: "no-store"
-    });
+
+    console.log("Carregando dados do Firebase...");
+
+    const resposta = await fetch(
+      "/api/dados?tempo=" + Date.now(),
+      {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache"
+        }
+      }
+    );
 
     if (!resposta.ok) {
-      console.warn("Backend /api/dados não respondeu com sucesso (status " + resposta.status + "). Mantendo estado local.");
-      return;
+
+      console.error(
+        "Erro ao carregar /api/dados. Status:",
+        resposta.status
+      );
+
+      return false;
     }
 
     const dados = await resposta.json();
 
-    produtos = Array.isArray(dados.produtos) ? dados.produtos : [];
-    movimentacoes = Array.isArray(dados.movimentacoes) ? dados.movimentacoes : [];
-    vendas = Array.isArray(dados.vendas) ? dados.vendas : [];
+    console.log(
+      "Dados recebidos do Firebase:",
+      dados
+    );
+
+
+    if (Array.isArray(dados.produtos)) {
+      produtos = dados.produtos;
+    } else {
+      produtos = [];
+    }
+
+
+    if (Array.isArray(dados.movimentacoes)) {
+      movimentacoes = dados.movimentacoes;
+    } else {
+      movimentacoes = [];
+    }
+
+
+    if (Array.isArray(dados.vendas)) {
+      vendas = dados.vendas;
+    } else {
+      vendas = [];
+    }
+
 
     atualizarTudo();
+
+
+    console.log(
+      "Movimentações carregadas:",
+      movimentacoes.length
+    );
+
+    return true;
+
   } catch (erro) {
-    console.warn("Não foi possível carregar dados da API remota (/api/dados).", erro);
+
+    console.error(
+      "Erro ao carregar dados do Firebase:",
+      erro
+    );
+
+    return false;
   }
 }
 
@@ -1676,11 +1753,24 @@ function atualizarTudo() {
   atualizarResumoVendas();
 }
 
+ 
 window.onload = async function() {
-  document.getElementById("mov-data").value = dataHojeISO();
-  document.getElementById("nf-entrada-data").value = dataHojeISO();
-  document.getElementById("nf-saida-data").value = dataHojeISO();
-  atualizarTudo();
-};
 
-carregarDadosFirebase();
+  document.getElementById("mov-data").value =
+    dataHojeISO();
+
+  document.getElementById("nf-entrada-data").value =
+    dataHojeISO();
+
+  document.getElementById("nf-saida-data").value =
+    dataHojeISO();
+
+
+  // Primeiro carrega o que está salvo no Firebase
+  await carregarDadosFirebase();
+
+
+  // Depois atualiza toda a tela
+  atualizarTudo();
+
+};

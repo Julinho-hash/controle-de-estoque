@@ -1,179 +1,1329 @@
-const express = require('express');
-const path = require('path');
-const { Pool } = require('pg');
+from flask import Flask, request, jsonify, send_from_directory
+import os
+import json
+import firebase_admin
+from firebase_admin import credentials, db
 
-const app = express();
-const PORTA = process.env.PORT || 3000;
+app = Flask(__name__)
 
-// ==============================================
-// CONEXÃO COM BANCO DE DADOS
-// ==============================================
-const db = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+# ============================================================
 
-// ==============================================
-// CONFIGURAÇÕES DO SERVIDOR
-// ==============================================
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname)));
+# CONFIGURAÇÃO
 
-// ==============================================
-// PÁGINAS
-// ==============================================
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+# ============================================================
 
-// ==============================================
-// API — PRODUTOS
-// ==============================================
-app.get('/api/produtos', async (req, res) => {
-  const resultado = await db.query('SELECT * FROM produtos ORDER BY codigo');
-  res.json(resultado.rows);
-});
+PORTA = int(os.environ.get("PORT", 3000))
 
-app.get('/api/produtos/:codigo', async (req, res) => {
-  const codigo = req.params.codigo;
-  const resultado = await db.query('SELECT * FROM produtos WHERE codigo = $1', [codigo]);
-  res.json(resultado.rows[0] || null);
-});
+BASE_DIR = os.path.dirname(os.path.abspath(**file**))
 
-app.post('/api/produtos', async (req, res) => {
-  const d = req.body;
-  const data = new Date().toISOString();
-  try {
-    const resultado = await db.query(`
-      INSERT INTO produtos (codigo, nome, categoria, preco_unitario, quantidade, ultima_atualizacao)
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *
-    `, [d.codigo, d.nome, d.categoria, d.preco_unitario || 0, 0, data]);
-    res.json({ sucesso: true, produto: resultado.rows[0] });
-  } catch (erro) {
-    if (erro.constraint === 'produtos_codigo_key') {
-      res.status(400).json({ erro: 'Codigo ja cadastrado!' });
-    } else {
-      res.status(500).json({ erro: 'Erro ao cadastrar' });
-    }
-  }
-});
+URL_FIREBASE = "https://controledeestoque-2d07d-default-rtdb.firebaseio.com"
 
-app.delete('/api/produtos/:codigo', async (req, res) => {
-  const codigo = req.params.codigo;
-  await db.query('DELETE FROM produtos WHERE codigo = $1', [codigo]);
-  res.json({ sucesso: true });
-});
+ARQUIVO_FIREBASE = os.path.join(
+BASE_DIR,
+"firebase-service-account.json"
+)
 
-// ==============================================
-// API — MOVIMENTAÇÃO
-// ==============================================
-app.post('/api/movimentacao', async (req, res) => {
-  const d = req.body;
-  const data = new Date().toISOString();
-  const prodResultado = await db.query('SELECT * FROM produtos WHERE codigo = $1', [d.codigo]);
-  const produto = prodResultado.rows[0];
-  if (!produto) return res.status(404).json({ erro: 'Produto nao encontrado!' });
+# ============================================================
 
-  let novaQuantidade;
-  if (d.tipo === 'entrada') {
-    novaQuantidade = produto.quantidade + Number(d.quantidade);
-  } else if (d.tipo === 'saida') {
-    if (produto.quantidade < Number(d.quantidade)) {
-      return res.status(400).json({ erro: 'Estoque insuficiente!' });
-    }
-    novaQuantidade = produto.quantidade - Number(d.quantidade);
-  } else {
-    return res.status(400).json({ erro: 'Tipo invalido!' });
-  }
+# CONEXÃO COM FIREBASE
 
-  await db.query(
-    'UPDATE produtos SET quantidade = $1, ultima_atualizacao = $2 WHERE codigo = $3',
-    [novaQuantidade, data, d.codigo]
-  );
-  await db.query(
-    'INSERT INTO movimentacoes (tipo, produto_codigo, quantidade, responsavel, data_hora) VALUES ($1, $2, $3, $4, $5)',
-    [d.tipo, d.codigo, d.quantidade, d.responsavel, data]
-  );
-  res.json({ sucesso: true, novaQuantidade: novaQuantidade });
-});
+# ============================================================
 
-// ==============================================
-// API — RELATÓRIOS
-// ==============================================
-app.get('/api/movimentacoes', async (req, res) => {
-  const q = req.query;
-  let sql = 'SELECT m.*, p.nome, p.categoria FROM movimentacoes m LEFT JOIN produtos p ON m.produto_codigo = p.codigo WHERE 1=1';
-  let params = [];
-  let indice = 1;
-  if (q.inicio) { sql += ` AND DATE(m.data_hora) >= $${indice}`; params.push(q.inicio); indice++; }
-  if (q.fim)   { sql += ` AND DATE(m.data_hora) <= $${indice}`; params.push(q.fim); indice++; }
-  if (q.categoria) { sql += ` AND p.categoria = $${indice}`; params.push(q.categoria); indice++; }
-  sql += ' ORDER BY m.data_hora DESC';
-  const resultado = await db.query(sql, params);
-  res.json(resultado.rows);
-});
+def conectar_firebase():
 
-app.get('/api/resumo', async (req, res) => {
-  const p = await db.query('SELECT COUNT(*) as total FROM produtos');
-  const q = await db.query('SELECT COALESCE(SUM(quantidade), 0) as total FROM produtos');
-  const v = await db.query('SELECT COALESCE(SUM(quantidade * preco_unitario), 0) as total FROM produtos');
-  res.json({
-    total_produtos: parseInt(p.rows[0].total),
-    total_quantidade: parseInt(q.rows[0].total),
-    total_valor: parseFloat(v.rows[0].total)
-  });
-});
+```
+if firebase_admin._apps:
+    return
 
-// ==============================================
-// CRIAR TABELAS NO BANCO
-// ==============================================
-async function criarTabelas() {
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS produtos (
-      id SERIAL PRIMARY KEY,
-      codigo INTEGER UNIQUE NOT NULL,
-      nome TEXT NOT NULL,
-      categoria TEXT NOT NULL,
-      preco_unitario NUMERIC DEFAULT 0,
-      quantidade INTEGER DEFAULT 0,
-      ultima_atualizacao TEXT
+# --------------------------------------------------------
+# RENDER
+# --------------------------------------------------------
+
+credenciais_json = os.environ.get(
+    "FIREBASE_CREDENTIALS_JSON"
+)
+
+if credenciais_json:
+
+    try:
+
+        dados = json.loads(
+            credenciais_json
+        )
+
+        credencial = credentials.Certificate(
+            dados
+        )
+
+        firebase_admin.initialize_app(
+            credencial,
+            {
+                "databaseURL": URL_FIREBASE
+            }
+        )
+
+        print(
+            "Firebase conectado usando "
+            "FIREBASE_CREDENTIALS_JSON."
+        )
+
+        return
+
+    except Exception as erro:
+
+        print(
+            "Erro nas credenciais do Render:"
+        )
+
+        print(erro)
+
+        raise
+
+
+# --------------------------------------------------------
+# COMPUTADOR
+# --------------------------------------------------------
+
+if not os.path.exists(
+    ARQUIVO_FIREBASE
+):
+
+    raise FileNotFoundError(
+        "Arquivo firebase-service-account.json "
+        "não encontrado."
     )
-  `);
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS movimentacoes (
-      id SERIAL PRIMARY KEY,
-      tipo TEXT NOT NULL,
-      produto_codigo INTEGER NOT NULL,
-      quantidade INTEGER NOT NULL,
-      responsavel TEXT NOT NULL,
-      data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+
+credencial = credentials.Certificate(
+    ARQUIVO_FIREBASE
+)
+
+
+firebase_admin.initialize_app(
+    credencial,
+    {
+        "databaseURL": URL_FIREBASE
+    }
+)
+
+
+print(
+    "Firebase conectado usando "
+    "firebase-service-account.json."
+)
+```
+
+conectar_firebase()
+
+# ============================================================
+
+# ESTRUTURA PADRÃO
+
+# ============================================================
+
+def dados_vazios():
+
+```
+return {
+    "produtos": [],
+    "movimentacoes": [],
+    "vendas": []
+}
+```
+
+# ============================================================
+
+# LER DADOS
+
+# ============================================================
+
+def ler_dados():
+
+```
+referencia = db.reference(
+    "sistema"
+)
+
+dados = referencia.get()
+
+if not isinstance(
+    dados,
+    dict
+):
+
+    return dados_vazios()
+
+
+resultado = dados_vazios()
+
+
+for nome in resultado:
+
+    valor = dados.get(
+        nome,
+        []
     )
-  `);
-}
 
-// ==============================================
-// LIGA O SERVIDOR PRIMEIRO, DEPOIS CONECTA BANCO
-// ==============================================
-function iniciarServidor() {
-  app.listen(PORTA, () => {
-    console.log('✅ Servidor rodando na porta ' + PORTA);
-    console.log('✅ Aguardando banco de dados...');
-  });
-}
+    if isinstance(
+        valor,
+        list
+    ):
 
-// TENTA CONECTAR NO BANCO COM CALMA
-async function conectarBanco() {
-  try {
-    await db.query('SELECT NOW()');
-    console.log('✅ Conectado ao Banco Permanente!');
-    await criarTabelas();
-    console.log('✅ Sistema Pronto! Dados salvos para SEMPRE! 🎉');
-  } catch (erro) {
-    console.log('⚠️ Aguardando banco... tentando em 10 segundos');
-    setTimeout(conectarBanco, 10000);
-  }
-}
+        resultado[nome] = valor
 
-// INICIA TUDO
-iniciarServidor();
-conectarBanco();
+    elif isinstance(
+        valor,
+        dict
+    ):
+
+        resultado[nome] = list(
+            valor.values()
+        )
+
+
+return resultado
+```
+
+# ============================================================
+
+# SALVAR DADOS
+
+# ============================================================
+
+def salvar_dados(dados):
+
+```
+estado = dados_vazios()
+
+
+if isinstance(
+    dados.get("produtos"),
+    list
+):
+
+    estado["produtos"] = dados[
+        "produtos"
+    ]
+
+
+if isinstance(
+    dados.get("movimentacoes"),
+    list
+):
+
+    estado["movimentacoes"] = dados[
+        "movimentacoes"
+    ]
+
+
+if isinstance(
+    dados.get("vendas"),
+    list
+):
+
+    estado["vendas"] = dados[
+        "vendas"
+    ]
+
+
+db.reference(
+    "sistema"
+).set(
+    estado
+)
+```
+
+# ============================================================
+
+# CONVERSÕES
+
+# ============================================================
+
+def numero(
+valor,
+padrao=0
+):
+
+```
+try:
+
+    if isinstance(
+        valor,
+        str
+    ):
+
+        valor = valor.replace(
+            ",",
+            "."
+        )
+
+    return float(
+        valor
+    )
+
+except:
+
+    return padrao
+```
+
+def inteiro(
+valor,
+padrao=0
+):
+
+```
+try:
+
+    return int(
+        float(valor)
+    )
+
+except:
+
+    return padrao
+```
+
+# ============================================================
+
+# ENCONTRAR PRODUTO
+
+# ============================================================
+
+def encontrar_produto(
+produtos,
+codigo
+):
+
+```
+codigo = str(
+    codigo
+)
+
+
+for produto in produtos:
+
+    if not isinstance(
+        produto,
+        dict
+    ):
+
+        continue
+
+
+    if str(
+        produto.get(
+            "codigo",
+            ""
+        )
+    ) == codigo:
+
+        return produto
+
+
+    if str(
+        produto.get(
+            "id",
+            ""
+        )
+    ) == codigo:
+
+        return produto
+
+
+return None
+```
+
+# ============================================================
+
+# PÁGINA PRINCIPAL
+
+# ============================================================
+
+@app.route("/")
+def pagina_principal():
+
+```
+return send_from_directory(
+    BASE_DIR,
+    "index.html"
+)
+```
+
+# ============================================================
+
+# ARQUIVOS DO SITE
+
+# ============================================================
+
+@app.route(
+"/[path:nome_arquivo](path:nome_arquivo)"
+)
+
+def arquivos():
+
+```
+caminho = os.path.join(
+    BASE_DIR,
+    nome_arquivo
+)
+
+if os.path.isfile(
+    caminho
+):
+
+    return send_from_directory(
+        BASE_DIR,
+        nome_arquivo
+    )
+
+
+return jsonify({
+    "erro": "Arquivo não encontrado"
+}), 404
+```
+
+# ============================================================
+
+# API - DADOS
+
+# ============================================================
+
+@app.route(
+"/api/dados",
+methods=["GET"]
+)
+
+def api_dados_get():
+
+```
+try:
+
+    dados = ler_dados()
+
+    return jsonify(
+        dados
+    )
+
+except Exception as erro:
+
+    print(
+        "ERRO GET /api/dados:",
+        erro
+    )
+
+    return jsonify({
+
+        "erro":
+            "Erro ao buscar dados",
+
+        "detalhes":
+            str(erro)
+
+    }), 500
+```
+
+@app.route(
+"/api/dados",
+methods=["POST"]
+)
+
+def api_dados_post():
+
+```
+try:
+
+    dados = request.get_json(
+        silent=True
+    )
+
+
+    if not isinstance(
+        dados,
+        dict
+    ):
+
+        return jsonify({
+
+            "erro":
+                "Dados inválidos"
+
+        }), 400
+
+
+    salvar_dados(
+        dados
+    )
+
+
+    return jsonify({
+
+        "ok": True,
+
+        "mensagem":
+            "Dados salvos com sucesso"
+
+    })
+
+
+except Exception as erro:
+
+    print(
+        "ERRO POST /api/dados:",
+        erro
+    )
+
+    return jsonify({
+
+        "erro":
+            "Erro ao salvar dados",
+
+        "detalhes":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# TESTE FIREBASE
+
+# ============================================================
+
+@app.route(
+"/api/teste-firebase",
+methods=["GET"]
+)
+
+def teste_firebase():
+
+```
+try:
+
+    referencia = db.reference(
+        "teste/conexao"
+    )
+
+
+    referencia.set({
+
+        "conectado": True,
+
+        "mensagem":
+            "Firebase funcionando"
+
+    })
+
+
+    return jsonify(
+        referencia.get()
+    )
+
+
+except Exception as erro:
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# PRODUTOS
+
+# ============================================================
+
+@app.route(
+"/api/produtos",
+methods=["GET"]
+)
+
+def listar_produtos():
+
+```
+try:
+
+    dados = ler_dados()
+
+    return jsonify(
+        dados["produtos"]
+    )
+
+except Exception as erro:
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+@app.route(
+"/api/produtos",
+methods=["POST"]
+)
+
+def cadastrar_produto():
+
+```
+try:
+
+    dados = ler_dados()
+
+    entrada = request.get_json(
+        silent=True
+    ) or {}
+
+
+    nome = str(
+        entrada.get(
+            "nome",
+            ""
+        )
+    ).strip()
+
+
+    if not nome:
+
+        return jsonify({
+
+            "erro":
+                "Nome do produto obrigatório"
+
+        }), 400
+
+
+    codigo = entrada.get(
+        "codigo"
+    )
+
+
+    if codigo in (
+        None,
+        ""
+    ):
+
+        maior = 0
+
+
+        for produto in dados[
+            "produtos"
+        ]:
+
+            try:
+
+                numero_codigo = int(
+                    produto.get(
+                        "codigo",
+                        0
+                    )
+                )
+
+
+                if numero_codigo > maior:
+
+                    maior = numero_codigo
+
+
+            except:
+
+                pass
+
+
+        codigo = maior + 1
+
+
+    codigo = str(
+        codigo
+    )
+
+
+    if encontrar_produto(
+        dados["produtos"],
+        codigo
+    ):
+
+        return jsonify({
+
+            "erro":
+                "Produto já cadastrado"
+
+        }), 409
+
+
+    produto = {
+
+        "id":
+            codigo,
+
+        "codigo":
+            codigo,
+
+        "nome":
+            nome,
+
+        "categoria":
+            entrada.get(
+                "categoria",
+                "Sem categoria"
+            ),
+
+        "preco":
+            numero(
+                entrada.get(
+                    "preco",
+                    0
+                )
+            ),
+
+        "unidade":
+            entrada.get(
+                "unidade",
+                "UN"
+            ),
+
+        "quantidade":
+            inteiro(
+                entrada.get(
+                    "quantidade",
+                    0
+                )
+            ),
+
+        "ativo":
+            True,
+
+        "ultimaMov":
+            entrada.get(
+                "ultimaMov",
+                ""
+            )
+
+    }
+
+
+    produto["valor"] = (
+
+        produto["quantidade"]
+
+        *
+
+        produto["preco"]
+
+    )
+
+
+    dados["produtos"].append(
+        produto
+    )
+
+
+    salvar_dados(
+        dados
+    )
+
+
+    return jsonify(
+        produto
+    ), 201
+
+
+except Exception as erro:
+
+    print(
+        "ERRO POST /api/produtos:",
+        erro
+    )
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# BUSCAR PRODUTO
+
+# ============================================================
+
+@app.route(
+"/api/produtos/[int:codigo](int:codigo)",
+methods=["GET"]
+)
+
+def buscar_produto(
+codigo
+):
+
+```
+try:
+
+    dados = ler_dados()
+
+
+    produto = encontrar_produto(
+
+        dados["produtos"],
+
+        codigo
+
+    )
+
+
+    if not produto:
+
+        return jsonify({
+
+            "erro":
+                "Produto não encontrado"
+
+        }), 404
+
+
+    return jsonify(
+        produto
+    )
+
+
+except Exception as erro:
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# ESTOQUE
+
+# ============================================================
+
+@app.route(
+"/api/estoque",
+methods=["GET"]
+)
+
+@app.route(
+"/api/resumo",
+methods=["GET"]
+)
+
+def estoque():
+
+```
+try:
+
+    dados = ler_dados()
+
+    resultado = []
+
+
+    for produto in dados[
+        "produtos"
+    ]:
+
+        quantidade = inteiro(
+
+            produto.get(
+                "quantidade",
+                0
+            )
+
+        )
+
+
+        preco = numero(
+
+            produto.get(
+                "preco",
+                0
+            )
+
+        )
+
+
+        resultado.append({
+
+            "id":
+                produto.get(
+                    "id"
+                ),
+
+            "codigo":
+                produto.get(
+                    "codigo"
+                ),
+
+            "nome":
+                produto.get(
+                    "nome",
+                    ""
+                ),
+
+            "categoria":
+                produto.get(
+                    "categoria",
+                    ""
+                ),
+
+            "preco":
+                preco,
+
+            "preco_unitario":
+                preco,
+
+            "unidade":
+                produto.get(
+                    "unidade",
+                    "UN"
+                ),
+
+            "quantidade":
+                quantidade,
+
+            "valor":
+                quantidade * preco
+
+        })
+
+
+    return jsonify(
+        resultado
+    )
+
+
+except Exception as erro:
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# MOVIMENTAÇÃO
+
+# ============================================================
+
+@app.route(
+"/api/movimentacao",
+methods=["POST"]
+)
+
+def movimentacao():
+
+```
+try:
+
+    dados = ler_dados()
+
+    entrada = request.get_json(
+        silent=True
+    ) or {}
+
+
+    codigo = (
+
+        entrada.get(
+            "produto_id"
+        )
+
+        or
+
+        entrada.get(
+            "codigo"
+        )
+
+    )
+
+
+    produto = encontrar_produto(
+
+        dados["produtos"],
+
+        codigo
+
+    )
+
+
+    if not produto:
+
+        return jsonify({
+
+            "erro":
+                "Produto não encontrado"
+
+        }), 404
+
+
+    quantidade = inteiro(
+
+        entrada.get(
+            "quantidade",
+            0
+        )
+
+    )
+
+
+    if quantidade <= 0:
+
+        return jsonify({
+
+            "erro":
+                "Quantidade inválida"
+
+        }), 400
+
+
+    tipo = str(
+
+        entrada.get(
+            "tipo",
+            "Entrada"
+        )
+
+    )
+
+
+    tipo_sem_acento = (
+
+        tipo.lower()
+
+        .replace(
+            "í",
+            "i"
+        )
+
+    )
+
+
+    atual = inteiro(
+
+        produto.get(
+            "quantidade",
+            0
+        )
+
+    )
+
+
+    if tipo_sem_acento in (
+        "saida",
+        "venda"
+    ):
+
+        if quantidade > atual:
+
+            return jsonify({
+
+                "erro":
+                    "Estoque insuficiente"
+
+            }), 400
+
+
+        novo = (
+            atual - quantidade
+        )
+
+    else:
+
+        novo = (
+            atual + quantidade
+        )
+
+
+    produto[
+        "quantidade"
+    ] = novo
+
+
+    preco = numero(
+
+        produto.get(
+            "preco",
+            0
+        )
+
+    )
+
+
+    produto[
+        "valor"
+    ] = novo * preco
+
+
+    produto[
+        "ultimaMov"
+    ] = entrada.get(
+        "data",
+        ""
+    )
+
+
+    movimento = {
+
+        "id":
+            str(
+                len(
+                    dados[
+                        "movimentacoes"
+                    ]
+                ) + 1
+            ),
+
+        "data":
+            entrada.get(
+                "data",
+                ""
+            ),
+
+        "codigo":
+            produto.get(
+                "codigo"
+            ),
+
+        "produto":
+            produto.get(
+                "nome",
+                ""
+            ),
+
+        "tipo":
+            tipo,
+
+        "quantidade":
+            quantidade,
+
+        "nf":
+            entrada.get(
+                "nf",
+                ""
+            ),
+
+        "responsavel":
+            entrada.get(
+                "responsavel",
+                ""
+            ),
+
+        "preco":
+            preco,
+
+        "valorTotal":
+            quantidade * preco
+
+    }
+
+
+    dados[
+        "movimentacoes"
+    ].append(
+        movimento
+    )
+
+
+    salvar_dados(
+        dados
+    )
+
+
+    return jsonify({
+
+        "ok": True,
+
+        "produto":
+            produto,
+
+        "movimentacao":
+            movimento
+
+    })
+
+
+except Exception as erro:
+
+    print(
+        "ERRO MOVIMENTAÇÃO:",
+        erro
+    )
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# MOVIMENTAÇÕES - LISTAR
+
+# ============================================================
+
+@app.route(
+"/api/movimentacoes",
+methods=["GET"]
+)
+
+def listar_movimentacoes():
+
+```
+try:
+
+    dados = ler_dados()
+
+    return jsonify(
+        dados["movimentacoes"]
+    )
+
+except Exception as erro:
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# VENDAS
+
+# ============================================================
+
+@app.route(
+"/api/vendas",
+methods=["GET"]
+)
+
+def listar_vendas():
+
+```
+try:
+
+    dados = ler_dados()
+
+    return jsonify(
+        dados["vendas"]
+    )
+
+except Exception as erro:
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+@app.route(
+"/api/vendas",
+methods=["POST"]
+)
+
+def cadastrar_venda():
+
+```
+try:
+
+    dados = ler_dados()
+
+    venda = request.get_json(
+        silent=True
+    )
+
+
+    if not isinstance(
+        venda,
+        dict
+    ):
+
+        return jsonify({
+
+            "erro":
+                "Venda inválida"
+
+        }), 400
+
+
+    dados[
+        "vendas"
+    ].append(
+        venda
+    )
+
+
+    salvar_dados(
+        dados
+    )
+
+
+    return jsonify({
+
+        "ok":
+            True,
+
+        "venda":
+            venda
+
+    }), 201
+
+
+except Exception as erro:
+
+    return jsonify({
+
+        "erro":
+            str(erro)
+
+    }), 500
+```
+
+# ============================================================
+
+# INICIAR SERVIDOR
+
+# ============================================================
+
+if **name** == "**main**":
+
+```
+print("")
+print("======================================")
+print(" SISTEMA DE CONTROLE DE ESTOQUE")
+print("======================================")
+print(
+    "Servidor: http://localhost:"
+    + str(PORTA)
+)
+print("======================================")
+print("")
+
+
+app.run(
+
+    host="0.0.0.0",
+
+    port=PORTA,
+
+    debug=True
+
+)
+```
