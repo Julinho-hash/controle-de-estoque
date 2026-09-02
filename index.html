@@ -1,709 +1,1332 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Controle de Estoque</title>
-  <link rel="stylesheet" href="style.css?v=5">
-  <script src="xlsx.min.js"></script>
+<head><script src="https://happyseeds.ai/app/__happyseeds__/preview-runtime.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<title>Sistema de Controle de Estoque</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="script.js"></script>
+<script src="xlsx.min.js"></script>
+
 </head>
+
 <body>
 
 <section id="tela-login">
-  <div class="caixa-login">
-    <h1>Acesso ao Sistema</h1>
-    <input
-      type="password"
-      id="campo-senha"
-      placeholder="Digite a senha"
-      onkeydown="if(event.key==='Enter') entrarSistema()"
-    >
-    <button onclick="entrarSistema()">Entrar</button>
-    <p id="aviso-erro" class="aviso-erro">Senha incorreta!</p>
-  </div>
+
+<div class="caixa-login">
+
+<h1>🔐 Acesso ao Sistema</h1>
+
+<input
+type="password"
+id="campo-senha"
+placeholder="Digite a senha"
+onkeydown="if(event.key==='Enter') entrarSistema()"
+>
+
+<button onclick="entrarSistema()">
+Entrar
+</button>
+
+<p id="aviso-erro" class="aviso-erro">
+Senha incorreta!
+</p>
+
+</div>
+
 </section>
 
 <main id="sistema">
-  <header class="cabecalho">
-    <h1>Controle de Estoque</h1>
-    <button class="botao-sair" onclick="sairSistema()">Sair</button>
-  </header>
 
-  <nav class="navegacao-abas">
-    <button class="aba ativa" onclick="trocarAba(0)">Estoque</button>
-    <button class="aba" onclick="trocarAba(1)">Cadastro</button>
-    <button class="aba" onclick="trocarAba(2)">Movimentação</button>
-    <button class="aba" onclick="trocarAba(3)">NF Entrada</button>
-    <button class="aba" onclick="trocarAba(4)">NF Saída</button>
-    <button class="aba" onclick="trocarAba(5)">Histórico</button>
-    <button class="aba aba-vendas" onclick="abrirVendasComSenha()">Vendas</button>
-  </nav>
+<header class="cabecalho">
 
-  <section class="conteudo-aba visivel">
-    <h2>Controle de Estoque</h2>
-    <div class="linha-botoes">
-      <button onclick="alternarOcultarEstoque()">Ocultar Estoque</button>
-      <button onclick="abrirFiltroCategoria()">Filtrar Categoria</button>
-      <button onclick="exportarParaExcel()">Exportar Excel</button>
-      <button onclick="document.getElementById('arquivoExcel').click()">Importar Excel</button>
-      <button onclick="document.getElementById('arquivoXML').click()">Importar XML NF-e</button>
-      <button onclick="gerarRelatorio()">Gerar Relatório</button>
-    </div>
+<h1>📦 Controle de Estoque</h1>
 
-    <input
-      type="file"
-      id="arquivoExcel"
-      accept=".xlsx,.xls"
-      style="display:none"
-      onchange="importarExcel(event)"
-    >
-    <input
-      type="file"
-      id="arquivoXML"
-      accept=".xml"
-      style="display:none"
-      onchange="importarXML(event)"
-    >
+<button
+class="botao-sair"
+onclick="sairSistema()">
+Sair
+</button>
 
-    <div id="filtro-categoria-container" style="display:none;margin-bottom:15px">
-      <select id="filtro-categoria" class="filtro-categoria" onchange="atualizarTabelaEstoque()">
-        <option value="">Todas as categorias</option>
-      </select>
-    </div>
+</header>
 
-    <div class="resumo">
-      <div class="card-resumo">Produtos <strong id="total-produtos">0</strong></div>
-      <div class="card-resumo">Qtd Total <strong id="total-quantidade">0</strong></div>
-      <div class="card-resumo">Valor Total <strong id="valor-total">R$ 0,00</strong></div>
-    </div>
+<nav class="navegacao-abas">
 
-    <table>
-      <thead>
-        <tr>
-          <th class="col-estoque">Código</th>
-          <th class="col-estoque">Nome</th>
-          <th class="col-estoque">Categoria</th>
-          <th class="col-estoque">Preço</th>
-          <th class="col-estoque">Un</th>
-          <th class="col-estoque">Qtd</th>
-          <th class="col-estoque">Valor</th>
-          <th class="col-estoque">Última Movimentação</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody id="tabela-estoque-body"></tbody>
-    </table>
+<button
+class="aba ativa"
+onclick="trocarAba(0)">
+📊 Estoque
+</button>
 
-    <div id="mensagem-estoque" class="mensagem"></div>
+<button
+class="aba"
+onclick="trocarAba(1)">
+📝 Cadastro
+</button>
 
-    <div id="area-relatorio" class="caixa-relatorio" style="display:none">
-      <h3>Relatório de Estoque / Movimentações</h3>
-      <div class="filtros-periodo">
-        <div class="grupo-form">
-          <label>Data Inicial</label>
-          <input type="date" id="relatorio-data-inicial">
-        </div>
-        <div class="grupo-form">
-          <label>Data Final</label>
-          <input type="date" id="relatorio-data-final">
-        </div>
-        <div>
-          <button onclick="aplicarFiltrosRelatorio()">Aplicar Filtros</button>
-        </div>
-      </div>
+<button
+class="aba"
+onclick="trocarAba(2)">
+📥 Movimentação
+</button>
 
-      <div class="dois-colunas">
-        <div class="grupo-form">
-          <label>Produto</label>
-          <select id="relatorio-produto">
-            <option value="">Todos</option>
-          </select>
-        </div>
-        <div class="grupo-form">
-          <label>Tipo</label>
-          <select id="relatorio-tipo">
-            <option value="">Todos</option>
-            <option value="Entrada">Entrada</option>
-            <option value="Saída">Saída</option>
-            <option value="Venda">Venda</option>
-          </select>
-        </div>
-      </div>
+<button
+class="aba"
+onclick="trocarAba(3)">
+📄 NF Entrada
+</button>
 
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>Código</label>
-          <input type="text" id="relatorio-codigo" placeholder="Código">
-        </div>
-        <div class="grupo-form">
-          <label>NF</label>
-          <input type="text" id="relatorio-nf" placeholder="Número da NF">
-        </div>
-        <div class="grupo-form">
-          <label>Responsável</label>
-          <input type="text" id="relatorio-responsavel" placeholder="Responsável">
-        </div>
-      </div>
+<button
+class="aba"
+onclick="trocarAba(4)">
+📄 NF Saída
+</button>
 
-      <div class="relatorio-totais">
-        <div class="card-resumo">Movimentações <strong id="relatorio-total-mov">0</strong></div>
-        <div class="card-resumo">Quantidade <strong id="relatorio-total-qtd">0</strong></div>
-        <div class="card-resumo">Valor Total <strong id="relatorio-total-valor">R$ 0,00</strong></div>
-        <div class="card-resumo">Valor Médio <strong id="relatorio-valor-medio">R$ 0,00</strong></div>
-      </div>
+<button
+class="aba"
+onclick="trocarAba(5)">
+📋 Histórico
+</button>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Código</th>
-            <th>Produto</th>
-            <th>Tipo</th>
-            <th>Quantidade</th>
-            <th>NF</th>
-            <th>Responsável</th>
-            <th>Preço Unit.</th>
-            <th>Valor Total</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-relatorio-body"></tbody>
-      </table>
+<button
+class="aba aba-vendas"
+onclick="abrirVendasComSenha()">
+💰 Vendas
+</button>
 
-      <div class="linha-botoes">
-        <button onclick="imprimirRelatorio()">Imprimir</button>
-        <button onclick="fecharRelatorio()">Fechar</button>
-      </div>
-    </div>
-  </section>
+</nav>
 
-  <section class="conteudo-aba">
-    <h2>Cadastro de Produtos</h2>
-    <div class="form-secao">
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>Código</label>
-          <input type="number" id="cad-codigo" placeholder="Automático">
-        </div>
-        <div class="grupo-form">
-          <label>Nome do Produto</label>
-          <input type="text" id="cad-nome" placeholder="Nome do produto">
-        </div>
-        <div class="grupo-form">
-          <label>Categoria</label>
-          <input type="text" id="cad-categoria" placeholder="Categoria">
-        </div>
-      </div>
+<section class="conteudo-aba visivel">
 
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>Preço Unitário</label>
-          <input type="number" step="0.01" id="cad-preco" placeholder="0,00">
-        </div>
-        <div class="grupo-form">
-          <label>Unidade</label>
-          <select id="cad-unidade">
-            <option value="UN">UN</option>
-            <option value="KG">KG</option>
-            <option value="G">G</option>
-            <option value="L">L</option>
-            <option value="ML">ML</option>
-            <option value="CX">CX</option>
-            <option value="PC">PC</option>
-            <option value="FD">FD</option>
-            <option value="SC">SC</option>
-          </select>
-        </div>
-        <div class="grupo-form">
-          <label>Quantidade Inicial</label>
-          <input type="number" id="cad-quantidade" placeholder="0">
-        </div>
-      </div>
+<h2>📊 Controle de Estoque</h2>
 
-      <div class="linha-botoes">
-        <button onclick="cadastrarProduto()">Cadastrar Produto</button>
-        <button class="botao-cancelar" onclick="limparCadastro()">Limpar</button>
-      </div>
-      <div id="mensagem-cadastro" class="mensagem"></div>
-    </div>
-  </section>
+<div class="linha-botoes">
 
-  <section class="conteudo-aba">
-    <h2>Movimentação de Estoque</h2>
-    <div class="form-secao">
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>Produto</label>
-          <select id="mov-produto" onchange="mostrarProdutoMovimentacao()"></select>
-        </div>
-        <div class="grupo-form">
-          <label>Tipo</label>
-          <select id="mov-tipo">
-            <option value="Entrada">Entrada</option>
-            <option value="Saída">Saída</option>
-          </select>
-        </div>
-        <div class="grupo-form">
-          <label>Quantidade</label>
-          <input type="number" id="mov-quantidade" min="1" placeholder="Quantidade">
-        </div>
-      </div>
+<button onclick="alternarOcultarEstoque()">
+👁️ Ocultar Estoque
+</button>
 
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>NF</label>
-          <input type="text" id="mov-nf" placeholder="Número da NF">
-        </div>
-        <div class="grupo-form">
-          <label>Responsável</label>
-          <input type="text" id="mov-responsavel" placeholder="Responsável">
-        </div>
-        <div class="grupo-form">
-          <label>Data</label>
-          <input type="date" id="mov-data">
-        </div>
-      </div>
+<button onclick="abrirFiltroCategoria()">
+🔍 Filtrar Categoria
+</button>
 
-      <div id="info-mov-produto" class="info-produto-venda"></div>
+<button onclick="exportarParaExcel()">
+📊 Exportar Excel
+</button>
 
-      <div class="linha-botoes">
-        <button onclick="registrarMovimentacao()">Registrar Movimentação</button>
-        <button class="botao-cancelar" onclick="limparMovimentacao()">Limpar</button>
-      </div>
-      <div id="mensagem-movimentacao" class="mensagem"></div>
-    </div>
-  </section>
+<button onclick="document.getElementById('arquivoExcel').click()">
+📂 Importar Excel
+</button>
 
-  <section class="conteudo-aba">
-    <h2>Nota Fiscal de Entrada</h2>
-    <div class="form-secao">
-      <div class="dois-colunas">
-        <div class="grupo-form">
-          <label>Número da NF</label>
-          <input type="text" id="nf-entrada-numero" placeholder="Número da NF">
-        </div>
-        <div class="grupo-form">
-          <label>Fornecedor</label>
-          <input type="text" id="nf-entrada-fornecedor" placeholder="Fornecedor">
-        </div>
-      </div>
+<button onclick="document.getElementById('arquivoXML').click()">
+📥 Importar XML NF-e
+</button>
 
-      <div class="dois-colunas">
-        <div class="grupo-form">
-          <label>Data</label>
-          <input type="date" id="nf-entrada-data">
-        </div>
-        <div class="grupo-form">
-          <label>Responsável</label>
-          <input type="text" id="nf-entrada-responsavel" placeholder="Responsável">
-        </div>
-      </div>
+<button onclick="gerarRelatorio()">
+📋 Gerar Relatório
+</button>
 
-      <h3>Itens da Nota Fiscal</h3>
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>Produto</label>
-          <select id="nf-entrada-produto"></select>
-        </div>
-        <div class="grupo-form">
-          <label>Quantidade</label>
-          <input type="number" id="nf-entrada-quantidade" min="1" placeholder="Quantidade">
-        </div>
-        <div class="grupo-form">
-          <label>Preço Unitário</label>
-          <input type="number" step="0.01" id="nf-entrada-preco" placeholder="0,00">
-        </div>
-      </div>
+</div>
 
-      <div class="linha-botoes">
-        <button onclick="adicionarItemNFEntrada()">Adicionar Item</button>
-      </div>
+<input
+type="file"
+id="arquivoExcel"
+accept=".xlsx,.xls"
+style="display:none"
+onchange="importarExcel(event)"
+>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Preço</th>
-            <th>Total</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-nf-entrada-body"></tbody>
-      </table>
+<input
+type="file"
+id="arquivoXML"
+accept=".xml"
+style="display:none"
+onchange="importarXML(event)"
+>
 
-      <div class="total-venda-box">
-        <div class="total-linha-final">
-          <span>Total da NF</span>
-          <span id="nf-entrada-total">R$ 0,00</span>
-        </div>
-      </div>
+<div
+id="filtro-categoria-container"
+style="display:none;margin-bottom:15px"
+>
 
-      <div class="linha-botoes">
-        <button onclick="finalizarNFEntrada()">Finalizar NF Entrada</button>
-        <button class="botao-cancelar" onclick="limparNFEntrada()">Limpar</button>
-      </div>
-      <div id="mensagem-nf-entrada" class="mensagem"></div>
-    </div>
-  </section>
+<select
+id="filtro-categoria"
+class="filtro-categoria"
+onchange="atualizarTabelaEstoque()"
+>
 
-  <section class="conteudo-aba">
-    <h2>Nota Fiscal de Saída</h2>
-    <div class="form-secao">
-      <div class="dois-colunas">
-        <div class="grupo-form">
-          <label>Número da NF</label>
-          <input type="text" id="nf-saida-numero" placeholder="Número da NF">
-        </div>
-        <div class="grupo-form">
-          <label>Cliente</label>
-          <input type="text" id="nf-saida-cliente" placeholder="Cliente">
-        </div>
-      </div>
+<option value="">
+Todas as categorias
+</option>
 
-      <div class="dois-colunas">
-        <div class="grupo-form">
-          <label>Data</label>
-          <input type="date" id="nf-saida-data">
-        </div>
-        <div class="grupo-form">
-          <label>Responsável</label>
-          <input type="text" id="nf-saida-responsavel" placeholder="Responsável">
-        </div>
-      </div>
+</select>
 
-      <h3>Itens da Nota Fiscal</h3>
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>Produto</label>
-          <select id="nf-saida-produto"></select>
-        </div>
-        <div class="grupo-form">
-          <label>Quantidade</label>
-          <input type="number" id="nf-saida-quantidade" min="1" placeholder="Quantidade">
-        </div>
-        <div class="grupo-form">
-          <label>Preço Unitário</label>
-          <input type="number" step="0.01" id="nf-saida-preco" placeholder="0,00">
-        </div>
-      </div>
+</div>
 
-      <div class="linha-botoes">
-        <button onclick="adicionarItemNFSaida()">Adicionar Item</button>
-      </div>
+<div class="resumo">
 
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Preço</th>
-            <th>Total</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-nf-saida-body"></tbody>
-      </table>
+<div class="card-resumo">
+Produtos
+<strong id="total-produtos">0</strong>
+</div>
 
-      <div class="total-venda-box">
-        <div class="total-linha-final">
-          <span>Total da NF</span>
-          <span id="nf-saida-total">R$ 0,00</span>
-        </div>
-      </div>
+<div class="card-resumo">
+Qtd Total
+<strong id="total-quantidade">0</strong>
+</div>
 
-      <div class="linha-botoes">
-        <button onclick="finalizarNFSaida()">Finalizar NF Saída</button>
-        <button class="botao-cancelar" onclick="limparNFSaida()">Limpar</button>
-      </div>
-      <div id="mensagem-nf-saida" class="mensagem"></div>
-    </div>
-  </section>
+<div class="card-resumo">
+Valor Total
+<strong id="valor-total">R$ 0,00</strong>
+</div>
 
-  <section class="conteudo-aba">
-    <h2>Histórico de Movimentações</h2>
-    <div class="linha-botoes">
-      <button onclick="atualizarTabelaMovimentacoes()">Atualizar Histórico</button>
-      <button onclick="limparHistorico()">Limpar Histórico</button>
-    </div>
+</div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Código</th>
-          <th>Produto</th>
-          <th>Tipo</th>
-          <th>Quantidade</th>
-          <th>NF</th>
-          <th>Responsável</th>
-          <th>Preço Unit.</th>
-          <th>Valor Total</th>
-        </tr>
-      </thead>
-      <tbody id="tabela-movimentacoes-body"></tbody>
-    </table>
+<table>
 
-    <p id="sem-movimentacoes" style="text-align:center;padding:20px;color:#777;display:none">
-      Nenhuma movimentação registrada ainda.
-    </p>
-  </section>
+<thead>
 
-  <section class="conteudo-aba" id="area-vendas">
-    <div class="cabecalho-vendas">
-      <h2>Vendas</h2>
-      <button class="botao-vendas" onclick="prepararNovaVenda()">Nova Venda</button>
-    </div>
+<tr>
 
-    <div class="resumo-venda">
-      <div class="card-venda">Vendas Hoje <strong id="vendas-hoje">0</strong></div>
-      <div class="card-venda">Itens Vendidos <strong id="itens-vendidos-hoje">0</strong></div>
-      <div class="card-venda">Faturamento Hoje <strong id="faturamento-hoje">R$ 0,00</strong></div>
-      <div class="card-venda">Venda Atual <strong id="numero-venda-atual">-</strong></div>
-    </div>
+<th class="col-estoque">
+Código
+</th>
 
-    <div class="caixa-venda">
-      <h3>Dados da Venda</h3>
-      <div class="tres-colunas">
-        <div class="grupo-form">
-          <label>Vendedor</label>
-          <input type="text" id="venda-vendedor" placeholder="Nome do vendedor">
-        </div>
-        <div class="grupo-form">
-          <label>Cliente</label>
-          <input type="text" id="venda-cliente" placeholder="Cliente">
-        </div>
-        <div class="grupo-form">
-          <label>Forma de Pagamento</label>
-          <select id="venda-pagamento">
-            <option value="Dinheiro">Dinheiro</option>
-            <option value="PIX">PIX</option>
-            <option value="Cartão de Débito">Cartão de Débito</option>
-            <option value="Cartão de Crédito">Cartão de Crédito</option>
-            <option value="Boleto">Boleto</option>
-            <option value="Outro">Outro</option>
-          </select>
-        </div>
-      </div>
+<th class="col-estoque">
+Nome
+</th>
 
-      <div class="dois-colunas">
-        <div class="grupo-form">
-          <label>Produto</label>
-          <select id="venda-produto" onchange="mostrarProdutoVenda()"></select>
-        </div>
-        <div class="grupo-form">
-          <label>Quantidade</label>
-          <input
-            type="number"
-            id="venda-quantidade"
-            min="1"
-            value="1"
-            onkeydown="if(event.key==='Enter') adicionarItemVenda()"
-          >
-        </div>
-      </div>
+<th class="col-estoque">
+Categoria
+</th>
 
-      <div id="info-produto-venda" class="info-produto-venda"></div>
+<th class="col-estoque">
+Preço
+</th>
 
-      <div class="linha-botoes">
-        <button onclick="adicionarItemVenda()">Adicionar Produto</button>
-      </div>
-    </div>
+<th class="col-estoque">
+Un
+</th>
 
-    <div class="caixa-venda tabela-itens-venda">
-      <h3>Itens da Venda</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Produto</th>
-            <th>Un</th>
-            <th>Quantidade</th>
-            <th>Preço Unit.</th>
-            <th>Total</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-itens-venda-body"></tbody>
-      </table>
-    </div>
+<th class="col-estoque">
+Qtd
+</th>
 
-    <div class="total-venda-box">
-      <div class="total-linha">
-        <span>Subtotal</span>
-        <strong id="venda-subtotal">R$ 0,00</strong>
-      </div>
-      <div class="total-linha">
-        <span>Desconto</span>
-        <strong id="venda-desconto-exibicao">R$ 0,00</strong>
-      </div>
+<th class="col-estoque">
+Valor
+</th>
 
-      <div class="dois-colunas">
-        <div class="grupo-form">
-          <label>Desconto</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            id="venda-desconto"
-            value="0"
-            oninput="atualizarTotalVenda()"
-          >
-        </div>
-        <div class="grupo-form">
-          <label>Observação</label>
-          <input type="text" id="venda-observacao" placeholder="Observação">
-        </div>
-      </div>
+<th class="col-estoque">
+Última Movimentação
+</th>
 
-      <div class="total-linha-final">
-        <span>TOTAL</span>
-        <span id="venda-total" class="valor-final-venda">R$ 0,00</span>
-      </div>
+<th>
+Ação
+</th>
 
-      <div id="troco-container" style="display:none;margin-top:15px">
-        <div class="dois-colunas">
-          <div class="grupo-form">
-            <label>Valor Recebido</label>
-            <input type="number" step="0.01" min="0" id="venda-valor-recebido" oninput="calcularTroco()">
-          </div>
-          <div class="grupo-form">
-            <label>Troco</label>
-            <input type="text" id="venda-troco" readonly>
-          </div>
-        </div>
-      </div>
+</tr>
 
-      <div class="linha-botoes">
-        <button class="botao-venda-finalizar" onclick="finalizarVenda()">FINALIZAR VENDA</button>
-        <button class="botao-cancelar" onclick="cancelarVenda()">Cancelar</button>
-        <button class="botao-relatorio-vendas" onclick="abrirRelatorioVendas()">Relatório de Vendas</button>
-      </div>
-    </div>
+</thead>
 
-    <div id="area-relatorio-vendas">
-      <h3>Relatório de Vendas</h3>
-      <div class="filtros-relatorio-vendas">
-        <div class="grupo-form">
-          <label>Data Inicial</label>
-          <input type="date" id="rv-data-inicial">
-        </div>
-        <div class="grupo-form">
-          <label>Data Final</label>
-          <input type="date" id="rv-data-final">
-        </div>
-        <div class="grupo-form">
-          <label>Vendedor</label>
-          <select id="rv-vendedor">
-            <option value="">Todos os vendedores</option>
-          </select>
-        </div>
-      </div>
+<tbody id="tabela-estoque-body">
+</tbody>
 
-      <div class="filtros-relatorio-vendas-extra">
-        <div class="grupo-form">
-          <label>Cliente</label>
-          <select id="rv-cliente">
-            <option value="">Todos os clientes</option>
-          </select>
-        </div>
-        <div class="grupo-form">
-          <label>Produto</label>
-          <select id="rv-produto">
-            <option value="">Todos os produtos</option>
-          </select>
-        </div>
-        <div class="grupo-form">
-          <label>Pagamento</label>
-          <select id="rv-pagamento">
-            <option value="">Todas as formas</option>
-            <option value="Dinheiro">Dinheiro</option>
-            <option value="PIX">PIX</option>
-            <option value="Cartão de Débito">Cartão de Débito</option>
-            <option value="Cartão de Crédito">Cartão de Crédito</option>
-            <option value="Boleto">Boleto</option>
-            <option value="Outro">Outro</option>
-          </select>
-        </div>
-      </div>
+</table>
 
-      <div class="linha-botoes">
-        <button onclick="gerarRelatorioVendas()">Gerar Relatório</button>
-        <button onclick="fecharRelatorioVendas()">Fechar</button>
-      </div>
+<div
+id="mensagem-estoque"
+class="mensagem">
+</div>
 
-      <div class="cards-relatorio-vendas">
-        <div class="card-relatorio-vendas">
-          <span>Total de Vendas</span>
-          <strong id="rv-total-vendas">0</strong>
-        </div>
-        <div class="card-relatorio-vendas">
-          <span>Itens Vendidos</span>
-          <strong id="rv-total-itens">0</strong>
-        </div>
-        <div class="card-relatorio-vendas">
-          <span>Descontos</span>
-          <strong id="rv-total-desconto">R$ 0,00</strong>
-        </div>
-        <div class="card-relatorio-vendas">
-          <span>Faturamento</span>
-          <strong id="rv-faturamento">R$ 0,00</strong>
-        </div>
-      </div>
+<div
+id="area-relatorio"
+class="caixa-relatorio"
+style="display:none"
+>
 
-      <p id="rv-resumo-texto" style="margin:10px 0;font-weight:bold"></p>
+<h3>📋 Relatório de Estoque / Movimentações</h3>
 
-      <div class="tabela-relatorio-vendas">
-        <table>
-          <thead>
-            <tr>
-              <th>Nº Venda</th>
-              <th>Data</th>
-              <th>Horário</th>
-              <th>Vendedor</th>
-              <th>Cliente</th>
-              <th>Código</th>
-              <th>Produto</th>
-              <th>Quantidade</th>
-              <th>Preço Unitário</th>
-              <th>Valor Total</th>
-              <th>Pagamento</th>
-              <th>Observação</th>
-            </tr>
-          </thead>
-          <tbody id="tabela-relatorio-vendas-body"></tbody>
-        </table>
-      </div>
+<div class="filtros-periodo">
 
-      <div class="relatorio-vendas-botoes">
-        <button onclick="imprimirRelatorioVendas()">Imprimir</button>
-        <button onclick="exportarRelatorioVendasExcel()">Exportar Excel</button>
-      </div>
-    </div>
-  </section>
+<div class="grupo-form">
+
+<label>
+Data Inicial
+</label>
+
+<input
+type="date"
+id="relatorio-data-inicial"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>
+Data Final
+</label>
+
+<input
+type="date"
+id="relatorio-data-final"
+>
+
+</div>
+
+<div>
+
+<button onclick="aplicarFiltrosRelatorio()">
+Aplicar Filtros
+</button>
+
+</div>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+
+<label>
+Produto
+</label>
+
+<select id="relatorio-produto">
+
+<option value="">
+Todos
+</option>
+
+</select>
+
+</div>
+
+<div class="grupo-form">
+
+<label>
+Tipo
+</label>
+
+<select id="relatorio-tipo">
+
+<option value="">
+Todos
+</option>
+
+<option value="Entrada">
+Entrada
+</option>
+
+<option value="Saída">
+Saída
+</option>
+
+<option value="Venda">
+Venda
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+
+<label>
+Código
+</label>
+
+<input
+type="text"
+id="relatorio-codigo"
+placeholder="Código"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>
+NF
+</label>
+
+<input
+type="text"
+id="relatorio-nf"
+placeholder="Número da NF"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>
+Responsável
+</label>
+
+<input
+type="text"
+id="relatorio-responsavel"
+placeholder="Responsável"
+>
+
+</div>
+
+</div>
+
+<div class="relatorio-totais">
+
+<div class="card-resumo">
+Movimentações
+<strong id="relatorio-total-mov">0</strong>
+</div>
+
+<div class="card-resumo">
+Quantidade
+<strong id="relatorio-total-qtd">0</strong>
+</div>
+
+<div class="card-resumo">
+Valor Total
+<strong id="relatorio-total-valor">R$ 0,00</strong>
+</div>
+
+<div class="card-resumo">
+Valor Médio
+<strong id="relatorio-valor-medio">R$ 0,00</strong>
+</div>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Data</th>
+<th>Código</th>
+<th>Produto</th>
+<th>Tipo</th>
+<th>Quantidade</th>
+<th>NF</th>
+<th>Responsável</th>
+<th>Preço Unit.</th>
+<th>Valor Total</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabela-relatorio-body">
+</tbody>
+
+</table>
+
+<div class="linha-botoes">
+
+<button onclick="imprimirRelatorio()">
+🖨️ Imprimir
+</button>
+
+<button onclick="fecharRelatorio()">
+❌ Fechar
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📝 Cadastro de Produtos</h2>
+
+<div class="form-secao">
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Código</label>
+<input type="number" id="cad-codigo" placeholder="Automático">
+</div>
+
+<div class="grupo-form">
+<label>Nome do Produto</label>
+<input type="text" id="cad-nome" placeholder="Nome do produto">
+</div>
+
+<div class="grupo-form">
+<label>Categoria</label>
+<input type="text" id="cad-categoria" placeholder="Categoria">
+</div>
+
+</div>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Preço Unitário</label>
+<input type="number" step="0.01" id="cad-preco" placeholder="0,00">
+</div>
+
+<div class="grupo-form">
+<label>Unidade</label>
+
+<select id="cad-unidade">
+
+<option value="UN">UN</option>
+<option value="KG">KG</option>
+<option value="G">G</option>
+<option value="L">L</option>
+<option value="ML">ML</option>
+<option value="CX">CX</option>
+<option value="PC">PC</option>
+<option value="FD">FD</option>
+<option value="SC">SC</option>
+
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Quantidade Inicial</label>
+<input type="number" id="cad-quantidade" placeholder="0">
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="cadastrarProduto()">
+💾 Cadastrar Produto
+</button>
+
+<button class="botao-cancelar" onclick="limparCadastro()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-cadastro" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📥 Movimentação de Estoque</h2>
+
+<div class="form-secao">
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Produto</label>
+
+<select id="mov-produto" onchange="mostrarProdutoMovimentacao()">
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Tipo</label>
+
+<select id="mov-tipo">
+
+<option value="Entrada">Entrada</option>
+<option value="Saída">Saída</option>
+
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Quantidade</label>
+
+<input type="number" id="mov-quantidade" min="1" placeholder="Quantidade">
+
+</div>
+
+</div>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>NF</label>
+<input type="text" id="mov-nf" placeholder="Número da NF">
+</div>
+
+<div class="grupo-form">
+<label>Responsável</label>
+<input type="text" id="mov-responsavel" placeholder="Responsável">
+</div>
+
+<div class="grupo-form">
+<label>Data</label>
+<input type="date" id="mov-data">
+</div>
+
+</div>
+
+<div id="info-mov-produto" class="info-produto-venda"></div>
+
+<div class="linha-botoes">
+
+<button onclick="registrarMovimentacao()">
+💾 Registrar Movimentação
+</button>
+
+<button class="botao-cancelar" onclick="limparMovimentacao()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-movimentacao" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📄 Nota Fiscal de Entrada</h2>
+
+<div class="form-secao">
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Número da NF</label>
+<input type="text" id="nf-entrada-numero" placeholder="Número da NF">
+</div>
+
+<div class="grupo-form">
+<label>Fornecedor</label>
+<input type="text" id="nf-entrada-fornecedor" placeholder="Fornecedor">
+</div>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Data</label>
+<input type="date" id="nf-entrada-data">
+</div>
+
+<div class="grupo-form">
+<label>Responsável</label>
+<input type="text" id="nf-entrada-responsavel" placeholder="Responsável">
+</div>
+
+</div>
+
+<h3>Itens da Nota Fiscal</h3>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Produto</label>
+<select id="nf-entrada-produto"></select>
+</div>
+
+<div class="grupo-form">
+<label>Quantidade</label>
+<input type="number" id="nf-entrada-quantidade" min="1" placeholder="Quantidade">
+</div>
+
+<div class="grupo-form">
+<label>Preço Unitário</label>
+<input type="number" step="0.01" id="nf-entrada-preco" placeholder="0,00">
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="adicionarItemNFEntrada()">
+➕ Adicionar Item
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Código</th>
+<th>Produto</th>
+<th>Quantidade</th>
+<th>Preço</th>
+<th>Total</th>
+<th>Ação</th>
+</tr>
+
+</thead>
+
+<tbody id="tabela-nf-entrada-body"></tbody>
+
+</table>
+
+<div class="total-venda-box">
+
+<div class="total-linha-final">
+
+<span>Total da NF</span>
+<span id="nf-entrada-total">R$ 0,00</span>
+
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="finalizarNFEntrada()">
+💾 Finalizar NF Entrada
+</button>
+
+<button class="botao-cancelar" onclick="limparNFEntrada()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-nf-entrada" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📄 Nota Fiscal de Saída</h2>
+
+<div class="form-secao">
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Número da NF</label>
+<input type="text" id="nf-saida-numero" placeholder="Número da NF">
+</div>
+
+<div class="grupo-form">
+<label>Cliente</label>
+<input type="text" id="nf-saida-cliente" placeholder="Cliente">
+</div>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+<label>Data</label>
+<input type="date" id="nf-saida-data">
+</div>
+
+<div class="grupo-form">
+<label>Responsável</label>
+<input type="text" id="nf-saida-responsavel" placeholder="Responsável">
+</div>
+
+</div>
+
+<h3>Itens da Nota Fiscal</h3>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Produto</label>
+<select id="nf-saida-produto"></select>
+</div>
+
+<div class="grupo-form">
+<label>Quantidade</label>
+<input type="number" id="nf-saida-quantidade" min="1" placeholder="Quantidade">
+</div>
+
+<div class="grupo-form">
+<label>Preço Unitário</label>
+<input type="number" step="0.01" id="nf-saida-preco" placeholder="0,00">
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="adicionarItemNFSaida()">
+➕ Adicionar Item
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Código</th>
+<th>Produto</th>
+<th>Quantidade</th>
+<th>Preço</th>
+<th>Total</th>
+<th>Ação</th>
+</tr>
+
+</thead>
+
+<tbody id="tabela-nf-saida-body"></tbody>
+
+</table>
+
+<div class="total-venda-box">
+
+<div class="total-linha-final">
+
+<span>Total da NF</span>
+<span id="nf-saida-total">R$ 0,00</span>
+
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="finalizarNFSaida()">
+💾 Finalizar NF Saída
+</button>
+
+<button class="botao-cancelar" onclick="limparNFSaida()">
+Limpar
+</button>
+
+</div>
+
+<div id="mensagem-nf-saida" class="mensagem"></div>
+
+</div>
+
+</section>
+
+<section class="conteudo-aba">
+
+<h2>📋 Histórico de Movimentações</h2>
+
+<div class="linha-botoes">
+
+<button onclick="atualizarTabelaMovimentacoes()">
+🔄 Atualizar Histórico
+</button>
+
+<button onclick="limparHistorico()">
+🗑️ Limpar Histórico
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Data</th>
+<th>Código</th>
+<th>Produto</th>
+<th>Tipo</th>
+<th>Quantidade</th>
+<th>NF</th>
+<th>Responsável</th>
+<th>Preço Unit.</th>
+<th>Valor Total</th>
+</tr>
+
+</thead>
+
+<tbody id="tabela-movimentacoes-body"></tbody>
+
+</table>
+
+<p
+id="sem-movimentacoes"
+style="text-align:center;padding:20px;color:#777;display:none">
+Nenhuma movimentação registrada ainda.
+</p>
+
+</section>
+
+<section class="conteudo-aba" id="area-vendas">
+
+<div class="cabecalho-vendas">
+
+<h2>💰 Vendas</h2>
+
+<button
+class="botao-vendas"
+onclick="prepararNovaVenda()">
+➕ Nova Venda
+</button>
+
+</div>
+
+<div class="resumo-venda">
+
+<div class="card-venda">
+Vendas Hoje
+<strong id="vendas-hoje">0</strong>
+</div>
+
+<div class="card-venda">
+Itens Vendidos
+<strong id="itens-vendidos-hoje">0</strong>
+</div>
+
+<div class="card-venda">
+Faturamento Hoje
+<strong id="faturamento-hoje">R$ 0,00</strong>
+</div>
+
+<div class="card-venda">
+Venda Atual
+<strong id="numero-venda-atual">-</strong>
+</div>
+
+</div>
+
+<div class="caixa-venda">
+
+<h3>Dados da Venda</h3>
+
+<div class="tres-colunas">
+
+<div class="grupo-form">
+<label>Vendedor</label>
+<input type="text" id="venda-vendedor" placeholder="Nome do vendedor">
+</div>
+
+<div class="grupo-form">
+<label>Cliente</label>
+<input type="text" id="venda-cliente" placeholder="Cliente">
+</div>
+
+<div class="grupo-form">
+<label>Forma de Pagamento</label>
+
+<select id="venda-pagamento">
+
+<option value="Dinheiro">Dinheiro</option>
+<option value="PIX">PIX</option>
+<option value="Cartão de Débito">Cartão de Débito</option>
+<option value="Cartão de Crédito">Cartão de Crédito</option>
+<option value="Boleto">Boleto</option>
+<option value="Outro">Outro</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+
+<label>Produto</label>
+
+<select id="venda-produto" onchange="mostrarProdutoVenda()">
+</select>
+
+</div>
+
+<div class="grupo-form">
+
+<label>Quantidade</label>
+
+<input
+type="number"
+id="venda-quantidade"
+min="1"
+value="1"
+onkeydown="if(event.key==='Enter') adicionarItemVenda()"
+>
+
+</div>
+
+</div>
+
+<div id="info-produto-venda" class="info-produto-venda"></div>
+
+<div class="linha-botoes">
+
+<button onclick="adicionarItemVenda()">
+➕ Adicionar Produto
+</button>
+
+</div>
+
+</div>
+
+<div class="caixa-venda tabela-itens-venda">
+
+<h3>Itens da Venda</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Código</th>
+<th>Produto</th>
+<th>Un</th>
+<th>Quantidade</th>
+<th>Preço Unit.</th>
+<th>Total</th>
+<th>Ação</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabela-itens-venda-body"></tbody>
+
+</table>
+
+</div>
+
+<div class="total-venda-box">
+
+<div class="total-linha">
+
+<span>Subtotal</span>
+<strong id="venda-subtotal">R$ 0,00</strong>
+
+</div>
+
+<div class="total-linha">
+
+<span>Desconto</span>
+<strong id="venda-desconto-exibicao">R$ 0,00</strong>
+
+</div>
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+
+<label>Desconto</label>
+
+<input
+type="number"
+step="0.01"
+min="0"
+id="venda-desconto"
+value="0"
+oninput="atualizarTotalVenda()"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>Observação</label>
+
+<input
+type="text"
+id="venda-observacao"
+placeholder="Observação"
+>
+
+</div>
+
+</div>
+
+<div class="total-linha-final">
+
+<span>TOTAL</span>
+
+<span
+id="venda-total"
+class="valor-final-venda">
+R$ 0,00
+</span>
+
+</div>
+
+<div
+id="troco-container"
+style="display:none;margin-top:15px">
+
+<div class="dois-colunas">
+
+<div class="grupo-form">
+
+<label>Valor Recebido</label>
+
+<input
+type="number"
+step="0.01"
+min="0"
+id="venda-valor-recebido"
+oninput="calcularTroco()"
+>
+
+</div>
+
+<div class="grupo-form">
+
+<label>Troco</label>
+
+<input
+type="text"
+id="venda-troco"
+readonly
+>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button
+class="botao-venda-finalizar"
+onclick="finalizarVenda()">
+💰 FINALIZAR VENDA
+</button>
+
+<button
+class="botao-cancelar"
+onclick="cancelarVenda()">
+❌ Cancelar
+</button>
+
+<button
+class="botao-relatorio-vendas"
+onclick="abrirRelatorioVendas()">
+📊 Relatório de Vendas
+</button>
+
+</div>
+
+</div>
+
+<div id="area-relatorio-vendas">
+
+<h3>📊 Relatório de Vendas</h3>
+
+<div class="filtros-relatorio-vendas">
+
+<div class="grupo-form">
+<label>Data Inicial</label>
+<input type="date" id="rv-data-inicial">
+</div>
+
+<div class="grupo-form">
+<label>Data Final</label>
+<input type="date" id="rv-data-final">
+</div>
+
+<div class="grupo-form">
+<label>Vendedor</label>
+
+<select id="rv-vendedor">
+<option value="">Todos os vendedores</option>
+</select>
+
+</div>
+
+</div>
+
+<div class="filtros-relatorio-vendas-extra">
+
+<div class="grupo-form">
+<label>Cliente</label>
+
+<select id="rv-cliente">
+<option value="">Todos os clientes</option>
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Produto</label>
+
+<select id="rv-produto">
+<option value="">Todos os produtos</option>
+</select>
+
+</div>
+
+<div class="grupo-form">
+<label>Pagamento</label>
+
+<select id="rv-pagamento">
+
+<option value="">Todas as formas</option>
+<option value="Dinheiro">Dinheiro</option>
+<option value="PIX">PIX</option>
+<option value="Cartão de Débito">Cartão de Débito</option>
+<option value="Cartão de Crédito">Cartão de Crédito</option>
+<option value="Boleto">Boleto</option>
+<option value="Outro">Outro</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="linha-botoes">
+
+<button onclick="gerarRelatorioVendas()">
+🔎 Gerar Relatório
+</button>
+
+<button onclick="fecharRelatorioVendas()">
+❌ Fechar
+</button>
+
+</div>
+
+<div class="cards-relatorio-vendas">
+
+<div class="card-relatorio-vendas">
+<span>Total de Vendas</span>
+<strong id="rv-total-vendas">0</strong>
+</div>
+
+<div class="card-relatorio-vendas">
+<span>Itens Vendidos</span>
+<strong id="rv-total-itens">0</strong>
+</div>
+
+<div class="card-relatorio-vendas">
+<span>Descontos</span>
+<strong id="rv-total-desconto">R$ 0,00</strong>
+</div>
+
+<div class="card-relatorio-vendas">
+<span>Faturamento</span>
+<strong id="rv-faturamento">R$ 0,00</strong>
+</div>
+
+</div>
+
+<p
+id="rv-resumo-texto"
+style="margin:10px 0;font-weight:bold">
+</p>
+
+<div class="tabela-relatorio-vendas">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Nº Venda</th>
+<th>Data</th>
+<th>Horário</th>
+<th>Vendedor</th>
+<th>Cliente</th>
+<th>Código</th>
+<th>Produto</th>
+<th>Quantidade</th>
+<th>Preço Unitário</th>
+<th>Valor Total</th>
+<th>Pagamento</th>
+<th>Observação</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabela-relatorio-vendas-body"></tbody>
+
+</table>
+
+</div>
+
+<div class="relatorio-vendas-botoes">
+
+<button onclick="imprimirRelatorioVendas()">
+🖨️ Imprimir
+</button>
+
+<button onclick="exportarRelatorioVendasExcel()">
+📊 Exportar Excel
+</button>
+
+</div>
+
+</div>
+
+</section>
+
 </main>
 
 <div id="modal-senha">
-  <div class="caixa-senha">
-    <h3>Autorização necessária</h3>
-    <p>Digite a senha para voltar ao Estoque.</p>
-    <input
-      type="password"
-      id="senha-voltar-estoque"
-      placeholder="Digite a senha"
-      onkeydown="if(event.key==='Enter') confirmarVoltarEstoque()"
-    >
-    <div class="botoes-senha">
-      <button onclick="confirmarVoltarEstoque()">Confirmar</button>
-      <button class="botao-cancelar" onclick="fecharModalSenha()">Cancelar</button>
-    </div>
-    <p id="erro-senha-voltar" style="display:none;color:#dc2626;font-weight:bold;margin-top:12px">
-      Senha incorreta!
-    </p>
-  </div>
+
+<div class="caixa-senha">
+
+<h3>
+🔐 Autorização necessária
+</h3>
+
+<p>
+Digite a senha para voltar ao Estoque.
+</p>
+
+<input
+type="password"
+id="senha-voltar-estoque"
+placeholder="Digite a senha"
+onkeydown="if(event.key==='Enter') confirmarVoltarEstoque()"
+>
+
+<div class="botoes-senha">
+
+<button onclick="confirmarVoltarEstoque()">
+Confirmar
+</button>
+
+<button
+class="botao-cancelar"
+onclick="fecharModalSenha()">
+Cancelar
+</button>
+
 </div>
 
-<script src="script.js?v=5"></script>
+<p
+id="erro-senha-voltar"
+style="display:none;color:#dc2626;font-weight:bold;margin-top:12px">
+Senha incorreta!
+</p>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
 </body>
 </html>
