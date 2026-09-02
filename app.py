@@ -178,39 +178,45 @@ def api_salvar_dados():
 
 
 # =========================================================
-# PÁGINA PRINCIPAL
+# PÁGINA PRINCIPAL CORRIGIDA
 # =========================================================
 
 @app.route("/")
 def inicio():
+    # Tenta carregar o index.html da pasta raiz
+    caminho_raiz = os.path.join(BASE_DIR, "index.html")
+    if os.path.isfile(caminho_raiz):
+        return send_from_directory(BASE_DIR, "index.html")
+        
+    # Se não achar na raiz, tenta carregar de uma pasta templates
+    caminho_templates = os.path.join(BASE_DIR, "templates", "index.html")
+    if os.path.isfile(caminho_templates):
+        return send_from_directory(os.path.join(BASE_DIR, "templates"), "index.html")
 
-    return send_from_directory(
-        BASE_DIR,
-        "index.html"
-    )
+    return jsonify({
+        "erro": "Arquivo index.html de entrada nao foi localizado no servidor."
+    }), 404
 
 
 # =========================================================
-# ARQUIVOS DO SITE
+# ARQUIVOS DO SITE CORRIGIDO
 # =========================================================
 
 @app.route("/<path:nome_arquivo>")
 def arquivos(nome_arquivo):
 
-    caminho = os.path.join(
-        BASE_DIR,
-        nome_arquivo
-    )
-
+    # Verifica se o arquivo existe na pasta raiz
+    caminho = os.path.join(BASE_DIR, nome_arquivo)
     if os.path.isfile(caminho):
+        return send_from_directory(BASE_DIR, nome_arquivo)
 
-        return send_from_directory(
-            BASE_DIR,
-            nome_arquivo
-        )
+    # Verifica se o arquivo existe na pasta templates
+    caminho_templates = os.path.join(BASE_DIR, "templates", nome_arquivo)
+    if os.path.isfile(caminho_templates):
+        return send_from_directory(os.path.join(BASE_DIR, "templates"), nome_arquivo)
 
     return jsonify({
-        "erro": "Arquivo não encontrado"
+        "erro": "Arquivo nao encontrado"
     }), 404
 
 
