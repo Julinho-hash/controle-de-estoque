@@ -6,7 +6,8 @@ from firebase_admin import credentials, db
 
 app = Flask(__name__)
 
-PORTA = int(os.environ.get("PORT", 3000))
+# Render envia a porta automaticamente, caso contrário usa a 10000
+PORTA = int(os.environ.get("PORT", 10000))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,8 +20,8 @@ def iniciar_firebase():
     if firebase_admin._apps:
         return
 
-    # No Render, usa a variável FIREBASE_CREDENTIALS_JSON
-    credenciais_json = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+    # IMPORTANTE: Ajustado para ler 'FIREBASE_CONFIG' que colocamos na Render
+    credenciais_json = os.environ.get("FIREBASE_CONFIG")
 
     if credenciais_json:
         try:
@@ -35,15 +36,15 @@ def iniciar_firebase():
                 }
             )
 
-            print("Firebase iniciado usando FIREBASE_CREDENTIALS_JSON")
+            print("Firebase iniciado usando FIREBASE_CONFIG na nuvem")
             return
 
         except Exception as erro:
-            print("ERRO ao iniciar Firebase pelo FIREBASE_CREDENTIALS_JSON:")
+            print("ERRO ao iniciar Firebase pelo FIREBASE_CONFIG:")
             print(erro)
             raise
 
-    # No computador, usa o arquivo JSON
+    # No computador (Local), usa o arquivo JSON físico
     caminho_chave = os.path.join(
         BASE_DIR,
         "firebase-service-account.json"
