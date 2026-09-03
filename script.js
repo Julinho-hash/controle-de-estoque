@@ -134,7 +134,7 @@ elemento.textContent = "";
 
 function entrarSistema(){
 
-const senha =
+senha =
 document.getElementById("campo-senha").value;
 
 if(senha === SENHA_SISTEMA){
@@ -423,7 +423,7 @@ document.getElementById(
 
 function confirmarVoltarEstoque(){
 
-const senha =
+senha =
 document.getElementById(
 "senha-voltar-estoque"
 ).value;
