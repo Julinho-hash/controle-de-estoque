@@ -32,7 +32,7 @@ def iniciar_firebase():
             firebase_admin.initialize_app(
                 credencial,
                 {
-                    "databaseURL": "https://controledeestoque-2d07d-default-rtdb.firebaseio.com"
+                    "databaseURL": "https://firebaseio.com"
                 }
             )
 
@@ -60,7 +60,7 @@ def iniciar_firebase():
     firebase_admin.initialize_app(
         credencial,
         {
-            "databaseURL": "https://controledeestoque-2d07d-default-rtdb.firebaseio.com"
+            "databaseURL": "https://firebaseio.com"
         }
     )
 
@@ -68,7 +68,7 @@ def iniciar_firebase():
 
 
 # Inicia o Firebase
-iniciar_firebase()
+inicia_firebase()
 
 
 # =========================================================
