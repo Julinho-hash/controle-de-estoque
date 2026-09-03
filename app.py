@@ -67,8 +67,8 @@ def iniciar_firebase():
     print("Firebase iniciado usando arquivo local")
 
 
-# Inicia o Firebase
-inicia_firebase()
+# CORRIGIDO: Agora chamando o nome exato da função com 'ar' no final
+iniciar_firebase()
 
 
 # =========================================================
